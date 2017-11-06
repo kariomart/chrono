@@ -11,6 +11,7 @@ public class PlayerMovementController : MonoBehaviour {
 	public string rightTrigger;
 	public string leftTrigger;
 	public string xButton;
+	public string yButton;
 	public string aButton;
 	//public string rightStick;
 	public string leftStickH;
@@ -22,7 +23,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 	public float health;
 
-    Vector2 vel;
+    public Vector2 vel;
 	Vector2 bulletDir;
     bool jumpFlag;
     bool grounded;
@@ -55,6 +56,7 @@ public class PlayerMovementController : MonoBehaviour {
 
     Vector3 defSprScale;
     public GameObject bullet;
+	public GameObject timeSlowBullet;
 	public GameObject manaBar;
 	public TextMesh healthBar;
 	public GameObject reticle;
@@ -149,9 +151,14 @@ public class PlayerMovementController : MonoBehaviour {
 				ShootBullet ();
 			} else {
 				// do sound effect / text effect here for no mana
-			}
-
+				}
 		}
+
+		if (Input.GetButtonDown (yButton)) {
+			
+			ShootSlowdownBullet ();
+		}
+
 
 		if (Input.GetButtonDown ("start")) {
 				Time.timeScale = 1f;
@@ -277,6 +284,8 @@ public class PlayerMovementController : MonoBehaviour {
 
 		reticle.transform.position = new Vector2 (shootPt.transform.position.x + (dir.x * .5f), shootPt.transform.position.y + (dir.y * .5f));
 
+
+
     }
 
 	void OnCollisionEnter2D(Collision2D coll) {
@@ -308,7 +317,7 @@ public class PlayerMovementController : MonoBehaviour {
 			vel.y = jumpSpd;
 		}
 		if (coll.gameObject.tag == "Bullet") {
-			Bullet2 bull = coll.gameObject.GetComponent<Bullet2> ();
+			Bullet bull = coll.gameObject.GetComponent<Bullet> ();
 			vel = bull.vel * knockbackAmount;
 		}
 
@@ -322,23 +331,45 @@ public class PlayerMovementController : MonoBehaviour {
 	public void ShootBullet() {
 
 		SoundController.me.PlaySound (shootSound, 1f, maxBullets / (amountOfBullets + 1));
-		//SoundController.me.PlaySound(shootSound
-//		Debug.Log ("sound triggered");
 		GameObject tempBullet;
+
 		if (dir.x == 0 && dir.y == 0) {
 
 			tempBullet = Instantiate (bullet, new Vector3(shootPt.position.x + .5f, shootPt.transform.position.y + .5f), Quaternion.identity);
-			tempBullet.GetComponent<Bullet2>().vel = defaultShootingDirection;
+			tempBullet.GetComponent<Bullet>().vel = defaultShootingDirection;
 
 		} else {
 			
 		tempBullet = Instantiate (bullet, new Vector3(shootPt.transform.position.x + dir.x * .5f, shootPt.transform.position.y + dir.y * .5f), Quaternion.identity);
-		tempBullet.GetComponent<Bullet2> ().vel = dir; 
+		tempBullet.GetComponent<Bullet> ().vel = dir; 
 
 		}
-		mana -= bulletManaDrain;
-	//	bulletDir =  tempBullet.GetComponent<Bullet2>().vel * knockbackAmount;
+
 		SoundController.me.PlaySound (whoosh, 0.8f);
+
+	}
+
+	public void ShootSlowdownBullet() {
+
+
+
+		GameObject tempBullet;
+
+		if (dir.x == 0 && dir.y == 0) {
+
+			tempBullet = Instantiate (timeSlowBullet, new Vector3(shootPt.position.x + .5f, shootPt.transform.position.y + .5f), Quaternion.identity);
+			tempBullet.GetComponent<TimeslowBullet>().vel = defaultShootingDirection;
+
+		} else {
+
+			tempBullet = Instantiate (timeSlowBullet, new Vector3(shootPt.transform.position.x + dir.x * .5f, shootPt.transform.position.y + dir.y * .5f), Quaternion.identity);
+			tempBullet.GetComponent<TimeslowBullet> ().vel = dir; 
+
+		}
+
+		SoundController.me.PlaySound (whoosh, 0.8f);
+
+
 
 	}
 		

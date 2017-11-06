@@ -30,7 +30,7 @@ public class Pinata : MonoBehaviour {
 			for (int i = 1; i < Random.Range (10, 20); i++) {
 				
 				GameObject tempBullet = Instantiate (bullet, new Vector2 (transform.position.x + Random.Range (-1, 1), transform.position.y + Random.Range (-1, 1)), Quaternion.identity);
-				Bullet2 bulletTemp = tempBullet.GetComponent<Bullet2> ();
+				Bullet bulletTemp = tempBullet.GetComponent<Bullet> ();
 				//bulletTemp.decayColor = new Color (Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f));
 				//bulletTemp.decayed = true;
 				bulletTemp.vel = new Vector2 (Random.Range (-explosionSpeed, explosionSpeed), Random.Range (-explosionSpeed, explosionSpeed));

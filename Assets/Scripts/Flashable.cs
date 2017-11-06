@@ -26,7 +26,7 @@ public class Flashable : MonoBehaviour {
 
 	void OnCollisionEnter2D(Collision2D coll) {
 
-		if (coll.gameObject.tag == "bullet" && !coll.gameObject.GetComponent<Bullet2>().decayed) {
+		if (coll.gameObject.tag == "bullet" && !coll.gameObject.GetComponent<Bullet>().decayed) {
 
 			flashTimer = flashLength;
 

@@ -58,28 +58,28 @@ public class TimeManager : MonoBehaviour {
 
 	void SlowTime() {
 
-		Time.timeScale = 0.25f;
-		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
-		music.pitch = 0.75f;
-		Camera.main.GetComponent<PostProcessingBehaviour> ().enabled = true;
+//		Time.timeScale = 0.25f;
+//		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
+//		music.pitch = 0.75f;
+//		Camera.main.GetComponent<PostProcessingBehaviour> ().enabled = true;
 
 
 	}
 
 	void SpeedTime() {
 
-		Time.timeScale = 2f;
-		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
-		music.pitch = 1.25f;
+//		Time.timeScale = 2f;
+//		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
+//		music.pitch = 1.25f;
 
 	}
 
 	void NormalTime() {
 
-		Time.timeScale = 1f;
-		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
-		music.pitch = 1f;
-		Camera.main.GetComponent<PostProcessingBehaviour> ().enabled = false;
+//		Time.timeScale = 1f;
+//		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
+//		music.pitch = 1f;
+//		Camera.main.GetComponent<PostProcessingBehaviour> ().enabled = false;
 
 	}
 
