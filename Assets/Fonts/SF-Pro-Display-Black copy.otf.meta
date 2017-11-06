@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 79fc542f3f0a04d69a8dcf7d8ffc0f43
+timeCreated: 1507712446
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: SF Pro Display
+  fontNames:
+  - SF Pro Display
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

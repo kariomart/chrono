@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: f823d8e34248a4a27a7cdf231d390de4
+timeCreated: 1508926860
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: PaintCans
+  fontNames:
+  - PaintCans
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
