@@ -14,7 +14,13 @@ public class TimeManager : MonoBehaviour {
 
 
 
+	void Awake() {
 
+		GameMaster.me.findUI ();
+		GameMaster.me.updateUI ();
+
+
+	}
 	// Use this for initialization
 	void Start () {
 
@@ -58,10 +64,10 @@ public class TimeManager : MonoBehaviour {
 
 	void SlowTime() {
 
-//		Time.timeScale = 0.25f;
-//		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
-//		music.pitch = 0.75f;
-//		Camera.main.GetComponent<PostProcessingBehaviour> ().enabled = true;
+		Time.timeScale = 0.25f;
+		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
+		music.pitch = 0.75f;
+		Camera.main.GetComponent<PostProcessingBehaviour> ().enabled = true;
 
 
 	}
@@ -76,10 +82,10 @@ public class TimeManager : MonoBehaviour {
 
 	void NormalTime() {
 
-//		Time.timeScale = 1f;
-//		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
-//		music.pitch = 1f;
-//		Camera.main.GetComponent<PostProcessingBehaviour> ().enabled = false;
+		Time.timeScale = 1f;
+		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
+		music.pitch = 1f;
+		Camera.main.GetComponent<PostProcessingBehaviour> ().enabled = false;
 
 	}
 

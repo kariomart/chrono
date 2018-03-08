@@ -7,6 +7,7 @@ public class PlayerMovementController : MonoBehaviour {
 	public TimeManager fatherTime;
 	public PlayerMovementController otherPlayer;
 	public TextMesh playerWon;
+	public string playerId;
 
 	public string rightTrigger;
 	public string leftTrigger;
@@ -59,6 +60,7 @@ public class PlayerMovementController : MonoBehaviour {
 	public GameObject timeSlowBullet;
 	public GameObject manaBar;
 	public TextMesh healthBar;
+	public TextMesh bulletAmount;
 	public GameObject reticle;
 	public bool gameOver;
     public int shotCoolDown;
@@ -120,6 +122,7 @@ public class PlayerMovementController : MonoBehaviour {
 		if (Input.GetAxis (rightTrigger) > 0 && mana - timeManaDrain >= 0) {
 			slow = true;
 			mana -= timeManaDrain;
+			otherPlayer.mana += timeManaDrain;
 	
 
 		} else {
@@ -160,7 +163,7 @@ public class PlayerMovementController : MonoBehaviour {
 		}
 
 
-		if (Input.GetButtonDown ("start")) {
+		if ((Input.GetButtonDown ("start") && otherPlayer.gameOver) || Input.GetKeyDown(KeyCode.R)) {
 				Time.timeScale = 1f;
 				Application.LoadLevel(Application.loadedLevel);
 		}
@@ -178,13 +181,14 @@ public class PlayerMovementController : MonoBehaviour {
 			Instantiate (letterbox, new Vector2(transform.position.x, transform.position.y - 1f), Quaternion.identity);
 			CamGameOver cameraController = camera.GetComponent<CamGameOver> ();
 			camera.GetComponent<Screenshake> ().enabled = false;
-			Debug.Log (transform.position.x + " " + transform.position.y + " " + -10);
+//			Debug.Log (transform.position.x + " " + transform.position.y + " " + -10);
 			camera.transform.position = new Vector3 (transform.position.x, transform.position.y, -10);
 			cameraController.playerLost = this.GetComponent<PlayerMovementController> ();
 			cameraController.textColor = playerColor;
 			cameraController.enabled = true;
 
 			Destroy (this.gameObject, 1.2f);
+			//this.sprite.GetComponent<SpriteRenderer>().enabled = false;
 			//camera.lookAtTarget = this.transform;
 			//camera.moveToTarget = this.transform;
 			//spawn letterbox
@@ -197,6 +201,8 @@ public class PlayerMovementController : MonoBehaviour {
 			//playerWon.text = otherPlayer.gameObject.name + " has won!";
 
 		}
+
+		updateBulletUI ();
 			
 	}
 
@@ -369,6 +375,17 @@ public class PlayerMovementController : MonoBehaviour {
 
 		SoundController.me.PlaySound (whoosh, 0.8f);
 
+
+
+	}
+
+	void updateBulletUI() {
+
+//		for (int i = 0; i < amountOfBullets; i++) {
+//			bulletAmount.text += "• ";
+//		}
+
+		bulletAmount.text = new string ('•', amountOfBullets);
 
 
 	}

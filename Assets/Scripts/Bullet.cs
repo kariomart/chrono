@@ -145,9 +145,11 @@ public class Bullet : MonoBehaviour {
 			vel = Geo.ReflectVect (prevVel.normalized, coll.contacts [0].normal) * (prevVel.magnitude * 0.65f);
 			bounceCount++;
 
-			if (bounceCount >= 3) {
+			if (bounceCount >= Random.Range(2, 6)) {
 				decayed = true;
+
 			}
+
 			SoundController.me.PlaySound (bounce, .2f);
 			ParticleEffect (coll.gameObject);
 

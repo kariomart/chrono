@@ -7,6 +7,13 @@ public class LoadController : MonoBehaviour {
 	private static LoadController music;
 	//public TimeManager time;
 	// Use this for initialization
+
+	void Start() {
+
+		checkIfMenu ();
+
+
+	}
 	void Awake() {
 		
 		DontDestroyOnLoad (this);
@@ -18,10 +25,22 @@ public class LoadController : MonoBehaviour {
 		} else {
 			Destroy(gameObject);
 		}
+
+		checkIfMenu ();
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		
+	}
+
+	public void checkIfMenu() {
+
+		if (UnityEngine.SceneManagement.SceneManager.GetActiveScene ().name == "menu") {
+
+			Destroy (this.gameObject);
+		}
+
+
 	}
 }

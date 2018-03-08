@@ -36,6 +36,11 @@ public class CamGameOver : MonoBehaviour {
 		startingZoom = cam.orthographicSize;
 		Instantiate (deathConfetti, new Vector3(transform.position.x, transform.position.y, -3), Quaternion.identity);
 
+		if (playerLost.otherPlayer.colorName == "red") {
+			GameMaster.me.redWins++;
+		} else {
+			GameMaster.me.blueWins++;
+		}
 
 
 
@@ -54,7 +59,8 @@ public class CamGameOver : MonoBehaviour {
 
 			TextMesh winner = Instantiate (winnerText, new Vector3 (transform.position.x, transform.position.y, -1), Quaternion.identity);
 			winner.text = playerLost.otherPlayer.colorName + "\nhas won!";
-			winner.color = playerLost.otherPlayer.playerColor;	
+			winner.color = playerLost.otherPlayer.playerColor;
+			GameMaster.me.updateUI ();
 			SoundController.me.PlaySound (slam, 1f);
 			this.gameObject.GetComponent<Screenshake> ().SetScreenshake (1.5f, 0.8f);
 			winnerTextDisplayed = true;
@@ -75,6 +81,14 @@ public class CamGameOver : MonoBehaviour {
 
 			SoundController.me.PlaySound (fireworks, 1f);
 			fireworksSound = true;
+
+		}
+
+		if ((counter > fireworksSoundTime + 150) && (GameMaster.me.redWins >= GameMaster.me.roundsNeeded || GameMaster.me.blueWins >= GameMaster.me.roundsNeeded)) {
+
+			GameMaster.me.winner = playerLost.otherPlayer.colorName;
+			UnityEngine.SceneManagement.SceneManager.LoadScene ("gameover");
+
 
 		}
 		
