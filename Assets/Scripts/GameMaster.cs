@@ -20,6 +20,7 @@ public class GameMaster : MonoBehaviour {
 	public TextMesh blueScore;
 
 	bool gameLoaded;
+	public string scene;
 
 
 
@@ -63,8 +64,7 @@ public class GameMaster : MonoBehaviour {
 
 		roundsNeeded = (bestOf + 1) / 2;
 		SoundController.me.PlaySound (playSoundEffect, .25f);
-		UnityEngine.SceneManagement.SceneManager.LoadScene ("main");
-
+		UnityEngine.SceneManagement.SceneManager.LoadScene (scene);
 
 	}
 

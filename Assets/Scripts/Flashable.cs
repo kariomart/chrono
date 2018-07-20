@@ -5,6 +5,7 @@ using UnityEngine;
 public class Flashable : MonoBehaviour {
 
 	public SpriteRenderer sprite;
+	public PlayerMovementController player;
 	float flashTimer;
 	public float flashLength;
 	Color defaultColor;
@@ -14,13 +15,19 @@ public class Flashable : MonoBehaviour {
 
 		//sprite = GetComponentInChildren<SpriteRenderer> ();
 		defaultColor = sprite.color;
+		//player = sprite.gameObject.GetComponent<PlayerMovementController>();
 
 	}
 	
 	// Update is called once per frame
 	void Update () {
 
+		float a = (float)player.bulletTimer / player.bulletCooldown;
+//		Debug.Log(a);
+		defaultColor = new Color(sprite.color.r, sprite.color.g, sprite.color.b, a);
+
 		Flash ();
+
 		
 	}
 

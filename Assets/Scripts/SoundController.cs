@@ -24,7 +24,11 @@ public class SoundController : MonoBehaviour {
 		audSources = new AudioSource[32];
 
 		for (int i = 0; i < audSources.Length; i++) {
-			audSources [i] = (Instantiate (audSource, Vector3.zero, Quaternion.identity) as GameObject).GetComponent<AudioSource>();
+
+			AudioSource aSource = (Instantiate (audSource, Vector3.zero, Quaternion.identity) as GameObject).GetComponent<AudioSource>();
+			audSources [i] = aSource;
+			aSource.gameObject.transform.parent = this.transform;
+
 
 		}
 

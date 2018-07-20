@@ -145,7 +145,7 @@ public class Bullet : MonoBehaviour {
 			vel = Geo.ReflectVect (prevVel.normalized, coll.contacts [0].normal) * (prevVel.magnitude * 0.65f);
 			bounceCount++;
 
-			if (bounceCount >= Random.Range(2, 6)) {
+			if (bounceCount >= 4) {
 				decayed = true;
 
 			}
@@ -153,8 +153,24 @@ public class Bullet : MonoBehaviour {
 			SoundController.me.PlaySound (bounce, .2f);
 			ParticleEffect (coll.gameObject);
 
+		}
+
+		if (coll.gameObject.tag == "bullet") {
+			
+			vel = Geo.ReflectVect (prevVel.normalized, coll.contacts [0].normal) * (prevVel.magnitude * 0.65f);
+			bounceCount++;
+
+			if (bounceCount >= 4) {
+				decayed = true;
+			}
+
+			SoundController.me.PlaySound (bounce, .2f);
+			ParticleEffect (coll.gameObject);
+
 
 		}
+
+
 
 		if (coll.gameObject.tag == "bullet") {
 
@@ -168,8 +184,7 @@ public class Bullet : MonoBehaviour {
 
 
 
-
-		if (coll.gameObject.name == "PINATA") {
+		if (coll.gameObject.layer == LayerMask.NameToLayer("Pinata")) {
 
 			Pinata pinata = coll.gameObject.GetComponent<Pinata> ();
 			pinata.health--;

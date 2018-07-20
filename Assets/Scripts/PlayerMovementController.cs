@@ -67,6 +67,8 @@ public class PlayerMovementController : MonoBehaviour {
     int shotTimer;
     bool safety;
     public float bulletSpeed;
+	public float bulletCooldown;
+	public float bulletTimer;
 	public float slowdownModifier = 0.05f;
 	public float slowdownLength = 2f;
 	public float maxMana;
@@ -95,7 +97,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 	public GameObject letterbox;
 	public GameObject camera;
-    
+    public float groundDrag;
     
 	// Use this for initialization
 	void Start () {
@@ -108,16 +110,13 @@ public class PlayerMovementController : MonoBehaviour {
 
 	}
 	
-	// Update is called once per frame
 	void Update () {
 
 
-
 		right = Input.GetAxis (leftStickH) > 0;
-
 		left = Input.GetAxis (leftStickH) < 0;
 
-
+		bulletTimer += Time.deltaTime;
 
 		if (Input.GetAxis (rightTrigger) > 0 && mana - timeManaDrain >= 0) {
 			slow = true;
@@ -149,9 +148,10 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if (Input.GetButtonDown (xButton) || Input.GetKeyDown(shootKey)) {
 
-			if (amountOfBullets > 0) {
+			if (amountOfBullets > 0 && bulletTimer > bulletCooldown) {
 				amountOfBullets--;
 				ShootBullet ();
+				bulletTimer = 0;
 			} else {
 				// do sound effect / text effect here for no mana
 				}
@@ -265,11 +265,16 @@ public class PlayerMovementController : MonoBehaviour {
         }
 				
 
-		vel.x = Mathf.Max(Mathf.Min(vel.x, mx), -mx);
+		vel.x = Mathf.Clamp(vel.x, -mx, mx);//Mathf.Max(Mathf.Min(vel.x, mx), -mx);
 
-        if (!right && !left) {
+        /*if (grounded && !right && !left) {
             vel.x = 0;
-        }
+        }*/
+
+		if (!left && !right && grounded){
+			if (Mathf.Abs(vel.x) < groundDrag * Time.fixedDeltaTime) vel.x = 0;
+			else vel.x -= (groundDrag * Mathf.Sign(vel.x)) * Time.fixedDeltaTime;
+		}
 
         jumpFlag = false;
         shotTimer--;
@@ -385,7 +390,7 @@ public class PlayerMovementController : MonoBehaviour {
 //			bulletAmount.text += "• ";
 //		}
 
-		bulletAmount.text = new string ('•', amountOfBullets);
+		//bulletAmount.text = new string ('•', amountOfBullets);
 
 
 	}
@@ -396,7 +401,7 @@ public class PlayerMovementController : MonoBehaviour {
         Vector2 pt2 = transform.TransformPoint(box.offset - (box.size / 2) + new Vector2(.01f, 0));
 
         debugPts[0] = pt1;
-        debugPts[1] = pt2;
+        debugPts[1] = pt2;	
 		bool prevGrounded = grounded;
 		grounded = Physics2D.OverlapArea(pt1, pt2, LayerMask.GetMask("Pinata")) != null;
         grounded = Physics2D.OverlapArea(pt1, pt2, LayerMask.GetMask("Platform")) != null;
