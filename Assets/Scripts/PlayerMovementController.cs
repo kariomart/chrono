@@ -57,7 +57,7 @@ public class PlayerMovementController : MonoBehaviour {
 
     Vector3 defSprScale;
     public GameObject bullet;
-	public GameObject timeSlowBullet;
+	//public GameObject timeSlowBullet;
 	public GameObject manaBar;
 	public TextMesh healthBar;
 	public TextMesh bulletAmount;
@@ -157,13 +157,13 @@ public class PlayerMovementController : MonoBehaviour {
 				}
 		}
 
-		if (Input.GetButtonDown (yButton)) {
+		// if (Input.GetButtonDown (yButton)) {
 			
-			ShootSlowdownBullet ();
-		}
+		// 	ShootSlowdownBullet ();
+		// }
 
 
-		if ((Input.GetButtonDown ("start") && otherPlayer.gameOver) || Input.GetKeyDown(KeyCode.R)) {
+		if ((Input.GetButtonDown ("start") && otherPlayer.gameOver && !GameMaster.me.matchOver) || Input.GetKeyDown(KeyCode.R)) {
 				Time.timeScale = 1f;
 				Application.LoadLevel(Application.loadedLevel);
 		}
@@ -360,29 +360,29 @@ public class PlayerMovementController : MonoBehaviour {
 
 	}
 
-	public void ShootSlowdownBullet() {
+	// public void ShootSlowdownBullet() {
 
 
 
-		GameObject tempBullet;
+	// 	GameObject tempBullet;
 
-		if (dir.x == 0 && dir.y == 0) {
+	// 	if (dir.x == 0 && dir.y == 0) {
 
-			tempBullet = Instantiate (timeSlowBullet, new Vector3(shootPt.position.x + .5f, shootPt.transform.position.y + .5f), Quaternion.identity);
-			tempBullet.GetComponent<TimeslowBullet>().vel = defaultShootingDirection;
+	// 		tempBullet = Instantiate (timeSlowBullet, new Vector3(shootPt.position.x + .5f, shootPt.transform.position.y + .5f), Quaternion.identity);
+	// 		tempBullet.GetComponent<TimeslowBullet>().vel = defaultShootingDirection;
 
-		} else {
+	// 	} else {
 
-			tempBullet = Instantiate (timeSlowBullet, new Vector3(shootPt.transform.position.x + dir.x * .5f, shootPt.transform.position.y + dir.y * .5f), Quaternion.identity);
-			tempBullet.GetComponent<TimeslowBullet> ().vel = dir; 
+	// 		tempBullet = Instantiate (timeSlowBullet, new Vector3(shootPt.transform.position.x + dir.x * .5f, shootPt.transform.position.y + dir.y * .5f), Quaternion.identity);
+	// 		tempBullet.GetComponent<TimeslowBullet> ().vel = dir; 
 
-		}
+	// 	}
 
-		SoundController.me.PlaySound (whoosh, 0.8f);
+	// 	SoundController.me.PlaySound (whoosh, 0.8f);
 
 
 
-	}
+	// }
 
 	void updateBulletUI() {
 

@@ -15,6 +15,7 @@ public class GameMaster : MonoBehaviour {
 	public int redWins;
 	public int blueWins;
 	public string winner;
+	public bool matchOver;
 
 	public TextMesh redScore;
 	public TextMesh blueScore;
@@ -63,6 +64,7 @@ public class GameMaster : MonoBehaviour {
 	public void playPressed() {
 
 		roundsNeeded = (bestOf + 1) / 2;
+		Debug.Log(roundsNeeded);
 		SoundController.me.PlaySound (playSoundEffect, .25f);
 		UnityEngine.SceneManagement.SceneManager.LoadScene (scene);
 

@@ -84,7 +84,14 @@ public class CamGameOver : MonoBehaviour {
 
 		}
 
-		if ((counter > fireworksSoundTime + 150) && (GameMaster.me.redWins >= GameMaster.me.roundsNeeded || GameMaster.me.blueWins >= GameMaster.me.roundsNeeded)) {
+		bool redWon = GameMaster.me.redWins >= GameMaster.me.roundsNeeded;
+		bool blueWon = GameMaster.me.blueWins >= GameMaster.me.roundsNeeded;
+
+		if (redWon || blueWon) {
+			GameMaster.me.matchOver = true;
+		}
+
+		if ((counter > fireworksSoundTime + 150) && (redWon || blueWon)) {
 
 			GameMaster.me.winner = playerLost.otherPlayer.colorName;
 			UnityEngine.SceneManagement.SceneManager.LoadScene ("gameover");
