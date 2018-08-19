@@ -34,11 +34,13 @@ public class GameMaster : MonoBehaviour {
 
 		if (me == null) {
 			me = this;
+			
 		} else {
 			Destroy (this.gameObject);
 		}
 
-		bestOf = 3;
+		bestOf = 100;
+		roundsNeeded = (bestOf + 1) / 2;
 		
 	}
 	
@@ -78,7 +80,7 @@ public class GameMaster : MonoBehaviour {
 		if (temp == 1) {
 			bestOf = 5;
 		} else if (temp == 2) {
-			bestOf = 7;
+			bestOf = 100;
 		}
 			
 

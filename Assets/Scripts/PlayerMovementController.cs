@@ -26,13 +26,20 @@ public class PlayerMovementController : MonoBehaviour {
 
     public Vector2 vel;
 	Vector2 bulletDir;
+	Vector2 prevVel;
+	Vector2 walljumpDir;
     bool jumpFlag;
     bool grounded;
+	int groundedCounter;
+	bool onWall;
 
 	public bool right;
 	public bool left;
+	public bool down;
 	public bool slow;
 	public bool speed;
+	public bool fastfall;
+	public bool crouching;
 
     public Transform groundPt1;
     public Transform groundPt2;
@@ -53,6 +60,9 @@ public class PlayerMovementController : MonoBehaviour {
     public float spinSpd;
     public float spinDir;
 	public float knockbackAmount;
+	public float wallJumpRange;
+	public float crouchScale;
+
 
 
     Vector3 defSprScale;
@@ -85,6 +95,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 	public Vector2 dir;
 	public Vector2 defaultShootingDirection = new Vector2(1, 0);
+	public Vector2 prevDir;
     BoxCollider2D box;
     Vector2[] debugPts;
 
@@ -115,6 +126,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 		right = Input.GetAxis (leftStickH) > 0;
 		left = Input.GetAxis (leftStickH) < 0;
+		down = ((Vector2.Dot(dir, new Vector2(0, -1)) > .7f));
 
 		bulletTimer += Time.deltaTime;
 
@@ -138,6 +150,10 @@ public class PlayerMovementController : MonoBehaviour {
 
 		dir = new Vector2 (Input.GetAxis (leftStickH), Input.GetAxis (leftStickV));
 		dir.Normalize ();
+		
+		if (dir != Vector2.zero) {
+			prevDir = dir;
+		}
 
 
 		if (Input.GetButtonDown(aButton) || Input.GetKeyDown(KeyCode.Space)) {
@@ -218,6 +234,13 @@ public class PlayerMovementController : MonoBehaviour {
 
 
         SetGrounded();
+		wallCast();
+
+		Debug.Log(fastfall);
+		if (down && vel.y < 0 && !fastfall) {
+				fastfall = true;
+				Debug.Log("test");
+			}
 
 		if (!grounded && spinning) {
 			sprite.eulerAngles = new Vector3(0, 0, sprite.eulerAngles.z + ((spinSpd) * Time.fixedDeltaTime * spinDir));
@@ -231,13 +254,29 @@ public class PlayerMovementController : MonoBehaviour {
 		if (jumpFlag && grounded) {
 			if ((left || right)) {
 				spinning = true;
+				transform.localScale = defaultScale;
 
 				if (left) spinDir = 1;
 				if (right) spinDir = -1;
 			}
 			vel.y = jumpSpd;
-		} else if (jumpFlag && !grounded) {
-			safety = false;
+		}
+
+		if (fastfall) {
+//			Debug.Log(100 * Time.fixedDeltaTime);
+			vel.y *= (100 * Time.fixedDeltaTime);
+		}
+			
+		// } else if (jumpFlag && !grounded) {
+		// 	safety = false;
+		//} 
+		
+		else if (onWall && jumpFlag) {
+			spinning = false;
+//			Debug.Log(-walljumpDir.x * 5);
+			vel.x = -walljumpDir.x * 5;
+			vel.y = jumpSpd;
+			onWall = false;
 		}
 			
 
@@ -248,6 +287,8 @@ public class PlayerMovementController : MonoBehaviour {
 			vel.y -= gravity * Time.fixedDeltaTime;
             accel = airAccel;
             mx = airMaxSpd;
+
+			//Debug.Log(Vector2.Dot(dir, new Vector2(0, -1)));
         }
 			
 		if (vel.y > 0 && !Input.GetButton(aButton)) {
@@ -277,12 +318,19 @@ public class PlayerMovementController : MonoBehaviour {
 		}
 
         jumpFlag = false;
+		//onWall = false;
         shotTimer--;
 
 		if (gameOver) {
 			vel = Vector2.zero;
 		}
+
+		prevVel = rb.position;
 		rb.MovePosition ((Vector2)transform.position + vel * Time.fixedDeltaTime);
+
+		if (vel.y != 0) {
+//			Debug.Log(vel.y);
+		}
 		//bulletDir = Vector2.zero;
 
 		 
@@ -332,7 +380,8 @@ public class PlayerMovementController : MonoBehaviour {
 			vel = bull.vel * knockbackAmount;
 		}
 
-		if (coll.gameObject.name == "PINATA") {
+		if (coll.gameObject.tag == "Pinata") {
+			Debug.Log("pinata");
 			vel.y = jumpSpd;
 		}
 	}
@@ -346,8 +395,8 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if (dir.x == 0 && dir.y == 0) {
 
-			tempBullet = Instantiate (bullet, new Vector3(shootPt.position.x + .5f, shootPt.transform.position.y + .5f), Quaternion.identity);
-			tempBullet.GetComponent<Bullet>().vel = defaultShootingDirection;
+			tempBullet = Instantiate (bullet, new Vector3(shootPt.position.x + prevDir.x * .5f, shootPt.transform.position.y + prevDir.y * .5f), Quaternion.identity);
+			tempBullet.GetComponent<Bullet>().vel = prevDir;
 
 		} else {
 			
@@ -360,30 +409,35 @@ public class PlayerMovementController : MonoBehaviour {
 
 	}
 
-	// public void ShootSlowdownBullet() {
+	public void wallCast() {
+
+		Ray2D myRay = new Ray2D(transform.position, vel);
+		RaycastHit2D hit = new RaycastHit2D();
+
+		float maxRayDis = 10;
+		//Debug.DrawRay(myRay.origin, myRay.direction * maxRayDis, Color.cyan);
 
 
+		hit = Physics2D.Raycast(myRay.origin, dir);
 
-	// 	GameObject tempBullet;
-
-	// 	if (dir.x == 0 && dir.y == 0) {
-
-	// 		tempBullet = Instantiate (timeSlowBullet, new Vector3(shootPt.position.x + .5f, shootPt.transform.position.y + .5f), Quaternion.identity);
-	// 		tempBullet.GetComponent<TimeslowBullet>().vel = defaultShootingDirection;
-
-	// 	} else {
-
-	// 		tempBullet = Instantiate (timeSlowBullet, new Vector3(shootPt.transform.position.x + dir.x * .5f, shootPt.transform.position.y + dir.y * .5f), Quaternion.identity);
-	// 		tempBullet.GetComponent<TimeslowBullet> ().vel = dir; 
-
-	// 	}
-
-	// 	SoundController.me.PlaySound (whoosh, 0.8f);
-
+		if (hit && hit.transform.tag == "Stage") {
+			float dis = Vector2.Distance(transform.position, hit.point);
+			walljumpDir = (hit.point - (Vector2)transform.position);
+			//Debug.Log(dis);
+			if (dis < wallJumpRange) {
+				//Debug.Log("ON WALL");
+				onWall = true;
+				vel.y = 0.5f * vel.y;
+				spinning = false;
+			} else {
+				//onWall = false;
+			}
+		}
 
 
-	// }
+	}
 
+	
 	void updateBulletUI() {
 
 //		for (int i = 0; i < amountOfBullets; i++) {
@@ -411,10 +465,25 @@ public class PlayerMovementController : MonoBehaviour {
             spinning = false;
             vel.y = 0;
             safety = true;
+			groundedCounter ++;
 			if (!prevGrounded) {
 				scaleSpd = -.1f;
 			}
-        }
+
+			fastfall = false;
+
+			// if (down && !crouching) {
+			// 	transform.localScale = new Vector3(transform.localScale.x, crouchScale, transform.localScale.z);
+			// 	transform.position = new Vector3(transform.position.x, transform.position.y - .254f, transform.position.z);
+			// 	crouching = true;
+			// 	grounded = true;
+			// } else {
+			// 	transform.localScale = defaultScale;
+			// 	crouching = false;
+			// }
+        } else {
+			groundedCounter = 0;
+		}
     }
 
 

@@ -16,14 +16,19 @@ public class TimeManager : MonoBehaviour {
 
 	void Awake() {
 
-		GameMaster.me.findUI ();
-		GameMaster.me.updateUI ();
+		// Debug.Log(GameMaster.me);
+		// GameMaster.me.findUI ();
+		// GameMaster.me.updateUI ();
 
 
 	}
 	// Use this for initialization
 	void Start () {
 
+
+		Debug.Log(GameMaster.me);
+		GameMaster.me.findUI ();
+		GameMaster.me.updateUI ();
 
 	}
 	
