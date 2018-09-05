@@ -236,7 +236,7 @@ public class PlayerMovementController : MonoBehaviour {
         SetGrounded();
 		wallCast();
 
-		Debug.Log(fastfall);
+//		Debug.Log(fastfall);
 		if (down && vel.y < 0 && !fastfall) {
 				fastfall = true;
 				Debug.Log("test");
