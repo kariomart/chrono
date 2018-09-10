@@ -64,7 +64,7 @@ public class Bullet : MonoBehaviour {
 			decayEffect.SetActive (true);
 			var main = middle.main;
 			main.startColor = Color.magenta;
-			trail.gameObject.SetActive(false);
+			//trail.gameObject.SetActive(false);
 			decayed = true;
 
 		}
@@ -140,7 +140,7 @@ public class Bullet : MonoBehaviour {
 
 		}
 
-		if (coll.gameObject.tag == "Stage") {
+		if ((coll.gameObject.tag == "Stage" || coll.gameObject.tag == "Wall" || coll.gameObject.tag == "Pinata") && coll.contacts.Length > 0) {
 			
 			vel = Geo.ReflectVect (prevVel.normalized, coll.contacts [0].normal) * (prevVel.magnitude * 0.65f);
 			bounceCount++;
@@ -157,7 +157,10 @@ public class Bullet : MonoBehaviour {
 
 		if (coll.gameObject.tag == "bullet") {
 			
-			vel = Geo.ReflectVect (prevVel.normalized, coll.contacts [0].normal) * (prevVel.magnitude * 0.65f);
+			Debug.Log(coll.contacts.Length);
+			if (coll.contacts.Length > 0) {
+				vel = Geo.ReflectVect (prevVel.normalized, coll.contacts [0].normal) * (prevVel.magnitude * 0.65f);
+			}
 			bounceCount++;
 
 			if (bounceCount >= 4) {

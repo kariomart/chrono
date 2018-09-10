@@ -14,7 +14,7 @@ public class OrbitController : MonoBehaviour {
 	void Start () {
 
 		player = GetComponentInParent<PlayerMovementController>();
-		angle = 360 / player.maxBullets;
+		angle = 360 / player.amountOfBullets;
 		updateOrbPositions();
 		
 	}

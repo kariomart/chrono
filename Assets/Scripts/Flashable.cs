@@ -8,13 +8,14 @@ public class Flashable : MonoBehaviour {
 	public PlayerMovementController player;
 	float flashTimer;
 	public float flashLength;
-	Color defaultColor;
+	public Color defaultColor;
 
 	// Use this for initialization
 	void Start () {
 
 		//sprite = GetComponentInChildren<SpriteRenderer> ();
 		defaultColor = sprite.color;
+		player = GetComponent<PlayerMovementController>();
 		//player = sprite.gameObject.GetComponent<PlayerMovementController>();
 
 	}
@@ -22,9 +23,18 @@ public class Flashable : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+		float totalTimeslow = (player.mana + player.otherPlayer.mana);
+		float percentageOfMana = player.mana / totalTimeslow;
+
 		float a = (float)player.bulletTimer / player.bulletCooldown;
 //		Debug.Log(a);
-		defaultColor = new Color(sprite.color.r, sprite.color.g, sprite.color.b, a);
+
+		//defaultColor = new Color(sprite.color.r, sprite.color.g, sprite.color.b, a);
+		Color HSV;
+		float h, s, v;
+		Color.RGBToHSV(defaultColor, out h, out s, out v);
+		HSV = Color.HSVToRGB(h, percentageOfMana * s + .25f, v);
+		defaultColor = HSV;
 
 		Flash ();
 

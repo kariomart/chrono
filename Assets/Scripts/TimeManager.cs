@@ -26,7 +26,7 @@ public class TimeManager : MonoBehaviour {
 	void Start () {
 
 
-		Debug.Log(GameMaster.me);
+//		Debug.Log(GameMaster.me);
 		GameMaster.me.findUI ();
 		GameMaster.me.updateUI ();
 

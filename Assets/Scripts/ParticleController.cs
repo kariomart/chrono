@@ -7,7 +7,7 @@ public class ParticleController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-		Destroy (this, 2f);
+		Destroy (this.gameObject, 2f);
 
 	}
 	
