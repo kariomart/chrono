@@ -13,6 +13,7 @@ public class PlayerMovementController : MonoBehaviour {
 	Rigidbody2D rb;
 	BoxCollider2D box;
 	public Transform sprite;
+	public TextMesh ammoText;
 
 	Vector3 defSprScale;
 	Vector2 debugPts;
@@ -77,6 +78,8 @@ public class PlayerMovementController : MonoBehaviour {
         box = GetComponent<BoxCollider2D>();
         defSprScale = sprite.localScale;
 		defaultScale = pivot.transform.localScale;
+		ammoText = GetComponentInChildren<TextMesh>();
+		ammoText.text = "" + amountOfBullets;
 //		Debug.Log(InputManager.Devices);
 		player1 = InputManager.Devices[playerId];		
 
@@ -84,12 +87,10 @@ public class PlayerMovementController : MonoBehaviour {
 	
 	void Update () {
 
-		//right = player1.LeftStickRight && Vector2.Dot(Vector2.down, player1.LeftStick.Value) < .7f;
-		//Debug.Log(Vector2.Dot(Vector2.right, player1.LeftStick.Value));
-		right = player1.LeftStickRight && Vector2.Dot(Vector2.right, player1.LeftStick.Value) > .75f;
-		left = player1.LeftStickLeft && Vector2.Dot(Vector2.left, player1.LeftStick.Value) > .75f;
-		//Debug.Log(Vector2.Dot(new Vector2(0, -1), player1.LeftStick.Value));
-		//left = player1.LeftStickLeft;
+	
+		right = player1.LeftStickRight && player1.LeftStickRight.Value > .5f;
+		left = player1.LeftStickLeft && player1.LeftStickLeft.Value > .5f;
+
 		dir = new Vector2(player1.LeftStickX, player1.LeftStickY).normalized;
 		bulletTimer += Time.deltaTime;
 
@@ -249,6 +250,8 @@ public class PlayerMovementController : MonoBehaviour {
 		}
 
 		//SoundController.me.PlaySound (whoosh, 0.8f);
+		ammoText.text = "" + amountOfBullets;
+
 
 	}
 
