@@ -49,6 +49,8 @@ public class PlayerMovementController : MonoBehaviour {
 	public float jumpSpd;
 	public float gravity;
 	public float bonusGravity;
+	public float jumpChargeTimer;
+	public float jumpChargeMax;
 
 	public bool right;
 	public bool left;
@@ -70,8 +72,10 @@ public class PlayerMovementController : MonoBehaviour {
 	public float bulletCooldown; 
 	public float mana; 
 	public float timeManaDrain;
-	
-
+	public float kick;
+	bool onWallRight;
+	bool onWallLeft;
+	public float wallFriction;
 	void Start () {
 
 		rb = GetComponent<Rigidbody2D>();
@@ -79,7 +83,7 @@ public class PlayerMovementController : MonoBehaviour {
         defSprScale = sprite.localScale;
 		defaultScale = pivot.transform.localScale;
 		ammoText = GetComponentInChildren<TextMesh>();
-		ammoText.text = "" + amountOfBullets;
+		updateUI();
 //		Debug.Log(InputManager.Devices);
 		player1 = InputManager.Devices[playerId];		
 
@@ -97,6 +101,10 @@ public class PlayerMovementController : MonoBehaviour {
 		
 		if (dir != Vector2.zero) {
 			prevDir = dir;
+		}
+
+		if (player1.Action1.IsPressed && jumpChargeTimer < jumpChargeMax) {
+			jumpChargeTimer ++;
 		}
 
 		if (player1.Action1.WasPressed) {
@@ -155,7 +163,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 
 		float accel = runAccel;
-		float mx = runMaxSpeed;
+		float mx = runMaxSpeed; //* (1f - (jumpChargeTimer / jumpChargeMax));
 
 		if (!spinning) {
 			pivot.transform.localScale = new Vector2 (defaultScale.x + (defaultScale.y - pivot.transform.localScale.y), pivot.transform.localScale.y + scaleSpd);
@@ -175,26 +183,33 @@ public class PlayerMovementController : MonoBehaviour {
 				if (left) spinDir = 1;
 				if (right) spinDir = -1;
 			}
-			vel.y = jumpSpd;
+			vel.y = jumpSpd; //* (jumpChargeTimer / jumpChargeMax);
+			jumpChargeTimer = 0;
 
 		} 
 		
-		if (onWall) {
-			vel = Vector2.zero;
+		if (onWall && !grounded) {
+			//vel = Vector2.zero;
 			spinning = false;
-
-				if (jumpFlag) {
+			vel.y *= wallFriction;
+			if (onWallLeft)
+				vel.x = Mathf.Max(vel.x, 0);
+			if (onWallRight)
+				vel.x = Mathf.Min(vel.x, 0);
+			if (jumpFlag) {
 				//vel.x = -wallDir.x * 5;
 				//vel.y = jumpSpd;
-				vel = new Vector2((-wallDir.x * 10) + dir.x, jumpSpd);
+				vel.x = onWallLeft ? 15f : -15f;//new Vector2((-wallDir.x * 10) + dir.x, jumpSpd);
+				vel.y = jumpSpd;
 				onWall = false;
 			}
+
 		}
 
 		if (!grounded) {
 			vel.y -= gravity * Time.fixedDeltaTime;
 			accel = airAccel;
-			mx = airMaxSpeed;
+			//mx = airMaxSpeed;
 		}
 
 		if (vel.y > 0 && !player1.Action1.IsPressed) {
@@ -248,9 +263,9 @@ public class PlayerMovementController : MonoBehaviour {
 			tempBullet = Instantiate (bullet, new Vector3(shootPt.transform.position.x + dir.x * .5f, shootPt.transform.position.y + dir.y * .5f), Quaternion.identity);
 			tempBullet.GetComponent<Bullet> ().vel = dir; 
 		}
-
+		vel -= dir * kick;
 		//SoundController.me.PlaySound (whoosh, 0.8f);
-		ammoText.text = "" + amountOfBullets;
+		updateUI();
 
 
 	}
@@ -276,8 +291,14 @@ public class PlayerMovementController : MonoBehaviour {
 	}
 	
 	void wallCast() {
+		int mask = LayerMask.GetMask("Platform");
 
-		Ray2D myRay = new Ray2D(transform.position, vel);
+		Vector2 top = (Vector2)transform.position + box.offset + (Vector2.up * (box.size.y /2f));
+		Vector2 bot = (Vector2)transform.position + box.offset - (Vector2.up * (box.size.y /2f));
+		onWallLeft = Physics2D.Raycast(top, Vector2.left, box.size.x * .6f, mask) || Physics2D.Raycast(bot, Vector2.left, box.size.x * .6f, mask);
+		onWallRight = Physics2D.Raycast(top, Vector2.right, box.size.x * .6f, mask) || Physics2D.Raycast(bot, Vector2.right, box.size.x * .6f, mask);
+		onWall = onWallLeft || onWallRight;
+		/*Ray2D myRay = new Ray2D(transform.position, vel);
 		RaycastHit2D hit = new RaycastHit2D();
 		float dis;
 		float maxRayDis = 2;
@@ -303,7 +324,13 @@ public class PlayerMovementController : MonoBehaviour {
 			if (Vector2.Distance(transform.position, wallPos) > wallJumpRange) {
 				onWall = false;
 			}
-		} 
+		} */
+	}
+
+	public void updateUI() {
+
+		ammoText.text = "" + amountOfBullets;
+
 	}
 
 
@@ -326,17 +353,24 @@ public class PlayerMovementController : MonoBehaviour {
 
 	void OnCollisionEnter2D(Collision2D coll) {
 
-		if (coll.gameObject.tag == "Player") {
-			vel.y = jumpSpd;
-		}
-		if (coll.gameObject.tag == "Bullet") {
-			Bullet bull = coll.gameObject.GetComponent<Bullet> ();
-			//vel = bull.vel * knockbackAmount;
+		if (coll.contacts.Length > 0) {
+
+			ContactPoint2D pt = coll.contacts[0];
+			if (coll.gameObject.layer == LayerMask.NameToLayer("Platform")) {
+				vel += pt.normal * Vector2.Dot(-pt.normal, vel);
+			}
+			if (coll.gameObject.tag == "Player") {
+				vel.y = jumpSpd;
+			}
+			if (coll.gameObject.tag == "Bullet") {
+				Bullet bull = coll.gameObject.GetComponent<Bullet> ();
+				//vel = bull.vel * knockbackAmount;
+			}
 		}
 
-		if (coll.gameObject.tag == "Stage" && !grounded) {
+		/*if (coll.gameObject.tag == "Stage" && !grounded) {
 			vel *= .3f;
-		}
+		}*/
 
 		if (coll.gameObject.tag == "Pinata") {
 			Debug.Log(coll.contacts[0].normal);
