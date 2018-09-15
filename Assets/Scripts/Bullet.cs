@@ -26,6 +26,7 @@ public class Bullet : MonoBehaviour {
 	public AudioClip tick;
 
 	public GameObject decayEffect;
+	public ParticleSystem bulletCore;
 	public ParticleSystem middle;
 
 	public Color decayColor = Color.grey;
@@ -61,9 +62,9 @@ public class Bullet : MonoBehaviour {
 		if (nonDecayedTime >= decayTime || decayed) {
 
 			sprite.color = decayColor;
-			decayEffect.SetActive (true);
+			//decayEffect.SetActive (true);
 			var main = middle.main;
-			main.startColor = Color.magenta;
+			main.startColor = decayColor;
 			//trail.gameObject.SetActive(false);
 			decayed = true;
 
@@ -121,7 +122,6 @@ public class Bullet : MonoBehaviour {
 			SoundController.me.PlaySound (tick, 1f);
 			PlayerMovementController player = coll.gameObject.GetComponent<PlayerMovementController> ();
 			player.amountOfBullets ++;
-			player.updateUI();
 			Destroy (this.gameObject);
 
 		}
@@ -158,7 +158,7 @@ public class Bullet : MonoBehaviour {
 
 		if (coll.gameObject.tag == "bullet") {
 			
-			Debug.Log(coll.contacts.Length);
+//			Debug.Log(coll.contacts.Length);
 			if (coll.contacts.Length > 0) {
 				vel = Geo.ReflectVect (prevVel.normalized, coll.contacts [0].normal) * (prevVel.magnitude * 0.65f);
 			}
