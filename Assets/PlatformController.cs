@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,7 +7,7 @@ public class PlatformController : MonoBehaviour {
 	public bool isWindow;
 	public int openChance;
 	int count;
-	bool closed;
+	bool open;
 
 	// Use this for initialization
 	void Start () {
@@ -16,6 +16,12 @@ public class PlatformController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+		if (!open) {
+
+			
+		}
+
 		
 	}
 }

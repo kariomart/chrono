@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.PostProcessing;
 
+
 public class TimeManager : MonoBehaviour {
 
 	public PlayerMovementController player1;
 	public PlayerMovementController player2;
 	public AudioSource music;
+	public PostProcessingProfile FX;
+	public PostProcessingProfile DoubleFX;
 
 	public float globalTimescale;
 	public int timeValue;
@@ -53,7 +56,8 @@ public class TimeManager : MonoBehaviour {
 		}
 
 		if (player1.slow && player2.slow) {
-			SlowTime ();
+			//SlowTime ();
+			DoubleSlow();
 		} 
 
 		if ((player1.slow && player2.speed) || (player1.speed && player2.slow)) {
@@ -72,9 +76,21 @@ public class TimeManager : MonoBehaviour {
 		Time.timeScale = 0.25f;
 		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
 		music.pitch = 0.75f;
-		Camera.main.GetComponent<PostProcessingBehaviour> ().enabled = true;
+		PostProcessingBehaviour p = Camera.main.GetComponent<PostProcessingBehaviour> ();
+		p.profile = FX;
+		p.enabled = true;
 
 
+	}
+
+	void DoubleSlow() {
+
+		Time.timeScale = 0.08f;
+		Time.fixedDeltaTime = Time.timeScale * 1/120f; 
+		music.pitch = 0.50f;
+		PostProcessingBehaviour p = Camera.main.GetComponent<PostProcessingBehaviour> ();
+		p.profile = DoubleFX;
+		p.enabled = true;
 	}
 
 	void SpeedTime() {

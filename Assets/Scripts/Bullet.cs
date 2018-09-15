@@ -122,6 +122,7 @@ public class Bullet : MonoBehaviour {
 			SoundController.me.PlaySound (tick, 1f);
 			PlayerMovementController player = coll.gameObject.GetComponent<PlayerMovementController> ();
 			player.amountOfBullets ++;
+			player.updateUI();
 			Destroy (this.gameObject);
 
 		}

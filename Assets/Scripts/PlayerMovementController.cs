@@ -76,6 +76,11 @@ public class PlayerMovementController : MonoBehaviour {
 	bool onWallRight;
 	bool onWallLeft;
 	public float wallFriction;
+
+	public AudioClip shootSound;
+	public AudioClip whoosh;
+
+
 	void Start () {
 
 		rb = GetComponent<Rigidbody2D>();
@@ -112,6 +117,10 @@ public class PlayerMovementController : MonoBehaviour {
 			//Instantiate(jumpEffect)
 		}
 
+		if (down && vel.y < 0 && !fastfall) {
+			fastfall = true;
+		}
+
 		if (player1.Action3.WasPressed && canShoot()) {
 			shootBullet();
 		}
@@ -124,9 +133,14 @@ public class PlayerMovementController : MonoBehaviour {
 			slow = false;
 		}
 
-		if ((player1.Action2.WasPressed && otherPlayer.gameOver && !GameMaster.me.matchOver) || Input.GetKeyDown(KeyCode.R)) {
+		if ((player1.Action2.WasPressed && (gameOver || otherPlayer.gameOver) && !GameMaster.me.matchOver) || Input.GetKeyDown(KeyCode.R)) {
 			Time.timeScale = 1f;
 			Application.LoadLevel(Application.loadedLevel);
+		}
+
+		if ((player1.Action4.WasPressed && (gameOver || otherPlayer.gameOver) && !GameMaster.me.matchOver)) {
+			Time.timeScale = 1f;
+			UnityEngine.SceneManagement.SceneManager.LoadScene("level_select");
 		}
 
 
@@ -251,6 +265,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 		amountOfBullets --;
 		bulletTimer = 0;
+		SoundController.me.PlaySound (shootSound, 1f, 3 / (amountOfBullets + 1));
 
 		//SoundController.me.PlaySound(shootSound, 1f, maxBullets / (amountOfBullets + 1));
 		GameObject tempBullet;
@@ -264,7 +279,7 @@ public class PlayerMovementController : MonoBehaviour {
 			tempBullet.GetComponent<Bullet> ().vel = dir; 
 		}
 		vel -= dir * kick;
-		//SoundController.me.PlaySound (whoosh, 0.8f);
+		SoundController.me.PlaySound (whoosh, 0.5f);
 		updateUI();
 
 
@@ -364,6 +379,7 @@ public class PlayerMovementController : MonoBehaviour {
 			}
 			if (coll.gameObject.tag == "Bullet") {
 				Bullet bull = coll.gameObject.GetComponent<Bullet> ();
+				updateUI();
 				//vel = bull.vel * knockbackAmount;
 			}
 		}
