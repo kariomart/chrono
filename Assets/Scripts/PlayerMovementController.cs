@@ -389,7 +389,7 @@ public class PlayerMovementController : MonoBehaviour {
 		}*/
 
 		if (coll.gameObject.tag == "Pinata") {
-			Debug.Log(coll.contacts[0].normal);
+//			Debug.Log(coll.contacts[0].normal);
 			Vector2 c = coll.contacts[0].normal;
 			vel = new Vector2(c.x, c.y * jumpSpd);
 //			Debug.Log("pinata");
