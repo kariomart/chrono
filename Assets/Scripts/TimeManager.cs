@@ -86,7 +86,7 @@ public class TimeManager : MonoBehaviour {
 	void DoubleSlow() {
 
 		Time.timeScale = 0.08f;
-		Time.fixedDeltaTime = Time.timeScale * 1/120f; 
+		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
 		music.pitch = 0.50f;
 		PostProcessingBehaviour p = Camera.main.GetComponent<PostProcessingBehaviour> ();
 		p.profile = DoubleFX;

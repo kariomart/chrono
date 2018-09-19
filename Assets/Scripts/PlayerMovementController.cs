@@ -90,7 +90,20 @@ public class PlayerMovementController : MonoBehaviour {
 		ammoText = GetComponentInChildren<TextMesh>();
 		updateUI();
 //		Debug.Log(InputManager.Devices);
-		player1 = InputManager.Devices[playerId];		
+		player1 = InputManager.Devices[playerId];	
+		PlayerTuning tuning = Resources.Load<PlayerTuning>("MyTune");
+		runAccel = tuning.runAccel;
+		runMaxSpeed = tuning.runMaxSpeed;
+		groundDrag = tuning.groundDrag;
+		airAccel = tuning.airAccel;
+		airMaxSpeed = tuning.airMaxSpeed;
+		jumpSpd = tuning.jumpSpd;
+		gravity = tuning.gravity;
+		bonusGravity = tuning.bonusGravity;
+		jumpChargeTimer = tuning.jumpChargeTimer;
+		jumpChargeMax = tuning.jumpChargeMax;
+		kick = tuning.kick;
+		wallFriction = tuning.wallFriction;
 
 	}
 	
@@ -171,8 +184,8 @@ public class PlayerMovementController : MonoBehaviour {
 		setGrounded();
 		wallCast();
 
-		float yScale = defaultScale.y + (Mathf.Abs(vel.y) * 0.02f);
-		scaleSpd += ((yScale - pivot.transform.localScale.y) * 6f);
+		float desYScale = defaultScale.y + (Mathf.Abs(vel.y) * 0.02f);
+		scaleSpd += ((desYScale - pivot.transform.localScale.y) * 3f);
 		scaleSpd *= 5.4f * Time.fixedDeltaTime;
 
 
@@ -254,7 +267,7 @@ public class PlayerMovementController : MonoBehaviour {
 			vel = Vector2.zero;
 		}
 
-		prevVel = rb.position;
+		prevVel = vel;
 		rb.MovePosition((Vector2)transform.position + vel * Time.fixedDeltaTime);
 
 		reticle.transform.position = new Vector2 (shootPt.transform.position.x + (dir.x * .5f), shootPt.transform.position.y + (dir.y * .5f));
@@ -295,10 +308,12 @@ public class PlayerMovementController : MonoBehaviour {
 		
         if (grounded) {
             spinning = false;
-            vel.y = 0;
 			if (!prevGrounded) {
-				scaleSpd = -.1f;
+				Debug.Log(prevVel.y);
+				scaleSpd = -13f * (Mathf.Abs(prevVel.y) / 20f);
 			}
+            vel.y = 0;
+
 
 			fastfall = false;
 		}

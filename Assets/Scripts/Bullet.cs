@@ -67,6 +67,7 @@ public class Bullet : MonoBehaviour {
 			main.startColor = decayColor;
 			//trail.gameObject.SetActive(false);
 			decayed = true;
+			trail.Stop();
 
 		}
 
