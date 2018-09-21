@@ -7,20 +7,20 @@ public class BulletSpawner : MonoBehaviour {
 	public int spawnChance;
 	public GameObject bullet;
 	public PlayerMovementController player1;
-	public static int totalBullets;
+	static int totalBullets;
 
 	// Use this for initialization
 	void Start () {
 
-		totalBullets +=  player1.amountOfBullets;
-		totalBullets +=  player1.otherPlayer.amountOfBullets;
+		player1 = GameObject.Find("red").GetComponent<PlayerMovementController>();
 		
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		
-		int rand = Random.Range(0, spawnChance + (10 * totalBullets));
+		Debug.Log(spawnChance + (150 * totalBullets));
+		int rand = Random.Range(0, spawnChance + 400 + (150 * totalBullets));
 
 		if (rand == 2) {
 			SpawnBullet();
@@ -32,6 +32,7 @@ public class BulletSpawner : MonoBehaviour {
 	void SpawnBullet() {
 
 		Instantiate(bullet, transform.position, Quaternion.identity);
+		totalBullets ++;
 
 	}
 }

@@ -100,6 +100,13 @@ public class PlayerMovementController : MonoBehaviour {
 		updateUI();
 //		Debug.Log(InputManager.Devices);
 		player1 = InputManager.Devices[playerId];	
+		foreach (GameObject g in GameObject.FindGameObjectsWithTag ("Player")) {
+			PlayerMovementController p = g.GetComponent<PlayerMovementController>();
+			if (p.playerId != this.playerId) {
+				otherPlayer = this;
+			}
+		}
+
 		PlayerTuning tuning = Resources.Load<PlayerTuning>("MyTune");
 
 		runAccel = tuning.runAccel;

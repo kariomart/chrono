@@ -147,6 +147,8 @@ public class Bullet : MonoBehaviour {
 				// Instantiate (hitPlayerEffect, transform.position, Quaternion.identity);
 				// Destroy (flash, .025f); 
 				// Destroy (this.gameObject);
+			} else {
+				vel = Geo.ReflectVect (prevVel.normalized, coll.contacts [0].normal) * (prevVel.magnitude * 0.65f);
 			}
 
 		}

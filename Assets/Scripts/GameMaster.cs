@@ -29,6 +29,7 @@ public class GameMaster : MonoBehaviour {
 	public string scene;
 
 	public GameObject[] spawnPoints;
+	public GameObject[] bulletSpawnPoints;
 	public GameObject redPlayer;
 	public GameObject bluePlayer;
 
@@ -130,12 +131,20 @@ public class GameMaster : MonoBehaviour {
 
 	public void findSpawnPoints() {
 
-		GameObject spawnPointParent = new GameObject("SpawnPonts");
+		GameObject spawnPointParent = new GameObject("SpawnPoints");
 		spawnPoints = GameObject.FindGameObjectsWithTag("SpawnPoint");
 
 		foreach (GameObject s in spawnPoints) {
 			s.transform.parent = spawnPointParent.transform;
 			s.GetComponent<SpriteRenderer>().enabled = false;
+		}
+
+		GameObject bulletSpawnPointParent = new GameObject("BulletSpawnPoints");
+		bulletSpawnPoints = GameObject.FindGameObjectsWithTag("BulletSpawner");
+
+		foreach (GameObject b in bulletSpawnPoints) {
+			b.transform.parent = bulletSpawnPointParent.transform;
+			b.GetComponent<SpriteRenderer>().enabled = false;
 		}
 	}
 
