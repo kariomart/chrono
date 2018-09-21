@@ -71,14 +71,23 @@ public class PlayerMovementController : MonoBehaviour {
 	public float bulletTimer;
 	public float bulletCooldown; 
 	public float mana; 
+	public float maxMana;
 	public float timeManaDrain;
+	public float manaGain;
 	public float kick;
 	bool onWallRight;
 	bool onWallLeft;
 	public float wallFriction;
 
+	public int invulnCounter;
+	public int invulnMaxFrames;
+	public bool invuln;
+
 	public AudioClip shootSound;
 	public AudioClip whoosh;
+	public int score;
+
+	public GameObject hitParticle;
 
 
 	void Start () {
@@ -92,6 +101,7 @@ public class PlayerMovementController : MonoBehaviour {
 //		Debug.Log(InputManager.Devices);
 		player1 = InputManager.Devices[playerId];	
 		PlayerTuning tuning = Resources.Load<PlayerTuning>("MyTune");
+
 		runAccel = tuning.runAccel;
 		runMaxSpeed = tuning.runMaxSpeed;
 		groundDrag = tuning.groundDrag;
@@ -104,6 +114,12 @@ public class PlayerMovementController : MonoBehaviour {
 		jumpChargeMax = tuning.jumpChargeMax;
 		kick = tuning.kick;
 		wallFriction = tuning.wallFriction;
+		maxMana = tuning.maxMana;
+		timeManaDrain = tuning.timeManaDrain;
+		manaGain = tuning.manaGain;
+		bulletCooldown = tuning.bulletCooldown;
+		invulnMaxFrames = tuning.invulnMaxFrames;
+		health = tuning.health;
 
 	}
 	
@@ -141,28 +157,36 @@ public class PlayerMovementController : MonoBehaviour {
 		if (player1.RightTrigger.Value > 0 && canSlowTime()) {
 			slow = true;
 			mana -= timeManaDrain;
-			otherPlayer.mana += timeManaDrain;
+			//otherPlayer.mana += timeManaDrain;
 		} else {
 			slow = false;
+
+			if (mana < maxMana) {
+				mana += manaGain;
+			}
 		}
 
-		if ((player1.Action2.WasPressed && (gameOver || otherPlayer.gameOver) && !GameMaster.me.matchOver) || Input.GetKeyDown(KeyCode.R)) {
-			Time.timeScale = 1f;
-			Application.LoadLevel(Application.loadedLevel);
-		}
+		// if ((player1.Action2.WasPressed && (gameOver || otherPlayer.gameOver) && !GameMaster.me.matchOver) || Input.GetKeyDown(KeyCode.R)) {
+		// 	Time.timeScale = 1f;
+		// 	Application.LoadLevel(Application.loadedLevel);
+		// }
 
-		if ((player1.Action4.WasPressed && (gameOver || otherPlayer.gameOver) && !GameMaster.me.matchOver)) {
+		if ((player1.Action2.WasPressed && (gameOver || otherPlayer.gameOver) && !GameMaster.me.matchOver)) {
 			Time.timeScale = 1f;
 			UnityEngine.SceneManagement.SceneManager.LoadScene("level_select");
+
 		}
 
 
-		manaBar.transform.localScale = new Vector2 (mana, manaBar.transform.localScale.y);
+//		manaBar.transform.localScale = new Vector2 (mana, manaBar.transform.localScale.y);
 
 		if (health <= 0 && !gameOver) {
 
 			gameOver = true;
 			otherPlayer.health += 10;
+			GameMaster.me.redWins = 0;
+			GameMaster.me.blueWins = 0;
+			GameMaster.me.updateUI();
 			Instantiate (letterbox, new Vector2(transform.position.x, transform.position.y - .5f), Quaternion.identity);
 			CamGameOver cameraController = camera.GetComponent<CamGameOver> ();
 			camera.GetComponent<Screenshake> ().enabled = false;
@@ -175,6 +199,12 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if (mana < 0) {
 			mana = 0;
+		}
+
+		if (invuln && invulnCounter < invulnMaxFrames) {
+			invulnCounter ++;
+		} else {
+			invuln = false;
 		}
 
 	}
@@ -271,7 +301,11 @@ public class PlayerMovementController : MonoBehaviour {
 		prevVel = vel;
 		rb.MovePosition((Vector2)transform.position + vel * Time.fixedDeltaTime);
 
-		reticle.transform.position = new Vector2 (shootPt.transform.position.x + (dir.x * .5f), shootPt.transform.position.y + (dir.y * .5f));
+		 /* if (dir == Vector2.zero) {
+			//reticle.transform.position = ((Vector2)(shootPt.position) + prevDir.normalized) * .5f;
+		} else { */
+			reticle.transform.position = new Vector2 (shootPt.transform.position.x + (dir.x * .5f), shootPt.transform.position.y + (dir.y * .5f)); 
+		/*}*/
 
 	}
 
@@ -358,6 +392,28 @@ public class PlayerMovementController : MonoBehaviour {
 		} */
 	}
 
+	public void respawn() {
+
+		health --;
+
+		if (health > 0 && !gameOver) {
+
+			GameMaster.me.addToScore(otherPlayer.colorName, 1);
+			GameMaster.me.updateUI();
+			Instantiate(hitParticle, transform.position, Quaternion.identity);
+			var main = hitParticle.transform.GetChild(0).GetComponent<ParticleSystem>().main;
+			main.startColor = playerColor;
+			otherPlayer.score ++;
+			Vector2 point = GameMaster.me.getFarthestSpawnPoint(otherPlayer.transform.position);
+			transform.position = point;
+			invuln = true;
+			invulnCounter = 0;
+			pivot.transform.localScale = pivot.transform.localScale * .2f;
+			scaleSpd = 1;
+		}
+
+	}
+
 	public void updateUI() {
 
 		ammoText.text = "" + amountOfBullets;
@@ -381,6 +437,7 @@ public class PlayerMovementController : MonoBehaviour {
 			return false;
 		}
 	}
+
 
 	void OnCollisionEnter2D(Collision2D coll) {
 

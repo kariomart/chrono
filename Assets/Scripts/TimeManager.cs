@@ -17,6 +17,7 @@ public class TimeManager : MonoBehaviour {
 
 
 
+
 	void Awake() {
 
 		// Debug.Log(GameMaster.me);
@@ -32,6 +33,7 @@ public class TimeManager : MonoBehaviour {
 //		Debug.Log(GameMaster.me);
 		GameMaster.me.findUI ();
 		GameMaster.me.updateUI ();
+		GameMaster.me.findSpawnPoints();
 
 	}
 	

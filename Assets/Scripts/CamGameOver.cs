@@ -37,9 +37,9 @@ public class CamGameOver : MonoBehaviour {
 		Instantiate (deathConfetti, new Vector3(transform.position.x, transform.position.y, -3), Quaternion.identity);
 
 		if (playerLost.otherPlayer.colorName == "red") {
-			GameMaster.me.redWins++;
+			GameMaster.me.redSets ++;
 		} else {
-			GameMaster.me.blueWins++;
+			GameMaster.me.blueSets++;
 		}
 
 
@@ -84,8 +84,8 @@ public class CamGameOver : MonoBehaviour {
 
 		}
 
-		bool redWon = GameMaster.me.redWins >= GameMaster.me.roundsNeeded;
-		bool blueWon = GameMaster.me.blueWins >= GameMaster.me.roundsNeeded;
+		bool redWon = GameMaster.me.redSets >= GameMaster.me.setsNeeded;
+		bool blueWon = GameMaster.me.blueSets >= GameMaster.me.setsNeeded;
 
 		if (redWon || blueWon) {
 			GameMaster.me.matchOver = true;

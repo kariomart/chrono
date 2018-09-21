@@ -131,15 +131,23 @@ public class Bullet : MonoBehaviour {
 		if (coll.gameObject.tag == "Player" && !decayed) {
 
 			PlayerMovementController player = coll.gameObject.GetComponent<PlayerMovementController> ();
-			player.health -= dmg;
-			//Camera.main.GetComponent<Screenshake> ().SetScreenshake (.25f, .15f * ((6f - coll.gameObject.GetComponent<PlayerMovementController>().health) / 2));
-			Camera.main.GetComponent<Screenshake>().SetScreenshake(0.35f, .25f);
-			GameObject flash = Instantiate (DamageFlash, transform.position, Quaternion.identity);
-			flash.GetComponent<SpriteRenderer> ().color = coll.gameObject.GetComponentInChildren<SpriteRenderer> ().color;
-			SoundController.me.PlaySound (playerHit, 1f);
-			Instantiate (hitPlayerEffect, transform.position, Quaternion.identity);
-			Destroy (flash, .025f); 
-			Destroy (this.gameObject);
+
+			if (!player.invuln) {
+	//			player.health -= dmg;
+				player.respawn();
+				GameObject flash = Instantiate (DamageFlash, transform.position, Quaternion.identity);
+				Camera.main.GetComponent<Screenshake>().SetScreenshake(0.35f, .25f);
+				SoundController.me.PlaySound (playerHit, 1f);
+				Destroy (this.gameObject);
+				Destroy (flash, .025f); 
+				//Camera.main.GetComponent<Screenshake> ().SetScreenshake (.25f, .15f * ((6f - coll.gameObject.GetComponent<PlayerMovementController>().health) / 2));
+				// Camera.main.GetComponent<Screenshake>().SetScreenshake(0.35f, .25f);
+				// flash.GetComponent<SpriteRenderer> ().color = coll.gameObject.GetComponentInChildren<SpriteRenderer> ().color;
+				// SoundController.me.PlaySound (playerHit, 1f);
+				// Instantiate (hitPlayerEffect, transform.position, Quaternion.identity);
+				// Destroy (flash, .025f); 
+				// Destroy (this.gameObject);
+			}
 
 		}
 

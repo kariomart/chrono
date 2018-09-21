@@ -15,6 +15,12 @@ public class PlayerTuning : ScriptableObject {
 	public float jumpChargeMax;
 	public float kick;
 	public float wallFriction;
+	public float maxMana;
+	public float timeManaDrain;
+	public float manaGain;
+	public float bulletCooldown;
+	public int invulnMaxFrames;
+	public int health;
 
 		
 }
