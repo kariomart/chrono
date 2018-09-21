@@ -198,6 +198,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if (!grounded && spinning) {
 			sprite.eulerAngles = new Vector3(0, 0, sprite.eulerAngles.z + ((spinSpd) * Time.fixedDeltaTime * spinDir));
+			pivot.transform.localScale = defaultScale;
 		} else {
 			sprite.eulerAngles = Vector3.zero;
 		}
@@ -309,8 +310,8 @@ public class PlayerMovementController : MonoBehaviour {
         if (grounded) {
             spinning = false;
 			if (!prevGrounded) {
-				Debug.Log(prevVel.y);
-				scaleSpd = -13f * (Mathf.Abs(prevVel.y) / 20f);
+//				Debug.Log(prevVel.y);
+				scaleSpd = -13f * (Mathf.Abs(prevVel.y) / 30f);
 			}
             vel.y = 0;
 
