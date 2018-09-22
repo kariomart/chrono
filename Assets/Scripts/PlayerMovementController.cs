@@ -98,12 +98,15 @@ public class PlayerMovementController : MonoBehaviour {
 		defaultScale = pivot.transform.localScale;
 		ammoText = GetComponentInChildren<TextMesh>();
 		updateUI();
+		camera = Camera.main.gameObject;
 //		Debug.Log(InputManager.Devices);
-		player1 = InputManager.Devices[playerId];	
+		player1 = InputManager.Devices[playerId];
+
 		foreach (GameObject g in GameObject.FindGameObjectsWithTag ("Player")) {
 			PlayerMovementController p = g.GetComponent<PlayerMovementController>();
+			Debug.Log(p.playerId);
 			if (p.playerId != this.playerId) {
-				otherPlayer = this;
+				otherPlayer = p;
 			}
 		}
 
@@ -352,7 +355,7 @@ public class PlayerMovementController : MonoBehaviour {
             spinning = false;
 			if (!prevGrounded) {
 //				Debug.Log(prevVel.y);
-				scaleSpd = -13f * (Mathf.Abs(prevVel.y) / 30f);
+				scaleSpd = -13f * (Mathf.Abs(prevVel.y) / 30f) * Time.fixedDeltaTime;
 			}
             vel.y = 0;
 
@@ -430,7 +433,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 	bool canSlowTime() {
 
-		if (mana - timeManaDrain >= 0) {
+		if (mana - timeManaDrain >= 2) {
 			return true;
 		} else {
 			return false;
