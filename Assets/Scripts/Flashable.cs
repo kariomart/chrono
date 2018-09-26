@@ -34,7 +34,7 @@ public class Flashable : MonoBehaviour {
 		Color HSV;
 		float h, s, v;
 		Color.RGBToHSV(defaultColor, out h, out s, out v);
-		HSV = Color.HSVToRGB(h, percentageOfMana * s + .20f, v);
+		HSV = Color.HSVToRGB(h, percentageOfMana * .8f + .2f, v);
 		defaultColor = HSV;
 
 		Flash ();

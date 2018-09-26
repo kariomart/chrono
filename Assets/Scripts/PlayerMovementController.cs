@@ -138,6 +138,7 @@ public class PlayerMovementController : MonoBehaviour {
 	
 		right = player1.LeftStickRight && player1.LeftStickRight.Value > .5f;
 		left = player1.LeftStickLeft && player1.LeftStickLeft.Value > .5f;
+		updateUI();
 
 		dir = new Vector2(player1.LeftStickX, player1.LeftStickY).normalized;
 		bulletTimer += Time.deltaTime;
@@ -164,7 +165,7 @@ public class PlayerMovementController : MonoBehaviour {
 			shootBullet();
 		}
 
-		if (player1.RightTrigger.Value > 0 && canSlowTime()) {
+		if (player1.RightTrigger.Value > 0 && (canSlowTime() || (slow && mana > 0))) {
 			slow = true;
 			mana -= timeManaDrain;
 			//otherPlayer.mana += timeManaDrain;
@@ -411,15 +412,18 @@ public class PlayerMovementController : MonoBehaviour {
 			GameMaster.me.addToScore(otherPlayer.colorName, 1);
 			GameMaster.me.updateUI();
 			Instantiate(hitParticle, transform.position, Quaternion.identity);
-			var main = hitParticle.transform.GetChild(0).GetComponent<ParticleSystem>().main;
-			main.startColor = playerColor;
+			//var main = hitParticle.transform.GetChild(0).GetComponent<ParticleSystem>().main;
+			//main.startColor = playerColor;
 			otherPlayer.score ++;
 			Vector2 point = GameMaster.me.getFarthestSpawnPoint(otherPlayer.transform.position);
 			transform.position = point;
 			invuln = true;
+			amountOfBullets ++;
 			invulnCounter = 0;
 			pivot.transform.localScale = pivot.transform.localScale * .2f;
 			scaleSpd = 1;
+			GameMaster.me.StartCoroutine(GameMaster.me.ReEnablePlayer(gameObject));
+			gameObject.SetActive(false);
 		}
 
 	}

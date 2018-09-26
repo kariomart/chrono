@@ -80,6 +80,10 @@ public class GameMaster : MonoBehaviour {
 		UnityEngine.SceneManagement.SceneManager.LoadScene (scene);
 
 	}
+	public IEnumerator ReEnablePlayer(GameObject obj) {
+		yield return new WaitForSeconds(.6f);
+		obj.SetActive(true);
+	}
 
 	public void dropdownItemSwitched() {
 
