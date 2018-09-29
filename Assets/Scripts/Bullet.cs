@@ -58,7 +58,6 @@ public class Bullet : MonoBehaviour {
 
 		//Debug.Log (rb.velocity);
 
-
 		if (nonDecayedTime >= decayTime || decayed) {
 
 			sprite.color = decayColor;
@@ -111,7 +110,19 @@ public class Bullet : MonoBehaviour {
 
 		}
 
+		if (coll.gameObject.tag == "pivot" && !decayed) {
 
+			GameMaster.me.timeMaster.gameOverSlow = true;
+			GameMaster.me.timeMaster.pos = coll.gameObject.transform.position;
+		}
+	}
+
+	void OnTriggerExit2D(Collider2D coll) {
+
+		if (coll.gameObject.tag == "pivot" && !decayed) {
+
+			GameMaster.me.timeMaster.gameOverSlow = false;
+		}
 
 	}
 
@@ -152,6 +163,7 @@ public class Bullet : MonoBehaviour {
 			}
 
 		}
+
 
 		if ((coll.gameObject.tag == "Stage" || coll.gameObject.tag == "Wall" || coll.gameObject.tag == "Pinata") && coll.contacts.Length > 0) {
 			
@@ -215,4 +227,6 @@ public class Bullet : MonoBehaviour {
 		//Destroy (this.gameObject);
 
 	}
+
+
 }

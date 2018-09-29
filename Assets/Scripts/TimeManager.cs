@@ -12,8 +12,14 @@ public class TimeManager : MonoBehaviour {
 	public PostProcessingProfile FX;
 	public PostProcessingProfile DoubleFX;
 
+	public bool gameOverSlow;
+	public int slowCounter;
+	public Vector2 pos;
+
 	public float globalTimescale;
 	public int timeValue;
+
+	public AudioClip slowSound;
 
 
 
@@ -59,7 +65,7 @@ public class TimeManager : MonoBehaviour {
 			SpeedTime ();
 		}
 
-		if (player1.slow && player2.slow) {
+		if ((player1.slow && player2.slow) || gameOverSlow) {
 			//SlowTime ();
 			DoubleSlow();
 		} 
@@ -69,6 +75,19 @@ public class TimeManager : MonoBehaviour {
 		} 
 		if (player1.speed && player2.speed) {
 			SpeedTime ();
+		}
+
+		if (gameOverSlow) {
+			slowCounter ++;
+		}
+
+		if (slowCounter > 300) {
+			gameOverSlow = false;
+			slowCounter = 0;
+		}
+
+		if (gameOverSlow == false) {
+			slowCounter = 0;
 		}
 			
 

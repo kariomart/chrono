@@ -33,6 +33,8 @@ public class GameMaster : MonoBehaviour {
 	public GameObject redPlayer;
 	public GameObject bluePlayer;
 
+	public TimeManager timeMaster;
+
 
 
 
@@ -121,6 +123,7 @@ public class GameMaster : MonoBehaviour {
 		blueScore = GameObject.Find ("blueScore").GetComponent<TextMesh>();
 		redSetsMesh = GameObject.Find ("redSets").GetComponent<TextMesh>();
 		blueSetsMesh = GameObject.Find ("blueSets").GetComponent<TextMesh>();
+		timeMaster = GameObject.Find("TimeManager").GetComponent<TimeManager>();
 
 	}
 

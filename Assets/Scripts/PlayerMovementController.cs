@@ -12,6 +12,7 @@ public class PlayerMovementController : MonoBehaviour {
 	InputDevice player1;
 	Rigidbody2D rb;
 	BoxCollider2D box;
+	CircleCollider2D almostDeadCircle;
 	public Transform sprite;
 	public TextMesh ammoText;
 
@@ -62,6 +63,7 @@ public class PlayerMovementController : MonoBehaviour {
 	bool spinning;
 	bool fastfall;
 	bool jumpFlag;
+	public bool almostdead;
 	public bool gameOver;
 
 
@@ -85,6 +87,8 @@ public class PlayerMovementController : MonoBehaviour {
 
 	public AudioClip shootSound;
 	public AudioClip whoosh;
+	public AudioClip slowSound;
+	public AudioClip speedSound;
 	public int score;
 
 	public GameObject hitParticle;
@@ -92,8 +96,10 @@ public class PlayerMovementController : MonoBehaviour {
 
 	void Start () {
 
+		almostdead = true;
 		rb = GetComponent<Rigidbody2D>();
         box = GetComponent<BoxCollider2D>();
+		almostDeadCircle = GetComponentInChildren<CircleCollider2D>();
         defSprScale = sprite.localScale;
 		defaultScale = pivot.transform.localScale;
 		ammoText = GetComponentInChildren<TextMesh>();
@@ -104,7 +110,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 		foreach (GameObject g in GameObject.FindGameObjectsWithTag ("Player")) {
 			PlayerMovementController p = g.GetComponent<PlayerMovementController>();
-			Debug.Log(p.playerId);
+//			Debug.Log(p.playerId);
 			if (p.playerId != this.playerId) {
 				otherPlayer = p;
 			}
@@ -166,10 +172,17 @@ public class PlayerMovementController : MonoBehaviour {
 		}
 
 		if (player1.RightTrigger.Value > 0 && (canSlowTime() || (slow && mana > 0))) {
+			if(!slow && !otherPlayer.slow) {
+			//	SoundController.me.PlaySound(slowSound, .3f);
+			}
 			slow = true;
 			mana -= timeManaDrain;
+
 			//otherPlayer.mana += timeManaDrain;
 		} else {
+			if (slow) {
+				//SoundController.me.PlaySound(speedSound, .3f);
+			}
 			slow = false;
 
 			if (mana < maxMana) {
@@ -191,9 +204,14 @@ public class PlayerMovementController : MonoBehaviour {
 
 //		manaBar.transform.localScale = new Vector2 (mana, manaBar.transform.localScale.y);
 
+		if (almostdead) {
+			almostDeadCircle.enabled = true;
+		}
+
 		if (health <= 0 && !gameOver) {
 
 			gameOver = true;
+			Camera.main.GetComponent<CamControl>().enabled = false;
 			otherPlayer.health += 10;
 			GameMaster.me.redWins = 0;
 			GameMaster.me.blueWins = 0;
@@ -324,7 +342,15 @@ public class PlayerMovementController : MonoBehaviour {
 
 		amountOfBullets --;
 		bulletTimer = 0;
-		SoundController.me.PlaySound (shootSound, 1f, 3 / (amountOfBullets + 1));
+
+
+		if (amountOfBullets > 3) {
+			SoundController.me.PlaySound (shootSound, 1f);
+		} else {
+			//Debug.Log(3 - (amountOfBullets + 1));
+			SoundController.me.PlaySound (shootSound, 1f, 3 - (amountOfBullets));
+		}
+		
 
 		//SoundController.me.PlaySound(shootSound, 1f, maxBullets / (amountOfBullets + 1));
 		GameObject tempBullet;
@@ -406,6 +432,10 @@ public class PlayerMovementController : MonoBehaviour {
 	public void respawn() {
 
 		health --;
+
+		if (health == 1) {
+			almostdead = true;
+		}
 
 		if (health > 0 && !gameOver) {
 
