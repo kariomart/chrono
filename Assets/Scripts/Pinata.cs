@@ -27,6 +27,8 @@ public class Pinata : MonoBehaviour {
 
 		startingHealth = health;
 		GrowAnimation ();
+		//minBulletsToRelease = 1;
+		//maxBulletsToRelease = 3;
 
 	}
 	

@@ -16,14 +16,19 @@ public class Bullet : MonoBehaviour {
 	public bool decayed;
 	public Vector2 vel;
 	public int bounceCount;
+	public float decayDeath;
+	public float decayDeathCounter;
+	public float lifetime;
 
 	public ParticleSystem hitObjectEffect;
 	public ParticleSystem shoot;
 	public ParticleSystem hitPlayerEffect;
 	public ParticleSystem trail;
 	public AudioClip playerHit;
+	public AudioClip lastHit;
 	public AudioClip bounce;
 	public AudioClip tick;
+
 
 	public GameObject decayEffect;
 	public ParticleSystem bulletCore;
@@ -41,6 +46,8 @@ public class Bullet : MonoBehaviour {
 		sprite = GetComponent<SpriteRenderer> ();
 		spawnTime = Time.time;
 		defaultSpd = spd;
+		if (lifetime == 0)
+			lifetime = Random.Range(3f, 5f);
 		//decayColor = Color.grey;
 		//ParticleSystem temp = Instantiate (shoot, transform.position, Quaternion.identity);
 		//temp.gameObject.transform.parent = transform;
@@ -51,6 +58,18 @@ public class Bullet : MonoBehaviour {
 	void Update () {
 
 		nonDecayedTime = Time.time - spawnTime;
+
+		if (decayed) {
+			decayDeathCounter += Time.deltaTime;
+
+
+			if (decayDeathCounter > lifetime) {
+				Destroy(gameObject);
+			}
+		}
+		
+
+
 
 	}
 
@@ -145,10 +164,15 @@ public class Bullet : MonoBehaviour {
 
 			if (!player.invuln) {
 	//			player.health -= dmg;
+				if (player.health == 1) {
+					SoundController.me.PlaySoundAtNormalPitch (lastHit, 1f);	
+				} else {
+					SoundController.me.PlaySoundAtNormalPitch (playerHit, 1f);
+					//Debug.Log("???");
+				}
 				player.respawn();
 				GameObject flash = Instantiate (DamageFlash, transform.position, Quaternion.identity);
 				Camera.main.GetComponent<Screenshake>().SetScreenshake(0.35f, .25f);
-				SoundController.me.PlaySound (playerHit, 1f);
 				Destroy (this.gameObject);
 				Destroy (flash, .025f); 
 				//Camera.main.GetComponent<Screenshake> ().SetScreenshake (.25f, .15f * ((6f - coll.gameObject.GetComponent<PlayerMovementController>().health) / 2));

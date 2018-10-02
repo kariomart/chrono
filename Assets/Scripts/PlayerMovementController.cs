@@ -62,7 +62,7 @@ public class PlayerMovementController : MonoBehaviour {
 	public bool onWall;
 	bool spinning;
 	bool fastfall;
-	bool jumpFlag;
+	int jumpTimer;
 	public bool almostdead;
 	public bool gameOver;
 
@@ -93,13 +93,16 @@ public class PlayerMovementController : MonoBehaviour {
 
 	public GameObject hitParticle;
 
+	Screenshake screenshake;
+
 
 	void Start () {
 
-		almostdead = true;
+		//almostdead = true;
 		rb = GetComponent<Rigidbody2D>();
         box = GetComponent<BoxCollider2D>();
 		almostDeadCircle = GetComponentInChildren<CircleCollider2D>();
+		screenshake = Camera.main.GetComponent<Screenshake>();
         defSprScale = sprite.localScale;
 		defaultScale = pivot.transform.localScale;
 		ammoText = GetComponentInChildren<TextMesh>();
@@ -159,7 +162,7 @@ public class PlayerMovementController : MonoBehaviour {
 		}
 
 		if (player1.Action1.WasPressed) {
-			jumpFlag = true;
+			jumpTimer = 5;
 			//Instantiate(jumpEffect)
 		}
 
@@ -173,7 +176,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if (player1.RightTrigger.Value > 0 && (canSlowTime() || (slow && mana > 0))) {
 			if(!slow && !otherPlayer.slow) {
-			//	SoundController.me.PlaySound(slowSound, .3f);
+				//SoundController.me.PlaySound(slowSound, .3f);
 			}
 			slow = true;
 			mana -= timeManaDrain;
@@ -262,7 +265,7 @@ public class PlayerMovementController : MonoBehaviour {
 			sprite.eulerAngles = Vector3.zero;
 		}
 
-		if (jumpFlag && grounded) {
+		if (jumpTimer > 0 && grounded) {
 			if (left || right) {
 				spinning = true;
 				transform.localScale = defaultScale;
@@ -283,7 +286,7 @@ public class PlayerMovementController : MonoBehaviour {
 				vel.x = Mathf.Max(vel.x, 0);
 			if (onWallRight)
 				vel.x = Mathf.Min(vel.x, 0);
-			if (jumpFlag) {
+			if (jumpTimer > 0) {
 				//vel.x = -wallDir.x * 5;
 				//vel.y = jumpSpd;
 				vel.x = onWallLeft ? 15f : -15f;//new Vector2((-wallDir.x * 10) + dir.x, jumpSpd);
@@ -320,7 +323,7 @@ public class PlayerMovementController : MonoBehaviour {
 			else vel.x -= (groundDrag * Mathf.Sign(vel.x)) * Time.fixedDeltaTime;
 		}
 
-		jumpFlag = false;
+		jumpTimer--;;
 		shotTimer --;
 
 		if (gameOver) {
@@ -364,6 +367,7 @@ public class PlayerMovementController : MonoBehaviour {
 			tempBullet.GetComponent<Bullet> ().vel = dir; 
 		}
 		vel -= dir * kick;
+		screenshake.SetScreenshake(.3f, .1f, dir);
 		SoundController.me.PlaySound (whoosh, 0.5f);
 		updateUI();
 
@@ -439,7 +443,9 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if (health > 0 && !gameOver) {
 
+
 			GameMaster.me.addToScore(otherPlayer.colorName, 1);
+			//reticle.SetActive(false);
 			GameMaster.me.updateUI();
 			Instantiate(hitParticle, transform.position, Quaternion.identity);
 			//var main = hitParticle.transform.GetChild(0).GetComponent<ParticleSystem>().main;
@@ -452,6 +458,7 @@ public class PlayerMovementController : MonoBehaviour {
 			invulnCounter = 0;
 			pivot.transform.localScale = pivot.transform.localScale * .2f;
 			scaleSpd = 1;
+			slow = false;
 			GameMaster.me.StartCoroutine(GameMaster.me.ReEnablePlayer(gameObject));
 			gameObject.SetActive(false);
 		}

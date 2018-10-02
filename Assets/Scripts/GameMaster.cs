@@ -77,7 +77,7 @@ public class GameMaster : MonoBehaviour {
 	public void playPressed() {
 
 		roundsNeeded = (bestOf + 1) / 2;
-		Debug.Log(roundsNeeded);
+//		Debug.Log(roundsNeeded);
 		SoundController.me.PlaySound (playSoundEffect, .25f);
 		UnityEngine.SceneManagement.SceneManager.LoadScene (scene);
 

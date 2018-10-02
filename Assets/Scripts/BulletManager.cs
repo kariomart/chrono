@@ -25,6 +25,7 @@ public class BulletManager : MonoBehaviour {
 			int j = (i + k) % spawnList.Count;
 			if (spawnList[j].myBullet == null){
 				spawnList[j].myBullet = Instantiate(bullet, spawnList[j].transform.position, Quaternion.identity);
+				spawnList[j].myBullet.GetComponent<Bullet>().lifetime = 99999f;
 				break;
 			}
 		}

@@ -65,6 +65,17 @@ public class SoundController : MonoBehaviour {
 		audSources [sNum].Play ();
 	}
 
+	public void PlaySoundAtNormalPitch(AudioClip snd, float vol)
+
+	{
+		//Debug.Log (snd);
+		int sNum = GetSourceNum ();
+		audSources [sNum].clip = snd;
+		audSources [sNum].volume = vol;
+		audSources [sNum].Play ();
+		audSources [sNum].pitch = 1;
+	}
+
 	// Update is called once per frame
 	public int GetSourceNum()
 	{

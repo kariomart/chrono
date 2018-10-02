@@ -17,6 +17,7 @@ public class Screenshake : MonoBehaviour {
 			
 	// Update is called once per frame
 	void Update () {
+
 		if (screenshakeTimer > 0) {
 			Vector3 shakeDirection = ((Vector3)Random.insideUnitCircle + weightedDirection).normalized * thisMagnitude * Mathf.Clamp01(screenshakeTimer);
 
@@ -32,7 +33,15 @@ public class Screenshake : MonoBehaviour {
 	public void SetScreenshake(float magnitude, float duration, Vector3 direction) {
 		thisMagnitude = magnitude;
 		screenshakeTimer = duration;
-		weightedDirection = weightedDirection;
+		weightedDirection = direction;
+
+	}
+
+	public void SetScreenshake(float magnitude, float duration, Vector3 origin, Vector3 direction) {
+		//defaultCameraPos = origin;
+		thisMagnitude = magnitude;
+		screenshakeTimer = duration;
+		weightedDirection = direction;
 
 	}
 
