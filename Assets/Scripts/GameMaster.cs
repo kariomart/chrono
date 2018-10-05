@@ -25,6 +25,11 @@ public class GameMaster : MonoBehaviour {
 	public TextMesh redSetsMesh;
 	public TextMesh blueSetsMesh;
 
+	public Sprite filledCircle;
+	public SpriteRenderer[] redScoreCircles = new SpriteRenderer[7];
+	public SpriteRenderer[] blueScoreCircles = new SpriteRenderer[7];
+
+
 	bool gameLoaded;
 	public string scene;
 
@@ -119,11 +124,23 @@ public class GameMaster : MonoBehaviour {
 
 	public void findUI() {
 
+		int count = 0;
+
 		redScore = GameObject.Find ("redScore").GetComponent<TextMesh>();
 		blueScore = GameObject.Find ("blueScore").GetComponent<TextMesh>();
 		redSetsMesh = GameObject.Find ("redSets").GetComponent<TextMesh>();
 		blueSetsMesh = GameObject.Find ("blueSets").GetComponent<TextMesh>();
 		timeMaster = GameObject.Find("TimeManager").GetComponent<TimeManager>();
+
+		redScoreCircles = GameObject.Find("redCircles").GetComponentsInChildren<SpriteRenderer>();
+		//blueScoreCircles = GameObject.Find("blueCircles").GetComponentsInChildren<SpriteRenderer>();
+
+		// foreach(Transform c in redCircles.transform) {
+
+		// 	redScoreCircles[count] = c.GetComponent<SpriteRenderer>();
+		// 	count ++;
+
+		// }
 
 	}
 
@@ -133,6 +150,8 @@ public class GameMaster : MonoBehaviour {
 		blueScore.text = blueWins.ToString();
 		redSetsMesh.text = redSets + " ";
 		blueSetsMesh.text = blueSets + " ";
+		fillInScore("red", timeMaster.player1.health);
+		//fillInScore("blue", timeMaster.player2.health);
 
 	}
 
@@ -172,6 +191,32 @@ public class GameMaster : MonoBehaviour {
 		}
 
 		return point;
+
+	}
+
+	void fillInScore(string player, int health) {
+
+		if (player == "red") {
+
+			int circlesToFill = 7 - health;
+
+			for (int i = 0; i < circlesToFill; i++) {
+
+				redScoreCircles[i].sprite = filledCircle;
+			}
+		}
+
+		if (player == "blue") {
+
+			int circlesToFill = 7 - health;
+
+			for (int i = 0; i < circlesToFill; i++) {
+
+				blueScoreCircles[i].sprite = filledCircle;
+			}
+		}
+
+
 
 	}
 

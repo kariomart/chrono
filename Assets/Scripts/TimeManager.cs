@@ -57,37 +57,40 @@ public class TimeManager : MonoBehaviour {
 
 		NormalTime ();
 
-		if (player1.slow || player2.slow) {
-			SlowTime ();
-		}
+		if (player1 && player2) {
 
-		if (player1.speed || player2.speed) {
-			SpeedTime ();
-		}
+			if (player1.slow || player2.slow) {
+				SlowTime ();
+			}
 
-		if ((player1.slow && player2.slow) || gameOverSlow) {
-			//SlowTime ();
-			DoubleSlow();
-		} 
+			if (player1.speed || player2.speed) {
+				SpeedTime ();
+			}
 
-		if ((player1.slow && player2.speed) || (player1.speed && player2.slow)) {
-			NormalTime ();
-		} 
-		if (player1.speed && player2.speed) {
-			SpeedTime ();
-		}
+			if ((player1.slow && player2.slow) || gameOverSlow) {
+				//SlowTime ();
+				DoubleSlow();
+			} 
 
-		if (gameOverSlow) {
-			slowCounter ++;
-		}
+			if ((player1.slow && player2.speed) || (player1.speed && player2.slow)) {
+				NormalTime ();
+			} 
+			if (player1.speed && player2.speed) {
+				SpeedTime ();
+			}
 
-		if (slowCounter > 300) {
-			gameOverSlow = false;
-			slowCounter = 0;
-		}
+			if (gameOverSlow) {
+				slowCounter ++;
+			}
 
-		if (gameOverSlow == false) {
-			slowCounter = 0;
+			if (slowCounter > 300) {
+				gameOverSlow = false;
+				slowCounter = 0;
+			}
+
+			if (gameOverSlow == false) {
+				slowCounter = 0;
+			}
 		}
 			
 

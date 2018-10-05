@@ -183,7 +183,9 @@ public class Bullet : MonoBehaviour {
 				// Destroy (flash, .025f); 
 				// Destroy (this.gameObject);
 			} else {
-				vel = Geo.ReflectVect (prevVel.normalized, coll.contacts [0].normal) * (prevVel.magnitude * 0.65f);
+				if (coll.contacts.Length > 0) {
+					vel = Geo.ReflectVect (prevVel.normalized, coll.contacts [0].normal) * (prevVel.magnitude * 0.65f);
+				}
 			}
 
 		}
