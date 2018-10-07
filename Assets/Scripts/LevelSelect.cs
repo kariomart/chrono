@@ -30,5 +30,6 @@ public class LevelSelect : MonoBehaviour {
 		if (x == 0) {
 			levelImage.sprite = level1;
 		}
+		
 	}
 }

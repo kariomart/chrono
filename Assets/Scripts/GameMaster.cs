@@ -126,14 +126,14 @@ public class GameMaster : MonoBehaviour {
 
 		int count = 0;
 
-		redScore = GameObject.Find ("redScore").GetComponent<TextMesh>();
-		blueScore = GameObject.Find ("blueScore").GetComponent<TextMesh>();
+		//redScore = GameObject.Find ("redScore").GetComponent<TextMesh>();
+		//blueScore = GameObject.Find ("blueScore").GetComponent<TextMesh>();
 		redSetsMesh = GameObject.Find ("redSets").GetComponent<TextMesh>();
 		blueSetsMesh = GameObject.Find ("blueSets").GetComponent<TextMesh>();
 		timeMaster = GameObject.Find("TimeManager").GetComponent<TimeManager>();
 
 		redScoreCircles = GameObject.Find("redCircles").GetComponentsInChildren<SpriteRenderer>();
-		//blueScoreCircles = GameObject.Find("blueCircles").GetComponentsInChildren<SpriteRenderer>();
+		blueScoreCircles = GameObject.Find("blueCircles").GetComponentsInChildren<SpriteRenderer>();
 
 		// foreach(Transform c in redCircles.transform) {
 
@@ -146,12 +146,12 @@ public class GameMaster : MonoBehaviour {
 
 	public void updateUI() {
 
-		redScore.text = redWins.ToString();
-		blueScore.text = blueWins.ToString();
+//		redScore.text = redWins.ToString();
+//		blueScore.text = blueWins.ToString();
 		redSetsMesh.text = redSets + " ";
 		blueSetsMesh.text = blueSets + " ";
 		fillInScore("red", timeMaster.player1.health);
-		//fillInScore("blue", timeMaster.player2.health);
+		fillInScore("blue", timeMaster.player2.health);
 
 	}
 
