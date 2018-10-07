@@ -26,7 +26,10 @@ public class Bullet : MonoBehaviour {
 	public ParticleSystem trail;
 	public AudioClip playerHit;
 	public AudioClip lastHit;
-	public AudioClip bounce;
+	public AudioClip bounce1;
+	public AudioClip bounce2;
+	public AudioClip bounce3;
+
 	public AudioClip tick;
 
 
@@ -150,7 +153,7 @@ public class Bullet : MonoBehaviour {
 
 		if (coll.gameObject.tag == "Player" && decayed) {
 
-			SoundController.me.PlaySound (tick, 1f);
+			SoundController.me.PlaySound (tick, .2f, 1, transform.position.x);
 			PlayerMovementController player = coll.gameObject.GetComponent<PlayerMovementController> ();
 			player.amountOfBullets ++;
 			player.updateUI();
@@ -167,7 +170,7 @@ public class Bullet : MonoBehaviour {
 				if (player.health == 1) {
 					SoundController.me.PlaySoundAtNormalPitch (lastHit, 1f);	
 				} else {
-					SoundController.me.PlaySoundAtNormalPitch (playerHit, 1f);
+					SoundController.me.PlaySoundAtNormalPitch (playerHit, 1f, transform.position.x);
 					//Debug.Log("???");
 				}
 				player.respawn();
@@ -175,13 +178,7 @@ public class Bullet : MonoBehaviour {
 				Camera.main.GetComponent<Screenshake>().SetScreenshake(0.35f, .25f);
 				Destroy (this.gameObject);
 				Destroy (flash, .025f); 
-				//Camera.main.GetComponent<Screenshake> ().SetScreenshake (.25f, .15f * ((6f - coll.gameObject.GetComponent<PlayerMovementController>().health) / 2));
-				// Camera.main.GetComponent<Screenshake>().SetScreenshake(0.35f, .25f);
-				// flash.GetComponent<SpriteRenderer> ().color = coll.gameObject.GetComponentInChildren<SpriteRenderer> ().color;
-				// SoundController.me.PlaySound (playerHit, 1f);
-				// Instantiate (hitPlayerEffect, transform.position, Quaternion.identity);
-				// Destroy (flash, .025f); 
-				// Destroy (this.gameObject);
+
 			} else {
 				if (coll.contacts.Length > 0) {
 					vel = Geo.ReflectVect (prevVel.normalized, coll.contacts [0].normal) * (prevVel.magnitude * 0.65f);
@@ -201,7 +198,8 @@ public class Bullet : MonoBehaviour {
 
 			}
 
-			SoundController.me.PlaySound (bounce, .2f);
+			playBounceSound();
+			//SoundController.me.PlaySound (bounce1, .2f, Mathf.Clamp(bounceCount, 1, 3f), Mathf.Clamp(transform.position.x, -1, 1));
 			ParticleEffect (coll.gameObject);
 
 		}
@@ -218,7 +216,8 @@ public class Bullet : MonoBehaviour {
 				decayed = true;
 			}
 
-			SoundController.me.PlaySound (bounce, .2f);
+
+			playBounceSound();
 			ParticleEffect (coll.gameObject);
 
 
@@ -226,15 +225,6 @@ public class Bullet : MonoBehaviour {
 
 
 
-		if (coll.gameObject.tag == "bullet") {
-
-			//this.vel *= -.3f;
-			SoundController.me.PlaySound (bounce, .2f);
-
-
-
-
-		}
 
 
 
@@ -247,12 +237,28 @@ public class Bullet : MonoBehaviour {
 		
 		}
 			
-
 //		Debug.Log ("Collided with " + coll.gameObject.name);
 		//Debug.Log (coll.gameObject.layer.ToString());
 		//Destroy (this.gameObject);
 
 	}
+
+	void playBounceSound() {
+
+		//float vol = Mathf.Clamp((float)bounceCount / 10f, .2f, .05f);
+		float vol = .2f / (float)bounceCount;
+//		Debug.Log(vol);
+
+			if (bounceCount == 1) {
+				SoundController.me.PlaySound (bounce1, vol, 1, transform.position.x);	
+			} else if (bounceCount == 2) {
+				SoundController.me.PlaySound (bounce2, vol, 1, transform.position.x);	
+			} else if (bounceCount >= 3) {
+				SoundController.me.PlaySound (bounce3, vol, 1, transform.position.x);	
+			}
+
+
+		}
 
 
 }

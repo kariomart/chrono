@@ -7,6 +7,7 @@ public class SoundController : MonoBehaviour {
 	public static SoundController me;
 	public GameObject audSource;
 	public AudioSource[] audSources;
+	public float panAmount = 1f;
 
 	void Update() {
 
@@ -51,6 +52,7 @@ public class SoundController : MonoBehaviour {
 		audSources [sNum].clip = snd;
 		audSources [sNum].volume = vol;
 		audSources [sNum].pitch = Time.timeScale;
+		audSources [sNum].panStereo = 0;
 		audSources [sNum].Play ();
 	}
 
@@ -62,6 +64,24 @@ public class SoundController : MonoBehaviour {
 		audSources [sNum].clip = snd;
 		audSources [sNum].volume = vol;
 		audSources [sNum].pitch = pitch * Time.timeScale;
+		audSources [sNum].panStereo = 0;
+		audSources [sNum].Play ();
+	}
+
+	public void PlaySound(AudioClip snd, float vol, float pitch, float xPos)
+
+	{
+		//Debug.Log (snd);
+		int sNum = GetSourceNum ();
+		audSources [sNum].clip = snd;
+		audSources [sNum].volume = vol;
+		audSources [sNum].pitch = pitch * Time.timeScale;
+
+		if (Mathf.Abs(xPos) > 2) {
+			audSources [sNum].panStereo = Geo.Remap(xPos, -7, 7, -panAmount, panAmount);
+		} else {
+			audSources [sNum].panStereo = 0;
+		}
 		audSources [sNum].Play ();
 	}
 
@@ -72,9 +92,41 @@ public class SoundController : MonoBehaviour {
 		int sNum = GetSourceNum ();
 		audSources [sNum].clip = snd;
 		audSources [sNum].volume = vol;
-		audSources [sNum].Play ();
+		audSources [sNum].panStereo = 0;
 		audSources [sNum].pitch = 1;
+		audSources [sNum].Play ();
 	}
+
+	public void PlaySoundAtNormalPitch(AudioClip snd, float vol, float xPos)
+
+	{
+		//Debug.Log (snd);
+		int sNum = GetSourceNum ();
+		audSources [sNum].clip = snd;
+		audSources [sNum].volume = vol;
+		audSources [sNum].pitch = 1;
+
+		if (Mathf.Abs(xPos) > 2) {
+			audSources [sNum].panStereo = Geo.Remap(xPos, -7, 7, -panAmount, panAmount);
+		} else {
+			audSources [sNum].panStereo = 0;
+		}
+
+		audSources [sNum].Play ();
+	}
+
+	public void PlaySoundAtPitch(AudioClip snd, float vol, float pitch)
+
+	{
+		//Debug.Log (snd);
+		int sNum = GetSourceNum ();
+		audSources [sNum].clip = snd;
+		audSources [sNum].volume = vol;
+		audSources [sNum].panStereo = 0;
+		audSources [sNum].pitch = pitch;
+		audSources [sNum].Play ();
+	}
+
 
 	// Update is called once per frame
 	public int GetSourceNum()

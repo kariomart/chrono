@@ -86,12 +86,19 @@ public class PlayerMovementController : MonoBehaviour {
 	public bool invuln;
 
 	public AudioClip shootSound;
+	public AudioClip shootSoundSlow;
 	public AudioClip whoosh;
 	public AudioClip slowSound;
 	public AudioClip speedSound;
+	public AudioClip jumpSound;
+	public AudioClip cantShootSound;
+
+
+
 	public int score;
 
 	public GameObject hitParticle;
+	public GameObject shootParticle;
 
 	Screenshake screenshake;
 
@@ -172,11 +179,13 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if (player1.Action3.WasPressed && canShoot()) {
 			shootBullet();
+		} else if (player1.Action3.WasPressed && !canShoot()) {
+			SoundController.me.PlaySoundAtPitch(cantShootSound, .1f, 0.25f);
 		}
 
 		if (player1.RightTrigger.Value > 0 && (canSlowTime() || (slow && mana > 0))) {
 			if(!slow && !otherPlayer.slow) {
-				//SoundController.me.PlaySound(slowSound, .3f);
+				SoundController.me.PlaySound(slowSound, .3f);
 			}
 			slow = true;
 			mana -= timeManaDrain;
@@ -273,7 +282,8 @@ public class PlayerMovementController : MonoBehaviour {
 				if (left) spinDir = 1;
 				if (right) spinDir = -1;
 			}
-			vel.y = jumpSpd; //* (jumpChargeTimer / jumpChargeMax);
+			vel.y = jumpSpd;
+			SoundController.me.PlaySoundAtNormalPitch(jumpSound, .1f, Mathf.Clamp(transform.position.x, -1, 1)); //* (jumpChargeTimer / jumpChargeMax);
 			jumpChargeTimer = 0;
 
 		} 
@@ -345,14 +355,23 @@ public class PlayerMovementController : MonoBehaviour {
 
 		amountOfBullets --;
 		bulletTimer = 0;
+		Debug.Log(dir + "\n" + transform.position);
+		float ang = Geo.ToAng(dir);
+		Debug.Log(ang);
+		Instantiate(shootParticle, new Vector2 (shootPt.transform.position.x + (dir.x * .5f), shootPt.transform.position.y + (dir.y * .5f)), Quaternion.Euler(new Vector3(360 - ang, 90, 0)));
 
-
-		if (amountOfBullets > 3) {
-			SoundController.me.PlaySound (shootSound, 1f);
+		if (slow && otherPlayer.slow) {
+			SoundController.me.PlaySoundAtNormalPitch (shootSoundSlow, 1f, transform.position.x);	
 		} else {
-			//Debug.Log(3 - (amountOfBullets + 1));
-			SoundController.me.PlaySound (shootSound, 1f, 3 - (amountOfBullets));
+			SoundController.me.PlaySoundAtNormalPitch (shootSound, 1f, transform.position.x);
 		}
+
+		// if (amountOfBullets > 3) {
+		// 	SoundController.me.PlaySound (shootSound, 1f);
+		// } else {
+		// 	//Debug.Log(3 - (amountOfBullets + 1));
+		// 	SoundController.me.PlaySound (shootSound, 1f, 3 - (amountOfBullets));
+		// }
 		
 
 		//SoundController.me.PlaySound(shootSound, 1f, maxBullets / (amountOfBullets + 1));
@@ -368,7 +387,7 @@ public class PlayerMovementController : MonoBehaviour {
 		}
 		vel -= dir * kick;
 		screenshake.SetScreenshake(.3f, .1f, dir);
-		SoundController.me.PlaySound (whoosh, 0.5f);
+		//SoundController.me.PlaySound (whoosh, 0.5f);
 		updateUI();
 
 

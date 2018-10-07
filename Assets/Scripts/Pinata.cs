@@ -53,7 +53,7 @@ public class Pinata : MonoBehaviour {
 			}
 
 			Camera.main.GetComponent<Screenshake> ().SetScreenshake (shakeIntensity, shakeDuration);
-			SoundController.me.PlaySound (pop, 1.5f);
+			SoundController.me.PlaySoundAtNormalPitch (pop, 1, transform.position.x);
 			Instantiate (confetti, transform.position, Quaternion.identity);
 			Destroy (this.gameObject);
 
