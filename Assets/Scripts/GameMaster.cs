@@ -26,6 +26,7 @@ public class GameMaster : MonoBehaviour {
 	public TextMesh blueSetsMesh;
 
 	public Sprite filledCircle;
+	public Sprite filledSquare;
 	public SpriteRenderer[] redScoreCircles = new SpriteRenderer[7];
 	public SpriteRenderer[] blueScoreCircles = new SpriteRenderer[7];
 
@@ -135,8 +136,8 @@ public class GameMaster : MonoBehaviour {
 		// blueSetsMesh = GameObject.Find ("blueSets").GetComponent<TextMesh>();
 		timeMaster = GameObject.Find("TimeManager").GetComponent<TimeManager>();
 		
-		redSetsSquares = GameObject.Find("redCircles").GetComponentsInChildren<SpriteRenderer>();
-		blueSetsSquares = GameObject.Find("redCircles").GetComponentsInChildren<SpriteRenderer>();
+		redSetsSquares = GameObject.Find("redSets").GetComponentsInChildren<SpriteRenderer>();
+		blueSetsSquares = GameObject.Find("blueSets").GetComponentsInChildren<SpriteRenderer>();
 
 		redScoreCircles = GameObject.Find("redCircles").GetComponentsInChildren<SpriteRenderer>();
 		blueScoreCircles = GameObject.Find("blueCircles").GetComponentsInChildren<SpriteRenderer>();
@@ -158,6 +159,8 @@ public class GameMaster : MonoBehaviour {
 		// blueSetsMesh.text = blueSets + " ";
 		fillInScore("red", timeMaster.player1.health);
 		fillInScore("blue", timeMaster.player2.health);
+		fillInSets("red", redSets);
+		fillInSets("red", blueSets);
 
 	}
 
@@ -219,6 +222,33 @@ public class GameMaster : MonoBehaviour {
 			for (int i = 0; i < circlesToFill; i++) {
 
 				blueScoreCircles[i].sprite = filledCircle;
+			}
+		}
+
+
+
+	}
+
+
+	void fillInSets(string player, int sets) {
+
+		if (player == "red") {
+
+			int circlesToFill = sets;
+
+			for (int i = 0; i < circlesToFill; i++) {
+
+				redSetsSquares[i].sprite = filledSquare;
+			}
+		}
+
+		if (player == "blue") {
+
+			int circlesToFill = sets;
+
+			for (int i = 0; i < circlesToFill; i++) {
+
+				blueSetsSquares[i].sprite = filledSquare;
 			}
 		}
 

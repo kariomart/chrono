@@ -22,11 +22,20 @@ public class Pinata : MonoBehaviour {
 	public float shakeIntensity;
 	public float shakeDuration;
 
+
+	public float maxSize;
+	public float growFactor;
+	public float waitTime;
+
+	public float targetScale = 0.1f;
+ 	public float shrinkSpeed = 0.1f;
+	public bool shrinking;
+
 	// Use this for initialization
 	void Start () {
 
 		startingHealth = health;
-		GrowAnimation ();
+
 		//minBulletsToRelease = 1;
 		//maxBulletsToRelease = 3;
 
@@ -34,6 +43,8 @@ public class Pinata : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+
 
 		if (health <= 0 && !exploded) {
 			exploded = true;
@@ -59,10 +70,53 @@ public class Pinata : MonoBehaviour {
 
 		}
 			
-		transform.localScale = new Vector2(2.1f, 2.1f) * (health / startingHealth * scale);
+
+		if (shrinking) {
+         	transform.localScale -= Vector3.one * Time.deltaTime * shrinkSpeed;
+
+        if (transform.localScale.x < targetScale) {
+             shrinking = false;
+	     	}
+		}
+	}
+ 
+		//transform.localScale = new Vector2(2.1f, 2.1f) * (health / startingHealth * scale);
 
 		
-	}
+
+
+	 public IEnumerator Scale()
+     {
+         float timer = 0;
+ 
+         while(true) // this could also be a condition indicating "alive or dead"
+         {
+             // we scale all axis, so they will have the same value, 
+             // so we can work with a float instead of comparing vectors
+			timer += Time.deltaTime;
+			transform.localScale += new Vector3(1, 1, 1) * Time.deltaTime * growFactor;
+			yield return null;
+             // reset the timer
+ 
+             yield return new WaitForSeconds(waitTime);
+ 
+             timer = 0;
+    
+			timer += Time.deltaTime;
+			transform.localScale -= new Vector3(1, 1, 1) * Time.deltaTime * growFactor;
+			yield return null;
+
+             timer = 0;
+             yield return new WaitForSeconds(waitTime);
+         }
+     }
+
+	 public void Shrink() {
+
+		targetScale = .25f + transform.localScale.x * (health / startingHealth);
+		shrinking = true;
+		
+	 }
 
 	void OnTriggerEnter2D(Collider2D coll) {
 

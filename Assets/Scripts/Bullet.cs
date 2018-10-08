@@ -231,7 +231,9 @@ public class Bullet : MonoBehaviour {
 		if (coll.gameObject.layer == LayerMask.NameToLayer("Pinata")) {
 
 			Pinata pinata = coll.gameObject.GetComponent<Pinata> ();
+			//pinata.StartCoroutine(pinata.Scale());
 			pinata.health--;
+			pinata.Shrink();
 			pinata.gameObject.GetComponent<Animator> ().enabled = false;
 			ParticleEffect (coll.gameObject);
 		
@@ -246,7 +248,7 @@ public class Bullet : MonoBehaviour {
 	void playBounceSound() {
 
 		//float vol = Mathf.Clamp((float)bounceCount / 10f, .2f, .05f);
-		float vol = .2f / (float)bounceCount;
+		float vol = 1 / (float)bounceCount;
 //		Debug.Log(vol);
 
 			if (bounceCount == 1) {

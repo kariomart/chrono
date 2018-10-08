@@ -185,7 +185,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if (player1.RightTrigger.Value > 0 && (canSlowTime() || (slow && mana > 0))) {
 			if(!slow && !otherPlayer.slow) {
-				SoundController.me.PlaySound(slowSound, .3f);
+				SoundController.me.PlaySound(slowSound, .5f);
 			}
 			slow = true;
 			mana -= timeManaDrain;
