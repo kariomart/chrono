@@ -180,7 +180,7 @@ public class PlayerMovementController : MonoBehaviour {
 		if (player1.Action3.WasPressed && canShoot()) {
 			shootBullet();
 		} else if (player1.Action3.WasPressed && !canShoot()) {
-			SoundController.me.PlaySoundAtPitch(cantShootSound, .1f, 0.25f);
+			SoundController.me.PlaySoundAtPitch(cantShootSound, .7f, 0.25f);
 		}
 
 		if (player1.RightTrigger.Value > 0 && (canSlowTime() || (slow && mana > 0))) {
@@ -257,7 +257,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 		float desYScale = defaultScale.y + (Mathf.Abs(vel.y) * 0.02f);
 		scaleSpd += ((desYScale - pivot.transform.localScale.y) * 3f * Time.fixedDeltaTime * 60f);
-		scaleSpd *= Mathf.Pow(.1f, Time.fixedDeltaTime);//5.4f * Time.fixedDeltaTime;
+		scaleSpd *= /*Mathf.Pow(.1f, Time.fixedDeltaTime);*/ 5.4f * Time.fixedDeltaTime;
 
 
 		float accel = runAccel;
