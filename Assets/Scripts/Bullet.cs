@@ -153,7 +153,7 @@ public class Bullet : MonoBehaviour {
 
 		if (coll.gameObject.tag == "Player" && decayed) {
 
-			SoundController.me.PlaySound (tick, .2f, 1, transform.position.x);
+			SoundController.me.PlaySound (tick, 1f, 1, transform.position.x);
 			PlayerMovementController player = coll.gameObject.GetComponent<PlayerMovementController> ();
 			player.amountOfBullets ++;
 			player.updateUI();
@@ -228,7 +228,7 @@ public class Bullet : MonoBehaviour {
 
 
 
-		if (coll.gameObject.layer == LayerMask.NameToLayer("Pinata")) {
+		if (coll.gameObject.tag == "Pinata") {
 
 			Pinata pinata = coll.gameObject.GetComponent<Pinata> ();
 			//pinata.StartCoroutine(pinata.Scale());
@@ -248,7 +248,8 @@ public class Bullet : MonoBehaviour {
 	void playBounceSound() {
 
 		//float vol = Mathf.Clamp((float)bounceCount / 10f, .2f, .05f);
-		float vol = 1 / (float)bounceCount;
+		//float vol = 1 / (float)bounceCount;
+		float vol = 1;
 //		Debug.Log(vol);
 
 			if (bounceCount == 1) {

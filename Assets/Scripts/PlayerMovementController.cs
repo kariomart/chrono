@@ -355,9 +355,9 @@ public class PlayerMovementController : MonoBehaviour {
 
 		amountOfBullets --;
 		bulletTimer = 0;
-		Debug.Log(dir + "\n" + transform.position);
+//		Debug.Log(dir + "\n" + transform.position);
 		float ang = Geo.ToAng(dir) + 180;
-		Debug.Log(ang);
+//		Debug.Log(ang);
 		Instantiate(shootParticle, new Vector2 (shootPt.transform.position.x + (dir.x * .5f), shootPt.transform.position.y + (dir.y * .5f)), Quaternion.Euler(new Vector3(360 - ang, 90, 0)));
 
 		if (slow && otherPlayer.slow) {
@@ -398,7 +398,7 @@ public class PlayerMovementController : MonoBehaviour {
 		Vector2 pt1 = transform.TransformPoint(box.offset + new Vector2(box.size.x / 2, -box.size.y / 2) + new Vector2(-.01f, 0));//(box.size / 2));
         Vector2 pt2 = transform.TransformPoint(box.offset - (box.size / 2) + new Vector2(.01f, 0));
 		bool prevGrounded = grounded;
-		grounded = Physics2D.OverlapArea(pt1, pt2, LayerMask.GetMask("Pinata")) != null;
+//		grounded = Physics2D.OverlapArea(pt1, pt2, LayerMask.GetMask("Pinata")) != null;
         grounded = Physics2D.OverlapArea(pt1, pt2, LayerMask.GetMask("Platform")) != null;
 		
         if (grounded) {
@@ -532,8 +532,8 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if (coll.gameObject.tag == "Pinata") {
 //			Debug.Log(coll.contacts[0].normal);
-			Vector2 c = coll.contacts[0].normal;
-			vel = new Vector2(c.x, c.y * jumpSpd);
+			//Vector2 c = coll.contacts[0].normal;
+			//vel = new Vector2(c.x, c.y * jumpSpd);
 //			Debug.Log("pinata");
 			//vel.y *= -.25f;
 		}
