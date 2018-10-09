@@ -43,13 +43,17 @@ public class GameMaster : MonoBehaviour {
 	public GameObject bluePlayer;
 
 	public TimeManager timeMaster;
+	public GameObject player1_prefab;
+	public GameObject player2_prefab;
 
+	public PlayerMovementController player1;
+	public PlayerMovementController player2;
 
 
 
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
 
 		DontDestroyOnLoad (this.gameObject);
 
@@ -91,8 +95,10 @@ public class GameMaster : MonoBehaviour {
 		UnityEngine.SceneManagement.SceneManager.LoadScene (scene);
 
 	}
-	public IEnumerator ReEnablePlayer(GameObject obj) {
-		yield return new WaitForSeconds(.6f);
+	public IEnumerator ReEnablePlayer(GameObject obj, GameObject otherPlayer) {
+		yield return new WaitForSeconds(.9f);
+		Vector2 point = GameMaster.me.getFarthestSpawnPoint(otherPlayer.transform.position);
+		obj.transform.position = point;
 		obj.SetActive(true);
 	}
 
@@ -157,8 +163,8 @@ public class GameMaster : MonoBehaviour {
 //		blueScore.text = blueWins.ToString();
 		// redSetsMesh.text = redSets + " ";
 		// blueSetsMesh.text = blueSets + " ";
-		fillInScore("red", timeMaster.player1.health);
-		fillInScore("blue", timeMaster.player2.health);
+		fillInScore("red", player1.health);
+		fillInScore("blue", player2.health);
 		fillInSets("red", redSets);
 		fillInSets("red", blueSets);
 
@@ -201,6 +207,23 @@ public class GameMaster : MonoBehaviour {
 
 		return point;
 
+	}
+
+	public void initializeLevel(){ 
+
+		SpawnPlayers();
+
+	}
+
+	public void SpawnPlayers() {
+
+		player1 = Instantiate(player1_prefab, LevelSettings.me.spawn1.position, Quaternion.identity).GetComponent<PlayerMovementController>();
+		player2 = Instantiate(player2_prefab, LevelSettings.me.spawn2.position, Quaternion.identity).GetComponent<PlayerMovementController>();
+
+		player1.amountOfBullets = 2;
+		player2.amountOfBullets = 2;
+
+		
 	}
 
 	void fillInScore(string player, int health) {

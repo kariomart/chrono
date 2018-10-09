@@ -40,8 +40,8 @@ public class TimeManager : MonoBehaviour {
 		GameMaster.me.findUI ();
 		GameMaster.me.updateUI ();
 		GameMaster.me.findSpawnPoints();
-		player1 = GameObject.Find("red").GetComponent<PlayerMovementController>();
-		player2 = GameObject.Find("blue").GetComponent<PlayerMovementController>();
+		player1 = GameMaster.me.player1;
+		player2 = GameMaster.me.player2;
 
 	}
 	

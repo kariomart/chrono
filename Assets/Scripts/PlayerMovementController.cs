@@ -256,8 +256,8 @@ public class PlayerMovementController : MonoBehaviour {
 		wallCast();
 
 		float desYScale = defaultScale.y + (Mathf.Abs(vel.y) * 0.02f);
-		scaleSpd += ((desYScale - pivot.transform.localScale.y) * 3f);
-		scaleSpd *= 5.4f * Time.fixedDeltaTime;
+		scaleSpd += ((desYScale - pivot.transform.localScale.y) * 3f * Time.fixedDeltaTime * 60f);
+		scaleSpd *= Mathf.Pow(.1f, Time.fixedDeltaTime);//5.4f * Time.fixedDeltaTime;
 
 
 		float accel = runAccel;
@@ -356,7 +356,7 @@ public class PlayerMovementController : MonoBehaviour {
 		amountOfBullets --;
 		bulletTimer = 0;
 		Debug.Log(dir + "\n" + transform.position);
-		float ang = Geo.ToAng(dir);
+		float ang = Geo.ToAng(dir) + 180;
 		Debug.Log(ang);
 		Instantiate(shootParticle, new Vector2 (shootPt.transform.position.x + (dir.x * .5f), shootPt.transform.position.y + (dir.y * .5f)), Quaternion.Euler(new Vector3(360 - ang, 90, 0)));
 
@@ -405,7 +405,7 @@ public class PlayerMovementController : MonoBehaviour {
             spinning = false;
 			if (!prevGrounded) {
 //				Debug.Log(prevVel.y);
-				scaleSpd = -13f * (Mathf.Abs(prevVel.y) / 30f) * Time.fixedDeltaTime;
+				scaleSpd = -13f * (Mathf.Abs(prevVel.y) / 30f);
 			}
             vel.y = 0;
 
@@ -470,15 +470,14 @@ public class PlayerMovementController : MonoBehaviour {
 			//var main = hitParticle.transform.GetChild(0).GetComponent<ParticleSystem>().main;
 			//main.startColor = playerColor;
 			otherPlayer.score ++;
-			Vector2 point = GameMaster.me.getFarthestSpawnPoint(otherPlayer.transform.position);
-			transform.position = point;
+			
 			invuln = true;
 			amountOfBullets ++;
 			invulnCounter = 0;
 			pivot.transform.localScale = pivot.transform.localScale * .2f;
 			scaleSpd = 1;
 			slow = false;
-			GameMaster.me.StartCoroutine(GameMaster.me.ReEnablePlayer(gameObject));
+			GameMaster.me.StartCoroutine(GameMaster.me.ReEnablePlayer(gameObject, otherPlayer.gameObject));
 			gameObject.SetActive(false);
 		}
 
