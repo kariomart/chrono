@@ -30,8 +30,8 @@ public class GameMaster : MonoBehaviour {
 	public SpriteRenderer[] redScoreCircles = new SpriteRenderer[7];
 	public SpriteRenderer[] blueScoreCircles = new SpriteRenderer[7];
 
-	public SpriteRenderer[] redSetsSquares = new SpriteRenderer[3];
-	public SpriteRenderer[] blueSetsSquares = new SpriteRenderer[3];
+	public SpriteRenderer[] redSetsSquares = new SpriteRenderer[2];
+	public SpriteRenderer[] blueSetsSquares = new SpriteRenderer[2];
 
 
 	bool gameLoaded;
@@ -68,7 +68,7 @@ public class GameMaster : MonoBehaviour {
 		//bestOf = 100;
 		//roundsNeeded = (bestOf + 1) / 2;
 		roundsNeeded = 7;
-		setsNeeded = 3;
+		setsNeeded = 2;
 		
 
 	}

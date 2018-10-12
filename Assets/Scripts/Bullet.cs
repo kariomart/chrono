@@ -148,7 +148,7 @@ public class Bullet : MonoBehaviour {
 
 			} else {
 
-				spd *= .2f;
+				spd *= .1f;
 			}
 
 		}
@@ -262,11 +262,15 @@ public class Bullet : MonoBehaviour {
 
 		if (coll.gameObject.tag == "Pinata") {
 
+
 			Pinata pinata = coll.gameObject.GetComponent<Pinata> ();
 			//pinata.StartCoroutine(pinata.Scale());
 			pinata.health--;
-			pinata.physics.vel = vel;
-			//pinata.Shrink();
+
+			if (pinata.physics) {
+				pinata.physics.vel = vel;
+			}
+			pinata.Shrink();
 //			pinata.gameObject.GetComponent<Animator> ().enabled = false;
 			ParticleEffect (coll.gameObject);
 		
