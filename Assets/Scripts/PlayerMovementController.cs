@@ -52,6 +52,7 @@ public class PlayerMovementController : MonoBehaviour {
 	public float bonusGravity;
 	public float jumpChargeTimer;
 	public float jumpChargeMax;
+	public float maxMapX;
 
 	public bool right;
 	public bool left;
@@ -338,6 +339,10 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if (gameOver) {
 			vel = Vector2.zero;
+		}
+
+		if (Mathf.Abs(transform.position.x) > maxMapX) {
+			transform.position = new Vector2(-transform.position.x, transform.position.y);
 		}
 
 		prevVel = vel;

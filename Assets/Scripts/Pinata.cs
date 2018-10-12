@@ -31,10 +31,13 @@ public class Pinata : MonoBehaviour {
  	public float shrinkSpeed = 0.1f;
 	public bool shrinking;
 
+	public PinataPhysics physics;
+
 	// Use this for initialization
 	void Start () {
 
 		startingHealth = health;
+		physics = GetComponent<PinataPhysics>();
 
 		//minBulletsToRelease = 1;
 		//maxBulletsToRelease = 3;

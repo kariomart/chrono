@@ -41,6 +41,7 @@ public class Bullet : MonoBehaviour {
 
 	public GameObject DamageFlash;
 	Vector2 prevVel;
+	public float maxMapX;
 
 	// Use this for initialization
 	void Start () {
@@ -92,8 +93,14 @@ public class Bullet : MonoBehaviour {
 
 		}
 
+		if (Mathf.Abs(transform.position.x) > maxMapX) {
+			transform.position = new Vector2(-transform.position.x, transform.position.y);
+			//vel *= -1;
+		}
+
 		rb.MovePosition ((Vector2)transform.position + vel * spd * Time.fixedDeltaTime);
 		prevVel = vel;
+
 
 	}
 
@@ -131,6 +138,25 @@ public class Bullet : MonoBehaviour {
 			//vel *= Random.Range (-.1f, -.2f);
 
 		}
+		
+		if (coll.gameObject.layer == LayerMask.NameToLayer("SlowZone")) {
+
+			if (!coll.GetComponent<SlowZone>().slow) {
+
+				spd *= 2f;
+				//Debug.Log("Slowzone");
+
+			} else {
+
+				spd *= .2f;
+			}
+
+		}
+
+			//Debug.Log (rb.velocity);
+			//Debug.Log ("trying to special case velocity");
+			//vel *= Random.Range (-.1f, -.2f);
+
 
 		if (coll.gameObject.tag == "pivot" && !decayed) {
 
@@ -144,6 +170,12 @@ public class Bullet : MonoBehaviour {
 		if (coll.gameObject.tag == "pivot" && !decayed) {
 
 			GameMaster.me.timeMaster.gameOverSlow = false;
+		}
+
+		if (coll.gameObject.layer == LayerMask.NameToLayer("SlowZone")) {
+
+			spd = defaultSpd;
+
 		}
 
 	}
@@ -233,8 +265,9 @@ public class Bullet : MonoBehaviour {
 			Pinata pinata = coll.gameObject.GetComponent<Pinata> ();
 			//pinata.StartCoroutine(pinata.Scale());
 			pinata.health--;
-			pinata.Shrink();
-			pinata.gameObject.GetComponent<Animator> ().enabled = false;
+			pinata.physics.vel = vel;
+			//pinata.Shrink();
+//			pinata.gameObject.GetComponent<Animator> ().enabled = false;
 			ParticleEffect (coll.gameObject);
 		
 		}
