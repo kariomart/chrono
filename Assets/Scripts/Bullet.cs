@@ -14,11 +14,14 @@ public class Bullet : MonoBehaviour {
 	float nonDecayedTime;
 	public float decayTime;
 	public bool decayed;
+	public float decayVel;
 	public Vector2 vel;
+	public float maxSpd;
 	public int bounceCount;
 	public float decayDeath;
 	public float decayDeathCounter;
 	public float lifetime;
+	public bool slowZoneAccel;
 
 	public ParticleSystem hitObjectEffect;
 	public ParticleSystem shoot;
@@ -68,11 +71,15 @@ public class Bullet : MonoBehaviour {
 
 
 			if (decayDeathCounter > lifetime) {
+				GameMaster.me.amtBullets --;
 				Destroy(gameObject);
 			}
 		}
-		
 
+
+		Color c = sprite.color;
+		Debug.Log((lifetime / decayDeathCounter) / 10);
+		sprite.color = new Color(c.r, c.g, c.b, (lifetime / decayDeathCounter) / 10);
 
 
 	}
@@ -89,14 +96,22 @@ public class Bullet : MonoBehaviour {
 			main.startColor = decayColor;
 			//trail.gameObject.SetActive(false);
 			decayed = true;
+			middle.Stop();
 			trail.Stop();
 
 		}
 
 		if (Mathf.Abs(transform.position.x) > maxMapX) {
 			transform.position = new Vector2(-transform.position.x, transform.position.y);
-			//vel *= -1;
+			vel *= .8f;
 		}
+
+		if (spd < decayVel && !decayed) {
+			decayed = true;
+			sprite.enabled = true;
+		}
+
+		spd = Mathf.Clamp(spd, 0, maxSpd);
 
 		rb.MovePosition ((Vector2)transform.position + vel * spd * Time.fixedDeltaTime);
 		prevVel = vel;
@@ -141,17 +156,25 @@ public class Bullet : MonoBehaviour {
 		
 		if (coll.gameObject.layer == LayerMask.NameToLayer("SlowZone")) {
 
-			if (!coll.GetComponent<SlowZone>().slow) {
 
-				spd *= 2f;
-				//Debug.Log("Slowzone");
-
+			if ((GameMaster.me.player1.slow || GameMaster.me.player2.slow)) {
+				spd *= 3f;	
 			} else {
-
-				spd *= .1f;
+				spd *= .2f;	
 			}
-
 		}
+
+
+			// if (!coll.GetComponent<SlowZone>().slow) {
+
+			// 	spd *= 2f;
+			// 	//Debug.Log("Slowzone");
+
+			// } else {
+
+			// 	spd *= .2f;
+			// }
+
 
 			//Debug.Log (rb.velocity);
 			//Debug.Log ("trying to special case velocity");
@@ -165,6 +188,21 @@ public class Bullet : MonoBehaviour {
 		}
 	}
 
+	void OnTriggerStay2D(Collider2D coll) {
+
+		if (coll.gameObject.layer == LayerMask.NameToLayer("SlowZone")) {
+
+			if ((GameMaster.me.player1.slow || GameMaster.me.player2.slow)) { 
+				slowZoneAccel = true;
+			}
+
+
+
+		}
+
+
+	}
+
 	void OnTriggerExit2D(Collider2D coll) {
 
 		if (coll.gameObject.tag == "pivot" && !decayed) {
@@ -174,7 +212,10 @@ public class Bullet : MonoBehaviour {
 
 		if (coll.gameObject.layer == LayerMask.NameToLayer("SlowZone")) {
 
-			spd = defaultSpd;
+			if (slowZoneAccel) {
+				spd *= 6f;
+			} 
+			//spd = defaultSpd;
 
 		}
 
@@ -268,9 +309,10 @@ public class Bullet : MonoBehaviour {
 			pinata.health--;
 
 			if (pinata.physics) {
-				pinata.physics.vel = vel;
+				pinata.physics.vel += -vel * 5f;
 			}
-			pinata.Shrink();
+
+			//pinata.Shrink();
 //			pinata.gameObject.GetComponent<Animator> ().enabled = false;
 			ParticleEffect (coll.gameObject);
 		

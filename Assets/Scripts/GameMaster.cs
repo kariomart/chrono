@@ -19,6 +19,7 @@ public class GameMaster : MonoBehaviour {
 	public int blueSets;
 	public string winner;
 	public bool matchOver;
+	public int amtBullets;
 
 	public TextMesh redScore;
 	public TextMesh blueScore;

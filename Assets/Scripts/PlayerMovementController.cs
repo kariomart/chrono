@@ -152,7 +152,7 @@ public class PlayerMovementController : MonoBehaviour {
 	
 	void Update () {
 
-	
+
 		right = player1.LeftStickRight && player1.LeftStickRight.Value > .5f;
 		left = player1.LeftStickLeft && player1.LeftStickLeft.Value > .5f;
 		updateUI();
