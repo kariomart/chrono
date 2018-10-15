@@ -78,7 +78,7 @@ public class Bullet : MonoBehaviour {
 
 
 		Color c = sprite.color;
-		Debug.Log((lifetime / decayDeathCounter) / 10);
+//		Debug.Log((lifetime / decayDeathCounter) / 10);
 		sprite.color = new Color(c.r, c.g, c.b, (lifetime / decayDeathCounter) / 10);
 
 
@@ -96,7 +96,8 @@ public class Bullet : MonoBehaviour {
 			main.startColor = decayColor;
 			//trail.gameObject.SetActive(false);
 			decayed = true;
-			middle.Stop();
+			//sprite.enabled = true;
+			//middle.Stop();
 			trail.Stop();
 
 		}
@@ -108,7 +109,6 @@ public class Bullet : MonoBehaviour {
 
 		if (spd < decayVel && !decayed) {
 			decayed = true;
-			sprite.enabled = true;
 		}
 
 		spd = Mathf.Clamp(spd, 0, maxSpd);
@@ -312,7 +312,7 @@ public class Bullet : MonoBehaviour {
 				pinata.physics.vel += -vel * 5f;
 			}
 
-			//pinata.Shrink();
+			pinata.Shrink();
 //			pinata.gameObject.GetComponent<Animator> ().enabled = false;
 			ParticleEffect (coll.gameObject);
 		

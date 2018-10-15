@@ -182,6 +182,8 @@ public class PlayerMovementController : MonoBehaviour {
 			shootBullet();
 		} else if (player1.Action3.WasPressed && !canShoot()) {
 			SoundController.me.PlaySoundAtPitch(cantShootSound, .7f, 0.25f);
+			//vel -= dir * kick * .15f;
+
 		}
 
 		if (player1.RightTrigger.Value > 0 && (canSlowTime() || (slow && mana > 0))) {
