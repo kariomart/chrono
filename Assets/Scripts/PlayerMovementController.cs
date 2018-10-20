@@ -155,6 +155,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 		right = player1.LeftStickRight && player1.LeftStickRight.Value > .5f;
 		left = player1.LeftStickLeft && player1.LeftStickLeft.Value > .5f;
+		
 		updateUI();
 
 		dir = new Vector2(player1.LeftStickX, player1.LeftStickY).normalized;
@@ -182,8 +183,6 @@ public class PlayerMovementController : MonoBehaviour {
 			shootBullet();
 		} else if (player1.Action3.WasPressed && !canShoot()) {
 			SoundController.me.PlaySoundAtPitch(cantShootSound, .7f, 0.25f);
-			//vel -= dir * kick * .15f;
-
 		}
 
 		if (player1.RightTrigger.Value > 0 && (canSlowTime() || (slow && mana > 0))) {
