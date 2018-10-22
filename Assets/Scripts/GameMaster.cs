@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.PostProcessing;
+using Kino;
+
 
 public class GameMaster : MonoBehaviour {
 
@@ -49,7 +52,8 @@ public class GameMaster : MonoBehaviour {
 
 	public PlayerMovementController player1;
 	public PlayerMovementController player2;
-
+	PostProcessingProfile retroFX_default;
+	AnalogGlitch glitchFX;
 
 
 
@@ -70,6 +74,8 @@ public class GameMaster : MonoBehaviour {
 		//roundsNeeded = (bestOf + 1) / 2;
 		roundsNeeded = 7;
 		setsNeeded = 2;
+		retroFX_default = Camera.main.GetComponent<PostProcessingBehaviour>().profile;
+		glitchFX = Camera.main.GetComponent<AnalogGlitch>();
 		
 
 	}
@@ -279,5 +285,29 @@ public class GameMaster : MonoBehaviour {
 
 
 	}
+
+	public void addMotionBlur() {
+
+		retroFX_default.motionBlur.enabled = true;
+	}
+
+	public void removeMotionBlur() {
+
+		retroFX_default.motionBlur.enabled = false;
+
+	}
+
+	public void addColorDrift() {
+
+		glitchFX.colorDrift = 1;
+
+	} 
+
+	public void removeColorDrift() {
+
+		glitchFX.colorDrift = 0;
+
+	} 
+
 
 }

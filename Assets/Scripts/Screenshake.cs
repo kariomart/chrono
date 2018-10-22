@@ -27,6 +27,9 @@ public class Screenshake : MonoBehaviour {
 			screenshakeTimer -= Time.deltaTime;
 
 
+		} else {
+
+			GameMaster.me.removeColorDrift();
 		}
 	}
 

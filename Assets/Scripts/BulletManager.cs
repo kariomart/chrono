@@ -6,17 +6,18 @@ public class BulletManager : MonoBehaviour {
 	public static BulletManager me;
 	public List<BulletSpawner> spawnList = new List<BulletSpawner>();
 	public GameObject bullet;
-	//public static int amtBullets;
+	public static int amtBullets;
 
 
 	void Awake(){
 		me = this;
+		BulletManager.amtBullets += 4;
 		StartCoroutine(SpawnBullets());
 	}
 
 	IEnumerator SpawnBullets(){
 		while (true){
-			yield return new WaitForSeconds(Random.Range(GameMaster.me.amtBullets, 4 * GameMaster.me.amtBullets));
+			yield return new WaitForSeconds(Random.Range(amtBullets, 4 * amtBullets));
 			SpawnBullet();
 
 		}
@@ -32,7 +33,7 @@ public class BulletManager : MonoBehaviour {
 				Bullet b = spawnList[j].myBullet.GetComponent<Bullet>();
 				b.decayed = true;
 				b.lifetime = 10f;
-				GameMaster.me.amtBullets ++;
+				amtBullets ++;
 				break;
 			}
 		}

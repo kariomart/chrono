@@ -102,10 +102,10 @@ public class TimeManager : MonoBehaviour {
 		Time.timeScale = 0.25f;
 		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
 		music.pitch = 0.75f;
-		PostProcessingBehaviour p = Camera.main.GetComponent<PostProcessingBehaviour> ();
-		p.profile = FX;
-		p.enabled = true;
-
+		// PostProcessingBehaviour p = Camera.main.GetComponent<PostProcessingBehaviour> ();
+		// p.profile = FX;
+		// p.enabled = true;
+		GameMaster.me.addMotionBlur();
 
 	}
 
@@ -114,9 +114,10 @@ public class TimeManager : MonoBehaviour {
 		Time.timeScale = 0.08f;
 		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
 		music.pitch = 0.50f;
-		PostProcessingBehaviour p = Camera.main.GetComponent<PostProcessingBehaviour> ();
-		p.profile = DoubleFX;
-		p.enabled = true;
+		// PostProcessingBehaviour p = Camera.main.GetComponent<PostProcessingBehaviour> ();
+		// p.profile = DoubleFX;
+		// p.enabled = true;
+		GameMaster.me.addMotionBlur();
 	}
 
 	void SpeedTime() {
@@ -132,10 +133,10 @@ public class TimeManager : MonoBehaviour {
 		Time.timeScale = 1f;
 		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
 		music.pitch = 1f;
-		Camera.main.GetComponent<PostProcessingBehaviour> ().enabled = false;
+		//Camera.main.GetComponent<PostProcessingBehaviour> ().enabled = false;
+		GameMaster.me.removeMotionBlur();
 
 	}
-
 
 
 }

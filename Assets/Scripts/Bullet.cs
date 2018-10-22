@@ -71,7 +71,7 @@ public class Bullet : MonoBehaviour {
 
 
 			if (decayDeathCounter > lifetime) {
-				GameMaster.me.amtBullets --;
+				BulletManager.amtBullets --;
 				Destroy(gameObject);
 			}
 		}
@@ -104,6 +104,7 @@ public class Bullet : MonoBehaviour {
 
 		if (Mathf.Abs(transform.position.x) > maxMapX) {
 			transform.position = new Vector2(-transform.position.x, transform.position.y);
+			vel.x *= 1.1f;
 			vel *= .8f;
 		}
 
@@ -247,6 +248,7 @@ public class Bullet : MonoBehaviour {
 					//Debug.Log("???");
 				}
 				player.respawn();
+				GameMaster.me.addColorDrift();
 				GameObject flash = Instantiate (DamageFlash, transform.position, Quaternion.identity);
 				Camera.main.GetComponent<Screenshake>().SetScreenshake(0.35f, .25f);
 				Destroy (this.gameObject);
