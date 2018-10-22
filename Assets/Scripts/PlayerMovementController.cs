@@ -211,7 +211,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if ((player1.Action2.WasPressed && (gameOver || otherPlayer.gameOver) && !GameMaster.me.matchOver)) {
 			Time.timeScale = 1f;
-			UnityEngine.SceneManagement.SceneManager.LoadScene("level_select");
+			UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
 
 		}
 
@@ -524,6 +524,15 @@ public class PlayerMovementController : MonoBehaviour {
 			}
 			if (coll.gameObject.tag == "Player") {
 				vel.y = jumpSpd;
+				if (amountOfBullets == 0) {
+					amountOfBullets ++;
+					otherPlayer.amountOfBullets --;
+				}
+
+				if (otherPlayer.amountOfBullets == 0) {
+					amountOfBullets --;
+					otherPlayer.amountOfBullets ++;
+				}
 			}
 			if (coll.gameObject.tag == "Bullet") {
 				Bullet bull = coll.gameObject.GetComponent<Bullet> ();

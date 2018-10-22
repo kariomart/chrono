@@ -53,7 +53,12 @@ public class GameMaster : MonoBehaviour {
 	public PlayerMovementController player1;
 	public PlayerMovementController player2;
 	PostProcessingProfile retroFX_default;
-	AnalogGlitch glitchFX;
+	public AnalogGlitch glitchFX;
+
+
+	public float fx_baseCA;
+	public float fx_baseVignette;
+	public float fx_slowVignette;
 
 
 
@@ -76,7 +81,7 @@ public class GameMaster : MonoBehaviour {
 		setsNeeded = 2;
 		retroFX_default = Camera.main.GetComponent<PostProcessingBehaviour>().profile;
 		glitchFX = Camera.main.GetComponent<AnalogGlitch>();
-		
+		setFXDefaults();
 
 	}
 	
@@ -286,6 +291,24 @@ public class GameMaster : MonoBehaviour {
 
 	}
 
+	public void AddSlowFX() {
+
+		addMotionBlur();
+		increaseCA();
+		increaseVignette();
+		glitchFX.colorDrift += 0.0005f;
+
+	}
+
+	public void RemoveSlowFX() {
+
+		removeMotionBlur();
+		decreaseCA();
+		decreaseVignette();
+		glitchFX.colorDrift = 0f;
+
+	}
+
 	public void addMotionBlur() {
 
 		retroFX_default.motionBlur.enabled = true;
@@ -307,7 +330,56 @@ public class GameMaster : MonoBehaviour {
 
 		glitchFX.colorDrift = 0;
 
+	}
+
+	public void increaseVignette() {
+		var v = retroFX_default.vignette.settings;
+		if (v.intensity < fx_slowVignette) {
+			v.intensity += .005f;
+		}
+		retroFX_default.vignette.settings = v;
 	} 
+
+	public void decreaseVignette() {
+		var v = retroFX_default.vignette.settings;
+		if (v.intensity > fx_baseVignette) {
+			v.intensity -= .01f;
+		}
+		retroFX_default.vignette.settings = v;
+	} 
+
+	public void increaseCA() {
+
+		var ca = retroFX_default.chromaticAberration.settings;
+		ca.intensity += 0.005f;
+		retroFX_default.chromaticAberration.settings = ca;
+
+	}
+
+	public void decreaseCA() {
+
+		var ca = retroFX_default.chromaticAberration.settings;
+		//ca.intensity = fx_baseCA;
+		if (ca.intensity > fx_baseCA) {
+			ca.intensity -= 0.01f;
+			}
+		retroFX_default.chromaticAberration.settings = ca;
+
+	}
+
+	public void setFXDefaults() {
+
+		var ca = retroFX_default.chromaticAberration.settings;
+		ca.intensity = fx_baseCA;
+
+		retroFX_default.chromaticAberration.settings = ca;
+
+		var v = retroFX_default.vignette.settings;
+		v.intensity = fx_baseVignette;
+
+		retroFX_default.vignette.settings = v;
+	
+	}
 
 
 }

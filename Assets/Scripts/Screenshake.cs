@@ -8,6 +8,7 @@ public class Screenshake : MonoBehaviour {
 	Vector3 weightedDirection;
 	float screenshakeTimer = 0;
 	float thisMagnitude = 0;
+	bool shaking;
 
 	// Use this for initialization
 	void Start () {
@@ -19,17 +20,21 @@ public class Screenshake : MonoBehaviour {
 	void Update () {
 
 		if (screenshakeTimer > 0) {
+			shaking = true;
 			Vector3 shakeDirection = ((Vector3)Random.insideUnitCircle + weightedDirection).normalized * thisMagnitude * Mathf.Clamp01(screenshakeTimer);
 
 			Vector3 result = defaultCameraPos + shakeDirection;
 			result.z = -10;
 			transform.position = result;
 			screenshakeTimer -= Time.deltaTime;
+		} 
 
+		else {
 
-		} else {
-
-			GameMaster.me.removeColorDrift();
+			if (shaking) {
+				GameMaster.me.removeColorDrift();
+				shaking = false;
+			}
 		}
 	}
 

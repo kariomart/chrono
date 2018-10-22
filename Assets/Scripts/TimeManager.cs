@@ -55,9 +55,13 @@ public class TimeManager : MonoBehaviour {
 
 		globalTimescale = Time.timeScale;
 
-		NormalTime ();
+	
 
 		if (player1 && player2) {
+
+			if (!player1.slow && !player2.slow) {
+				NormalTime ();
+			}
 
 			if (player1.slow || player2.slow) {
 				SlowTime ();
@@ -91,11 +95,11 @@ public class TimeManager : MonoBehaviour {
 			if (gameOverSlow == false) {
 				slowCounter = 0;
 			}
-		}
-			
 
+			}
+
+		}
 		
-	}
 
 	void SlowTime() {
 
@@ -105,7 +109,7 @@ public class TimeManager : MonoBehaviour {
 		// PostProcessingBehaviour p = Camera.main.GetComponent<PostProcessingBehaviour> ();
 		// p.profile = FX;
 		// p.enabled = true;
-		GameMaster.me.addMotionBlur();
+		GameMaster.me.AddSlowFX();
 
 	}
 
@@ -117,7 +121,7 @@ public class TimeManager : MonoBehaviour {
 		// PostProcessingBehaviour p = Camera.main.GetComponent<PostProcessingBehaviour> ();
 		// p.profile = DoubleFX;
 		// p.enabled = true;
-		GameMaster.me.addMotionBlur();
+		GameMaster.me.AddSlowFX();
 	}
 
 	void SpeedTime() {
@@ -133,8 +137,9 @@ public class TimeManager : MonoBehaviour {
 		Time.timeScale = 1f;
 		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
 		music.pitch = 1f;
+		//GameMaster.me.decreaseCA();
 		//Camera.main.GetComponent<PostProcessingBehaviour> ().enabled = false;
-		GameMaster.me.removeMotionBlur();
+		GameMaster.me.RemoveSlowFX();
 
 	}
 
