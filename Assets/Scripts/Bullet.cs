@@ -10,6 +10,7 @@ public class Bullet : MonoBehaviour {
 	public int dmg;
 	public Rigidbody2D rb;
 	public SpriteRenderer sprite;
+	public BoxCollider2D pickupBox;
 	float spawnTime;
 	float nonDecayedTime;
 	public float decayTime;
@@ -94,6 +95,7 @@ public class Bullet : MonoBehaviour {
 			//decayEffect.SetActive (true);
 			var main = middle.main;
 			main.startColor = decayColor;
+			pickupBox.enabled = true;
 			//trail.gameObject.SetActive(false);
 			decayed = true;
 			//sprite.enabled = true;

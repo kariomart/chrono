@@ -30,6 +30,7 @@ public class Pinata : MonoBehaviour {
 	public float targetScale = 0.1f;
  	public float shrinkSpeed = 0.1f;
 	public bool shrinking;
+	public bool shrinkable;
 
 	public PinataPhysics physics;
 
@@ -116,8 +117,10 @@ public class Pinata : MonoBehaviour {
 
 	 public void Shrink() {
 
-		targetScale = .25f + transform.localScale.x * (health / startingHealth);
-		shrinking = true;
+		if (shrinkable) {
+			targetScale = .25f + transform.localScale.x * (health / startingHealth);
+			shrinking = true;
+		}
 		
 	 }
 

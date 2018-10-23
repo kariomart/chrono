@@ -46,6 +46,8 @@ public class PinataPhysics : MonoBehaviour {
 		} else {
 		}
 
+		vel *= .99f;
+
 	rb.MovePosition(pos + (vel * Time.fixedDeltaTime));
 
 
