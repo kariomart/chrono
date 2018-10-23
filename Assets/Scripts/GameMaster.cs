@@ -293,7 +293,7 @@ public class GameMaster : MonoBehaviour {
 
 	public void AddSlowFX() {
 
-		addMotionBlur();
+		//addMotionBlur();
 		increaseCA();
 		increaseVignette();
 		glitchFX.colorDrift += 0.0005f;
@@ -302,7 +302,7 @@ public class GameMaster : MonoBehaviour {
 
 	public void RemoveSlowFX() {
 
-		removeMotionBlur();
+		//removeMotionBlur();
 		decreaseCA();
 		decreaseVignette();
 		glitchFX.colorDrift = 0f;
