@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.PostProcessing;
 
 
@@ -9,6 +10,7 @@ public class TimeManager : MonoBehaviour {
 	public PlayerMovementController player1;
 	public PlayerMovementController player2;
 	public AudioSource music;
+	public AudioMixer musicMix;
 	public PostProcessingProfile FX;
 	public PostProcessingProfile DoubleFX;
 
@@ -20,6 +22,9 @@ public class TimeManager : MonoBehaviour {
 	public int timeValue;
 
 	public AudioClip slowSound;
+
+	int lowpassMin = 500;
+	int lowpassMax = 22000;
 
 
 
@@ -106,6 +111,7 @@ public class TimeManager : MonoBehaviour {
 		Time.timeScale = 0.25f;
 		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
 		music.pitch = 0.75f;
+		musicMix.SetFloat("lowpassFreq", 920);
 		// PostProcessingBehaviour p = Camera.main.GetComponent<PostProcessingBehaviour> ();
 		// p.profile = FX;
 		// p.enabled = true;
@@ -118,6 +124,7 @@ public class TimeManager : MonoBehaviour {
 		Time.timeScale = 0.08f;
 		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
 		music.pitch = 0.50f;
+		musicMix.SetFloat("lowpassFreq", 500);
 		// PostProcessingBehaviour p = Camera.main.GetComponent<PostProcessingBehaviour> ();
 		// p.profile = DoubleFX;
 		// p.enabled = true;
@@ -137,6 +144,7 @@ public class TimeManager : MonoBehaviour {
 		Time.timeScale = 1f;
 		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
 		music.pitch = 1f;
+		musicMix.SetFloat("lowpassFreq", 22000);
 		//GameMaster.me.decreaseCA();
 		//Camera.main.GetComponent<PostProcessingBehaviour> ().enabled = false;
 		GameMaster.me.RemoveSlowFX();

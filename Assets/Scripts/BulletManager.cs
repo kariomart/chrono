@@ -17,7 +17,7 @@ public class BulletManager : MonoBehaviour {
 
 	IEnumerator SpawnBullets(){
 		while (true){
-			yield return new WaitForSeconds(Random.Range(amtBullets, 4 * amtBullets));
+			yield return new WaitForSeconds(Random.Range(1 + (amtBullets/3f), 2 + (amtBullets/2f)));
 			SpawnBullet();
 
 		}
@@ -32,7 +32,7 @@ public class BulletManager : MonoBehaviour {
 				spawnList[j].myBullet = Instantiate(bullet, spawnList[j].transform.position, Quaternion.identity);
 				Bullet b = spawnList[j].myBullet.GetComponent<Bullet>();
 				b.decayed = true;
-				b.lifetime = 10f;
+				b.lifetime = 99999999f;
 				amtBullets ++;
 				break;
 			}
