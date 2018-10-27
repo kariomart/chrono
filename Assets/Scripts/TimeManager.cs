@@ -26,6 +26,8 @@ public class TimeManager : MonoBehaviour {
 	int lowpassMin = 500;
 	int lowpassMax = 22000;
 
+	public ScanlinesEffect scanlines;
+
 
 
 
@@ -47,6 +49,7 @@ public class TimeManager : MonoBehaviour {
 		GameMaster.me.findSpawnPoints();
 		player1 = GameMaster.me.player1;
 		player2 = GameMaster.me.player2;
+		scanlines = Camera.main.GetComponent<ScanlinesEffect>();
 
 	}
 	
@@ -116,6 +119,7 @@ public class TimeManager : MonoBehaviour {
 		// p.profile = FX;
 		// p.enabled = true;
 		GameMaster.me.AddSlowFX();
+		scanlines.displacementSpeed = 0.038f;
 
 	}
 
@@ -129,6 +133,7 @@ public class TimeManager : MonoBehaviour {
 		// p.profile = DoubleFX;
 		// p.enabled = true;
 		GameMaster.me.AddSlowFX();
+		scanlines.displacementSpeed = 0.038f;
 	}
 
 	void SpeedTime() {
@@ -148,6 +153,7 @@ public class TimeManager : MonoBehaviour {
 		//GameMaster.me.decreaseCA();
 		//Camera.main.GetComponent<PostProcessingBehaviour> ().enabled = false;
 		GameMaster.me.RemoveSlowFX();
+		scanlines.displacementSpeed = 0.525f;
 
 	}
 
