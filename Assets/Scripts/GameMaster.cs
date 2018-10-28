@@ -175,8 +175,8 @@ public class GameMaster : MonoBehaviour {
 //		blueScore.text = blueWins.ToString();
 		// redSetsMesh.text = redSets + " ";
 		// blueSetsMesh.text = blueSets + " ";
-		fillInScore("red", player1.health);
-		fillInScore("blue", player2.health);
+		fillInScore("red", player2.health);
+		fillInScore("blue", player1.health);
 		fillInSets("red", redSets);
 		fillInSets("red", blueSets);
 
