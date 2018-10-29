@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
-using InControl;
+using Rewired;
+
 
 public class PlayerMovementController : MonoBehaviour {
 
@@ -9,7 +10,8 @@ public class PlayerMovementController : MonoBehaviour {
 	public PlayerMovementController otherPlayer;
 
 	public int playerId;
-	InputDevice player1;
+	//InputDevice player1;
+	private Player player;
 	Rigidbody2D rb;
 	BoxCollider2D box;
 	CircleCollider2D almostDeadCircle;
@@ -100,6 +102,8 @@ public class PlayerMovementController : MonoBehaviour {
 
 	public GameObject hitParticle;
 	public GameObject shootParticle;
+	public ParticleSystem jumpParticle;
+	public ParticleSystem landParticle;
 
 	Screenshake screenshake;
 
@@ -117,7 +121,8 @@ public class PlayerMovementController : MonoBehaviour {
 		updateUI();
 		camera = Camera.main.gameObject;
 //		Debug.Log(InputManager.Devices);
-		player1 = InputManager.Devices[playerId];
+		//player1 = InputManager.Devices[playerId];
+
 
 		foreach (GameObject g in GameObject.FindGameObjectsWithTag ("Player")) {
 			PlayerMovementController p = g.GetComponent<PlayerMovementController>();
@@ -127,6 +132,7 @@ public class PlayerMovementController : MonoBehaviour {
 			}
 		}
 
+		player = ReInput.players.GetPlayer(playerId);
 		PlayerTuning tuning = Resources.Load<PlayerTuning>("MyTune");
 
 		runAccel = tuning.runAccel;
@@ -153,12 +159,16 @@ public class PlayerMovementController : MonoBehaviour {
 	void Update () {
 
 
-		right = player1.LeftStickRight && player1.LeftStickRight.Value > .5f;
-		left = player1.LeftStickLeft && player1.LeftStickLeft.Value > .5f;
+		// right = player1.LeftStickRight && player1.LeftStickRight.Value > .5f;
+		// left = player1.LeftStickLeft && player1.LeftStickLeft.Value > .5f;
+		right = player.GetAxis("MoveHorizontal") > .5f;
+		left = player.GetAxis("MoveHorizontal") < -.5f;
+//		Debug.Log(player.GetAxis("MoveHorizontal"));
 		
 		updateUI();
 
-		dir = new Vector2(player1.LeftStickX, player1.LeftStickY).normalized;
+		//dir = new Vector2(player1.LeftStickX, player1.LeftStickY).normalized;
+		dir = new Vector2(player.GetAxis("MoveHorizontal"), player.GetAxis("MoveVertical")).normalized;
 		bulletTimer += Time.deltaTime;
 
 		
@@ -166,12 +176,17 @@ public class PlayerMovementController : MonoBehaviour {
 			prevDir = dir;
 		}
 
-		if (player1.Action1.IsPressed && jumpChargeTimer < jumpChargeMax) {
+		if (player.GetButtonDown("Jump") && jumpChargeTimer < jumpChargeMax) {
 			jumpChargeTimer ++;
+			Debug.Log("??");
 		}
 
-		if (player1.Action1.WasPressed) {
+		if (player.GetButtonDown("Jump")) {
 			jumpTimer = 5;
+
+			if (grounded) {
+				SpawnParticle(jumpParticle, (Vector2)transform.position + (Vector2.down * .5f), playerColor);
+			}
 			//Instantiate(jumpEffect)
 		}
 
@@ -179,13 +194,13 @@ public class PlayerMovementController : MonoBehaviour {
 			fastfall = true;
 		}
 
-		if (player1.Action3.WasPressed && canShoot()) {
+		if (player.GetButtonDown("Shoot") && canShoot()) {
 			shootBullet();
-		} else if (player1.Action3.WasPressed && !canShoot()) {
+		} else if (player.GetButtonDown("Shoot") && !canShoot()) {
 			SoundController.me.PlaySoundAtPitch(cantShootSound, .7f, 0.25f);
 		}
 
-		if (player1.RightTrigger.Value > 0 && (canSlowTime() || (slow && mana > 0))) {
+		if (player.GetButton("SlowTime") && (canSlowTime() || (slow && mana > 0))) {
 			if(!slow && !otherPlayer.slow) {
 				SoundController.me.PlaySound(slowSound, .5f);
 			}
@@ -209,7 +224,7 @@ public class PlayerMovementController : MonoBehaviour {
 		// 	Application.LoadLevel(Application.loadedLevel);
 		// }
 
-		if ((player1.Action2.WasPressed && (gameOver || otherPlayer.gameOver) && !GameMaster.me.matchOver)) {
+		if ((player.GetButtonDown("Restart") && (gameOver || otherPlayer.gameOver) && !GameMaster.me.matchOver)) {
 			Time.timeScale = 1f;
 			UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
 
@@ -314,7 +329,7 @@ public class PlayerMovementController : MonoBehaviour {
 			//mx = airMaxSpeed;
 		}
 
-		if (vel.y > 0 && !player1.Action1.IsPressed) {
+		if (vel.y > 0 && !player.GetButton("Jump")) {
 			vel.y -= bonusGravity * Time.fixedDeltaTime;
 		}
 
@@ -399,6 +414,38 @@ public class PlayerMovementController : MonoBehaviour {
 
 	}
 
+	void SpawnParticle(ParticleSystem fx, Vector2 pos) {
+
+		Instantiate(fx.gameObject, pos, Quaternion.identity);
+
+	}
+
+	void SpawnParticle(ParticleSystem fx, Vector2 pos, Color c) {
+
+		ParticleSystem p = Instantiate(fx.gameObject, pos, Quaternion.identity).GetComponent<ParticleSystem>();
+		var main = p.main;
+		main.startColor = c;
+
+	}
+
+	void SpawnParticle(ParticleSystem fx, Vector2 pos, Color c1, Color c2) {
+
+		ParticleSystem p = Instantiate(fx.gameObject, pos, Quaternion.identity).GetComponent<ParticleSystem>();
+		Gradient gradient = new Gradient();
+		GradientColorKey[] cK = new GradientColorKey[2];
+		GradientAlphaKey[] aK = new GradientAlphaKey[1];
+
+		Debug.Log(c1 + " " + c2);		
+		cK[0].color = c1;
+		cK[1].color = c2;
+		aK[0].alpha = 1f;
+		
+		gradient.SetKeys(cK, aK);
+		var main = p.main;
+		main.startColor = gradient;  
+
+	}
+
 	void setGrounded() {
 
 		Vector2 pt1 = transform.TransformPoint(box.offset + new Vector2(box.size.x / 2, -box.size.y / 2) + new Vector2(-.01f, 0));//(box.size / 2));
@@ -412,6 +459,7 @@ public class PlayerMovementController : MonoBehaviour {
 			if (!prevGrounded) {
 //				Debug.Log(prevVel.y);
 				scaleSpd = -13f * (Mathf.Abs(prevVel.y) / 30f);
+
 			}
             vel.y = 0;
 
@@ -495,6 +543,18 @@ public class PlayerMovementController : MonoBehaviour {
 
 	}
 
+	public void setRumble(int index, float amount) {
+
+		player.SetVibration(index, amount);
+
+	}
+
+	public void stopRumble(int index) {
+
+		player.SetVibration(index, 0);
+
+	}
+
 
 	bool canSlowTime() {
 
@@ -521,10 +581,12 @@ public class PlayerMovementController : MonoBehaviour {
 			ContactPoint2D pt = coll.contacts[0];
 			if (coll.gameObject.layer == LayerMask.NameToLayer("Platform")) {
 				vel += pt.normal * Vector2.Dot(-pt.normal, vel);
+				SpawnParticle(landParticle, coll.contacts[0].point, playerColor, coll.gameObject.GetComponent<SpriteRenderer>().color);
 			}
 			if (coll.gameObject.tag == "Player") {
 				vel.y = jumpSpd;
-				if (amountOfBullets == 0) {
+
+				if (amountOfBullets == 0 && otherPlayer.amountOfBullets != 0) {
 					amountOfBullets ++;
 					otherPlayer.amountOfBullets --;
 				}

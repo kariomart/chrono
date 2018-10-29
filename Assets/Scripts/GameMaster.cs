@@ -291,6 +291,7 @@ public class GameMaster : MonoBehaviour {
 
 	}
 
+
 	public void AddSlowFX() {
 
 		addMotionBlur();

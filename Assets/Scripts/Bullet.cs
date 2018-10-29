@@ -252,7 +252,7 @@ public class Bullet : MonoBehaviour {
 				player.respawn();
 				GameMaster.me.addColorDrift();
 				GameObject flash = Instantiate (DamageFlash, transform.position, Quaternion.identity);
-				Camera.main.GetComponent<Screenshake>().SetScreenshake(0.35f, .25f);
+				Camera.main.GetComponent<Screenshake>().SetScreenshake(0.35f, .25f, player);
 				Destroy (this.gameObject);
 				Destroy (flash, .025f); 
 
