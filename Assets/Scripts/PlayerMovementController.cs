@@ -62,6 +62,7 @@ public class PlayerMovementController : MonoBehaviour {
 	public bool slow;
 	public bool speed;
 	public bool grounded;
+	public bool prevGrounded;
 	public bool onWall;
 	bool spinning;
 	bool fastfall;
@@ -102,8 +103,11 @@ public class PlayerMovementController : MonoBehaviour {
 
 	public GameObject hitParticle;
 	public GameObject shootParticle;
+	public GameObject muzzleFlash;
 	public ParticleSystem jumpParticle;
 	public ParticleSystem landParticle;
+	public ParticleSystem moveParticle;
+
 
 	Screenshake screenshake;
 
@@ -185,7 +189,7 @@ public class PlayerMovementController : MonoBehaviour {
 			jumpTimer = 5;
 
 			if (grounded) {
-				SpawnParticle(jumpParticle, (Vector2)transform.position + (Vector2.down * .5f), playerColor);
+				GameMaster.me.SpawnParticle(jumpParticle, (Vector2)transform.position + (Vector2.down * .1f), playerColor);
 			}
 			//Instantiate(jumpEffect)
 		}
@@ -379,6 +383,7 @@ public class PlayerMovementController : MonoBehaviour {
 //		Debug.Log(dir + "\n" + transform.position);
 		float ang = Geo.ToAng(dir) + 180;
 //		Debug.Log(ang);
+		Instantiate(muzzleFlash, new Vector2 (shootPt.transform.position.x + (dir.x * .5f), shootPt.transform.position.y + (dir.y * .5f)), Quaternion.Euler(new Vector3(360 - ang, 90, 0))) ;
 		Instantiate(shootParticle, new Vector2 (shootPt.transform.position.x + (dir.x * .5f), shootPt.transform.position.y + (dir.y * .5f)), Quaternion.Euler(new Vector3(360 - ang, 90, 0)));
 
 		if (slow && otherPlayer.slow) {
@@ -414,48 +419,21 @@ public class PlayerMovementController : MonoBehaviour {
 
 	}
 
-	void SpawnParticle(ParticleSystem fx, Vector2 pos) {
-
-		Instantiate(fx.gameObject, pos, Quaternion.identity);
-
-	}
-
-	void SpawnParticle(ParticleSystem fx, Vector2 pos, Color c) {
-
-		ParticleSystem p = Instantiate(fx.gameObject, pos, Quaternion.identity).GetComponent<ParticleSystem>();
-		var main = p.main;
-		main.startColor = c;
-
-	}
-
-	void SpawnParticle(ParticleSystem fx, Vector2 pos, Color c1, Color c2) {
-
-		ParticleSystem p = Instantiate(fx.gameObject, pos, Quaternion.identity).GetComponent<ParticleSystem>();
-		Gradient gradient = new Gradient();
-		GradientColorKey[] cK = new GradientColorKey[2];
-		GradientAlphaKey[] aK = new GradientAlphaKey[1];
-
-		Debug.Log(c1 + " " + c2);		
-		cK[0].color = c1;
-		cK[1].color = c2;
-		aK[0].alpha = 1f;
-		
-		gradient.SetKeys(cK, aK);
-		var main = p.main;
-		main.startColor = gradient;  
-
-	}
 
 	void setGrounded() {
 
 		Vector2 pt1 = transform.TransformPoint(box.offset + new Vector2(box.size.x / 2, -box.size.y / 2) + new Vector2(-.01f, 0));//(box.size / 2));
         Vector2 pt2 = transform.TransformPoint(box.offset - (box.size / 2) + new Vector2(.01f, 0));
-		bool prevGrounded = grounded;
+		prevGrounded = grounded;
 //		grounded = Physics2D.OverlapArea(pt1, pt2, LayerMask.GetMask("Pinata")) != null;
         grounded = Physics2D.OverlapArea(pt1, pt2, LayerMask.GetMask("Platform")) != null;
 		
         if (grounded) {
             spinning = false;
+
+			if (vel != Vector2.zero) {
+				//GameMaster.me.SpawnParticle(moveParticle, (Vector2)transform.position + Vector2.down * .5f);
+			}
 			if (!prevGrounded) {
 //				Debug.Log(prevVel.y);
 				scaleSpd = -13f * (Mathf.Abs(prevVel.y) / 30f);
@@ -477,33 +455,7 @@ public class PlayerMovementController : MonoBehaviour {
 		onWallLeft = Physics2D.Raycast(top, Vector2.left, box.size.x * .6f, mask) || Physics2D.Raycast(bot, Vector2.left, box.size.x * .6f, mask);
 		onWallRight = Physics2D.Raycast(top, Vector2.right, box.size.x * .6f, mask) || Physics2D.Raycast(bot, Vector2.right, box.size.x * .6f, mask);
 		onWall = onWallLeft || onWallRight;
-		/*Ray2D myRay = new Ray2D(transform.position, vel);
-		RaycastHit2D hit = new RaycastHit2D();
-		float dis;
-		float maxRayDis = 2;
-		Debug.DrawRay(myRay.origin, myRay.direction * maxRayDis, Color.cyan);
-
-
-		hit = Physics2D.Raycast(myRay.origin, dir);
-		dis = Vector2.Distance(transform.position, hit.point);
-
-		if (hit.point != Vector2.zero) {
-			wallPos = hit.point;
-		}
-//		Debug.Log(transform.position + "\n" + hit.point + "\n" + dis);
-
-		if (hit && hit.transform.tag == "Wall") {
-			wallDir = (hit.point - (Vector2)transform.position);
-			//Debug.Log(dis);
-			if (dis < wallJumpRange) {
-				onWall = true;
-			} 
-		} else {
-
-			if (Vector2.Distance(transform.position, wallPos) > wallJumpRange) {
-				onWall = false;
-			}
-		} */
+		
 	}
 
 	public void respawn() {
@@ -581,7 +533,10 @@ public class PlayerMovementController : MonoBehaviour {
 			ContactPoint2D pt = coll.contacts[0];
 			if (coll.gameObject.layer == LayerMask.NameToLayer("Platform")) {
 				vel += pt.normal * Vector2.Dot(-pt.normal, vel);
-				SpawnParticle(landParticle, coll.contacts[0].point, playerColor, coll.gameObject.GetComponent<SpriteRenderer>().color);
+
+				if (!prevGrounded) {
+					GameMaster.me.SpawnParticle(landParticle, coll.contacts[0].point, playerColor, coll.gameObject.GetComponent<SpriteRenderer>().color);
+				}
 			}
 			if (coll.gameObject.tag == "Player") {
 				vel.y = jumpSpd;

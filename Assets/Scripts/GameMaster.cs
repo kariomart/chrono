@@ -294,7 +294,7 @@ public class GameMaster : MonoBehaviour {
 
 	public void AddSlowFX() {
 
-		addMotionBlur();
+		//addMotionBlur();
 		increaseCA();
 		increaseVignette();
 		glitchFX.colorDrift += 0.0005f;
@@ -303,7 +303,7 @@ public class GameMaster : MonoBehaviour {
 
 	public void RemoveSlowFX() {
 
-		removeMotionBlur();
+		//removeMotionBlur();
 		decreaseCA();
 		decreaseVignette();
 		glitchFX.colorDrift = 0f;
@@ -380,6 +380,44 @@ public class GameMaster : MonoBehaviour {
 
 		retroFX_default.vignette.settings = v;
 	
+	}
+
+	public void SpawnParticle(ParticleSystem fx, Vector2 pos) {
+
+		Instantiate(fx.gameObject, pos, Quaternion.identity);
+
+	}
+
+	public void SpawnParticle(ParticleSystem fx, Vector2 pos, Color c) {
+
+		ParticleSystem p = Instantiate(fx.gameObject, pos, Quaternion.identity).GetComponent<ParticleSystem>();
+		var main = p.main;
+		main.startColor = c;
+
+	}
+
+	public void SpawnParticle(ParticleSystem fx, Vector2 pos, Color c1, Color c2) {
+
+		ParticleSystem p = Instantiate(fx.gameObject, pos, Quaternion.identity).GetComponent<ParticleSystem>();
+		ParticleSystem.MinMaxGradient gradient = new Gradient();
+		GradientColorKey[] cK = new GradientColorKey[2];
+		GradientAlphaKey[] aK = new GradientAlphaKey[1];
+
+		//Debug.Log(c1 + " " + c2);		
+		cK[0].color = c1;
+		cK[1].color = c2;
+		cK[1].time = 1;
+		aK[0].alpha = 1f;
+
+		
+		gradient.gradient.SetKeys(cK, aK);
+		
+		var main = p.main;
+		gradient.mode = ParticleSystemGradientMode.Gradient;
+		//main.startColor.mode = ParticleSystemGradientMode.Gradient;
+
+		main.startColor = gradient;  
+
 	}
 
 

@@ -31,6 +31,7 @@ public class BulletManager : MonoBehaviour {
 			if (spawnList[j].myBullet == null){
 				spawnList[j].myBullet = Instantiate(bullet, spawnList[j].transform.position, Quaternion.identity);
 				Bullet b = spawnList[j].myBullet.GetComponent<Bullet>();
+				GameMaster.me.SpawnParticle(b.bulletSpawned, spawnList[j].transform.position);
 				b.decayed = true;
 				b.lifetime = 99999999f;
 				amtBullets ++;

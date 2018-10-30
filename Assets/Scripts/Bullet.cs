@@ -41,6 +41,9 @@ public class Bullet : MonoBehaviour {
 	public ParticleSystem bulletCore;
 	public ParticleSystem middle;
 
+	public ParticleSystem bulletWall;
+	public ParticleSystem bulletSpawned;
+
 	public Color decayColor = Color.grey;
 
 	public GameObject DamageFlash;
@@ -54,8 +57,10 @@ public class Bullet : MonoBehaviour {
 		sprite = GetComponent<SpriteRenderer> ();
 		spawnTime = Time.time;
 		defaultSpd = spd;
-		if (lifetime == 0)
+		if (lifetime == 0) {
 			lifetime = Random.Range(3f, 5f);
+		}
+
 		//decayColor = Color.grey;
 		//ParticleSystem temp = Instantiate (shoot, transform.position, Quaternion.identity);
 		//temp.gameObject.transform.parent = transform;
@@ -277,7 +282,8 @@ public class Bullet : MonoBehaviour {
 
 			playBounceSound();
 			//SoundController.me.PlaySound (bounce1, .2f, Mathf.Clamp(bounceCount, 1, 3f), Mathf.Clamp(transform.position.x, -1, 1));
-			ParticleEffect (coll.gameObject);
+			//ParticleEffect (coll.gameObject);
+			GameMaster.me.SpawnParticle(bulletWall, coll.contacts[0].point, Color.white, coll.gameObject.GetComponent<SpriteRenderer>().color);
 
 		}
 
