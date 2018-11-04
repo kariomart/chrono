@@ -230,7 +230,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if ((player.GetButtonDown("Restart") && (gameOver || otherPlayer.gameOver) && !GameMaster.me.matchOver)) {
 			Time.timeScale = 1f;
-			UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+			UnityEngine.SceneManagement.SceneManager.LoadScene(GameMaster.me.amountOfLevels);
 
 		}
 

@@ -51,6 +51,10 @@ public class TimeManager : MonoBehaviour {
 		player2 = GameMaster.me.player2;
 		scanlines = Camera.main.GetComponent<ScanlinesEffect>();
 
+		if (!musicMix) {
+			musicMix = music.outputAudioMixerGroup.audioMixer;
+		}
+
 	}
 	
 	// Update is called once per frame
@@ -114,7 +118,7 @@ public class TimeManager : MonoBehaviour {
 		Time.timeScale = 0.25f;
 		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
 		music.pitch = 0.75f;
-		musicMix.SetFloat("lowpassFreq", 920);
+		//musicMix.SetFloat("lowpassFreq", 920);
 		// PostProcessingBehaviour p = Camera.main.GetComponent<PostProcessingBehaviour> ();
 		// p.profile = FX;
 		// p.enabled = true;
@@ -128,7 +132,7 @@ public class TimeManager : MonoBehaviour {
 		Time.timeScale = 0.08f;
 		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
 		music.pitch = 0.50f;
-		musicMix.SetFloat("lowpassFreq", 500);
+		//musicMix.SetFloat("lowpassFreq", 500);
 		// PostProcessingBehaviour p = Camera.main.GetComponent<PostProcessingBehaviour> ();
 		// p.profile = DoubleFX;
 		// p.enabled = true;

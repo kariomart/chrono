@@ -23,6 +23,7 @@ public class GameMaster : MonoBehaviour {
 	public string winner;
 	public bool matchOver;
 	public int amtBullets;
+	public int amountOfLevels;
 
 	public TextMesh redScore;
 	public TextMesh blueScore;
@@ -77,12 +78,17 @@ public class GameMaster : MonoBehaviour {
 
 		//bestOf = 100;
 		//roundsNeeded = (bestOf + 1) / 2;
+
+	}
+
+	public void initializeLevel(){ 
+
 		roundsNeeded = 7;
 		setsNeeded = 2;
 		retroFX_default = Camera.main.GetComponent<PostProcessingBehaviour>().profile;
 		glitchFX = Camera.main.GetComponent<AnalogGlitch>();
 		setFXDefaults();
-
+		SpawnPlayers();
 	}
 	
 	// Update is called once per frame
@@ -101,10 +107,11 @@ public class GameMaster : MonoBehaviour {
 
 	public void playPressed() {
 
-		roundsNeeded = (bestOf + 1) / 2;
 //		Debug.Log(roundsNeeded);
 		SoundController.me.PlaySound (playSoundEffect, .25f);
-		UnityEngine.SceneManagement.SceneManager.LoadScene (scene);
+		//UnityEngine.SceneManagement.SceneManager.LoadScene (scene);
+		string level = pickRandomLevel();
+		UnityEngine.SceneManagement.SceneManager.LoadScene(level);
 
 	}
 	public IEnumerator ReEnablePlayer(GameObject obj, GameObject otherPlayer) {
@@ -130,6 +137,13 @@ public class GameMaster : MonoBehaviour {
 	public void hoverSound() {
 
 		SoundController.me.PlaySound (hoverSoundEffect, .5f);
+
+	}
+
+	public string pickRandomLevel() {
+
+		int rand = Random.Range(1, amountOfLevels + 1);
+		return "FINAL_level" + rand;
 
 	}
 
@@ -218,12 +232,6 @@ public class GameMaster : MonoBehaviour {
 		}
 
 		return point;
-
-	}
-
-	public void initializeLevel(){ 
-
-		SpawnPlayers();
 
 	}
 
