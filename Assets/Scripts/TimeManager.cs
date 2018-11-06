@@ -69,7 +69,7 @@ public class TimeManager : MonoBehaviour {
 
 	
 
-		if (player1 && player2) {
+		if (player1 && player2 && !GameMaster.me.GameIsPaused) {
 
 			if (!player1.slow && !player2.slow) {
 				NormalTime ();

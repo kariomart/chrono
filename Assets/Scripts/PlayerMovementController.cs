@@ -175,6 +175,17 @@ public class PlayerMovementController : MonoBehaviour {
 		dir = new Vector2(player.GetAxis("MoveHorizontal"), player.GetAxis("MoveVertical")).normalized;
 		bulletTimer += Time.deltaTime;
 
+		if (player.GetButtonDown("Start")) {
+
+			if (GameMaster.me.GameIsPaused) {
+				GameMaster.me.Resume();
+			}
+
+			if (!GameMaster.me.GameIsPaused) {
+				GameMaster.me.Pause();
+			}
+
+		}
 		
 		if (dir != Vector2.zero) {
 			prevDir = dir;

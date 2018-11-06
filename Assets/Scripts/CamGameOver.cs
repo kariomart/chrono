@@ -57,7 +57,7 @@ public class CamGameOver : MonoBehaviour {
 
 		if (counter > winnerTextTime && !winnerTextDisplayed) {
 
-			TextMesh winner = Instantiate (winnerText, new Vector3 (transform.position.x, transform.position.y + .3f, -1), Quaternion.identity);
+			TextMesh winner = Instantiate (winnerText, new Vector3 (transform.position.x, transform.position.y + .3f, -8), Quaternion.identity);
 			winner.text = playerLost.otherPlayer.colorName + "\nhas won";
 			winner.color = playerLost.otherPlayer.playerColor;
 			GameMaster.me.updateUI ();
@@ -94,7 +94,7 @@ public class CamGameOver : MonoBehaviour {
 		if ((counter > fireworksSoundTime + 150) && (redWon || blueWon)) {
 
 			GameMaster.me.winner = playerLost.otherPlayer.colorName;
-			UnityEngine.SceneManagement.SceneManager.LoadScene ("gameover");
+			UnityEngine.SceneManagement.SceneManager.LoadScene ("gameover2");
 
 
 		}

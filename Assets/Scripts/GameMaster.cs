@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.PostProcessing;
 using Kino;
+using Rewired;
 
 
 public class GameMaster : MonoBehaviour {
@@ -61,6 +62,11 @@ public class GameMaster : MonoBehaviour {
 	public float fx_baseVignette;
 	public float fx_slowVignette;
 
+	public Player controller1;
+	public Player controller2;
+
+	public bool GameIsPaused;
+
 
 
 	// Use this for initialization
@@ -89,6 +95,8 @@ public class GameMaster : MonoBehaviour {
 		glitchFX = Camera.main.GetComponent<AnalogGlitch>();
 		setFXDefaults();
 		SpawnPlayers();
+		controller1 = ReInput.players.GetPlayer(0);
+		controller2 = ReInput.players.GetPlayer(1);
 	}
 	
 	// Update is called once per frame
@@ -102,6 +110,10 @@ public class GameMaster : MonoBehaviour {
 //			} else {
 //				Destroy (this.gameObject);
 //			}
+		}
+
+		if (controller1.GetButtonDown("start") || controller2.GetButtonDown("start")) {
+			UnityEngine.SceneManagement.SceneManager.LoadScene (pickRandomLevel());
 		}
 	}
 
@@ -243,6 +255,23 @@ public class GameMaster : MonoBehaviour {
 		player1.amountOfBullets = 2;
 		player2.amountOfBullets = 2;
 
+		
+	}
+
+	public void Pause() {
+
+		//pauseMenu.SetActive(true)
+		Time.timeScale = 0f;
+		GameIsPaused = true;
+
+	}
+
+
+	public void Resume() {
+
+		//pauseMenu.SetActive(false)
+		Time.timeScale = timeMaster.globalTimescale;
+		GameIsPaused = false;
 		
 	}
 
