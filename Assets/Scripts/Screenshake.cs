@@ -35,10 +35,6 @@ public class Screenshake : MonoBehaviour {
 			if (shaking) {
 				GameMaster.me.removeColorDrift();
 				shaking = false;
-
-				if (player) {				
-					player.stopRumble(player.playerId);
-				}
 			}
 		}
 	}
@@ -65,8 +61,6 @@ public class Screenshake : MonoBehaviour {
 
 	public void SetScreenshake(float magnitude, float duration, PlayerMovementController player) {
 		SetScreenshake (magnitude, duration, Vector3.zero);
-		player.setRumble(player.playerId, 2f);
-		this.player = player;
 	}
 
 	

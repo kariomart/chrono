@@ -44,8 +44,6 @@ public class TimeManager : MonoBehaviour {
 		SceneManager.sceneLoaded += LevelLoaded;
 		LevelLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
 //		Debug.Log(GameMaster.me);
-
-
 	}
 
 	void LevelLoaded(Scene scene, LoadSceneMode bop){
@@ -56,7 +54,9 @@ public class TimeManager : MonoBehaviour {
 		player1 = GameMaster.me.player1;
 		player2 = GameMaster.me.player2;
 		scanlines = Camera.main.GetComponent<ScanlinesEffect>();
+		globalTimescale = 1f;
 
+		GameMaster.me.StartCoroutine(GameMaster.me.Countdown(3));
 		if (!musicMix) {
 			musicMix = music.outputAudioMixerGroup.audioMixer;
 		}
@@ -70,7 +70,6 @@ public class TimeManager : MonoBehaviour {
 			music = GameObject.FindGameObjectWithTag ("AudioController").GetComponent<AudioSource>();
 		}
 
-		globalTimescale = Time.timeScale;
 
 	
 

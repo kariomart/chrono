@@ -16,7 +16,7 @@ public class LoadController : MonoBehaviour {
 	}
 	void Awake() {
 		
-		DontDestroyOnLoad (this);
+//		DontDestroyOnLoad (this);
 
 		if (music == null) {
 			music = this;
@@ -37,7 +37,6 @@ public class LoadController : MonoBehaviour {
 	public void checkIfMenu() {
 
 		if (UnityEngine.SceneManagement.SceneManager.GetActiveScene ().name == "menu") {
-
 			Destroy (this.gameObject);
 		}
 

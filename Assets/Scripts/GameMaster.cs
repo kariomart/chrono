@@ -30,7 +30,10 @@ public class GameMaster : MonoBehaviour {
 	public TextMesh blueScore;
 	public TextMesh redSetsMesh;
 	public TextMesh blueSetsMesh;
-
+	public GameObject PauseMenu;
+	public GameObject TimerUI;
+	TextMesh TimerNum;
+	
 	public Sprite filledCircle;
 	public Sprite filledSquare;
 	public SpriteRenderer[] redScoreCircles = new SpriteRenderer[7];
@@ -72,7 +75,7 @@ public class GameMaster : MonoBehaviour {
 	// Use this for initialization
 	void Awake () {
 
-		DontDestroyOnLoad (this.gameObject);
+//		DontDestroyOnLoad (this.gameObject);
 
 
 		if (me == null) {
@@ -185,6 +188,13 @@ public class GameMaster : MonoBehaviour {
 
 		redScoreCircles = GameObject.Find("redCircles").GetComponentsInChildren<SpriteRenderer>();
 		blueScoreCircles = GameObject.Find("blueCircles").GetComponentsInChildren<SpriteRenderer>();
+		PauseMenu = GameObject.Find("PauseMenu");
+
+		TimerUI = GameObject.Find("Timer");
+		TimerNum = TimerUI.GetComponentInChildren<TextMesh>(true);
+		//Debug.Log(TimerNum);
+
+		//PauseMenu = GameObject.Find("PauseMenu");
 
 		// foreach(Transform c in redCircles.transform) {
 
@@ -202,7 +212,7 @@ public class GameMaster : MonoBehaviour {
 		// redSetsMesh.text = redSets + " ";
 		// blueSetsMesh.text = blueSets + " ";
 		fillInScore("red", player2.health);
-		Debug.Log(player2.health);
+//		Debug.Log(player2.health);
 		fillInScore("blue", player1.health);
 		fillInSets("red", redSets);
 		fillInSets("red", blueSets);
@@ -259,11 +269,39 @@ public class GameMaster : MonoBehaviour {
 		
 	}
 
+	public IEnumerator rumble(PlayerMovementController p, float strength, float length) {
+
+		p.player.SetVibration(p.playerId, strength);
+		yield return new WaitForSeconds(length);
+		p.player.SetVibration(p.playerId, 0);
+
+	}
+
+	public IEnumerator Countdown(int seconds) {
+		Time.timeScale = 0f;
+		GameIsPaused = true;
+        int count = seconds;
+       // Debug.Log("A " + count);
+		enableChildren(PauseMenu.transform, false);
+		enableChildren(TimerUI.transform, true);
+
+        for(count = seconds; count > 0; count --) {
+           
+			TimerNum.text = "" + (count);
+            yield return new WaitForSecondsRealtime(1);
+        }
+       
+        // count down is finished...
+       	Resume();
+    }
+
 	public void Pause() {
 
 		//pauseMenu.SetActive(true)
+		timeMaster.globalTimescale = Time.timeScale;
 		Time.timeScale = 0f;
 		GameIsPaused = true;
+		enableChildren(PauseMenu.transform, true);
 
 	}
 
@@ -271,9 +309,29 @@ public class GameMaster : MonoBehaviour {
 	public void Resume() {
 
 		//pauseMenu.SetActive(false)
-		Time.timeScale = timeMaster.globalTimescale;
+		TimerUI.SetActive(false);
 		GameIsPaused = false;
+		Time.timeScale = timeMaster.globalTimescale;
 		
+	}
+
+	void enableChildren(Transform o, bool active) {
+
+
+		if (active) {
+
+			foreach(Transform c in o) {
+				c.gameObject.SetActive(true);
+			}
+		}
+
+		if (!active) {
+
+			foreach(Transform c in o) {
+				c.gameObject.SetActive(false);
+			}
+		}
+
 	}
 
 	void fillInScore(string player, int health) {

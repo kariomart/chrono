@@ -11,7 +11,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 	public int playerId;
 	//InputDevice player1;
-	private Player player;
+	public Player player;
 	Rigidbody2D rb;
 	BoxCollider2D box;
 	CircleCollider2D almostDeadCircle;
@@ -178,7 +178,8 @@ public class PlayerMovementController : MonoBehaviour {
 		if (player.GetButtonDown("Start")) {
 
 			if (GameMaster.me.GameIsPaused ) {
-				GameMaster.me.Resume();
+				//GameMaster.me.Resume();
+				GameMaster.me.StartCoroutine(GameMaster.me.Countdown(3));
 			} else if (!GameMaster.me.GameIsPaused && (!gameOver && !otherPlayer.gameOver)) {
 				GameMaster.me.Pause();
 			}
@@ -493,6 +494,8 @@ public class PlayerMovementController : MonoBehaviour {
 			slow = false;
 			GameMaster.me.StartCoroutine(GameMaster.me.ReEnablePlayer(gameObject, otherPlayer.gameObject));
 			gameObject.SetActive(false);
+			GameMaster.me.StartCoroutine(GameMaster.me.rumble(this, 10f, .5f));
+			GameMaster.me.StartCoroutine(GameMaster.me.rumble(otherPlayer, .2f, .1f));
 		}
 
 	}
@@ -500,18 +503,6 @@ public class PlayerMovementController : MonoBehaviour {
 	public void updateUI() {
 
 		ammoText.text = "" + amountOfBullets;
-
-	}
-
-	public void setRumble(int index, float amount) {
-
-		player.SetVibration(index, amount);
-
-	}
-
-	public void stopRumble(int index) {
-
-		player.SetVibration(index, 0);
 
 	}
 
@@ -579,4 +570,6 @@ public class PlayerMovementController : MonoBehaviour {
 		}
 
 	}
+
+
 }
