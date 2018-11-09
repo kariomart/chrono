@@ -177,11 +177,9 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if (player.GetButtonDown("Start")) {
 
-			if (GameMaster.me.GameIsPaused) {
+			if (GameMaster.me.GameIsPaused ) {
 				GameMaster.me.Resume();
-			}
-
-			if (!GameMaster.me.GameIsPaused) {
+			} else if (!GameMaster.me.GameIsPaused && (!gameOver && !otherPlayer.gameOver)) {
 				GameMaster.me.Pause();
 			}
 
@@ -212,7 +210,7 @@ public class PlayerMovementController : MonoBehaviour {
 		if (player.GetButtonDown("Shoot") && canShoot()) {
 			shootBullet();
 		} else if (player.GetButtonDown("Shoot") && !canShoot()) {
-			SoundController.me.PlaySoundAtPitch(cantShootSound, .7f, 0.25f);
+			SoundController.me.PlaySoundAtPitch(cantShootSound, 1f, 0.25f);
 		}
 
 		if (player.GetButton("SlowTime") && (canSlowTime() || (slow && mana > 0))) {
@@ -242,7 +240,6 @@ public class PlayerMovementController : MonoBehaviour {
 		if ((player.GetButtonDown("Restart") && (gameOver || otherPlayer.gameOver) && !GameMaster.me.matchOver)) {
 			Time.timeScale = 1f;
 			UnityEngine.SceneManagement.SceneManager.LoadScene(GameMaster.me.amountOfLevels);
-
 		}
 
 

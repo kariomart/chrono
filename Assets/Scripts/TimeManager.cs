@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.PostProcessing;
-
+using UnityEngine.SceneManagement;
 
 public class TimeManager : MonoBehaviour {
 
@@ -41,9 +41,15 @@ public class TimeManager : MonoBehaviour {
 	}
 	// Use this for initialization
 	void Start () {
-
-
+		SceneManager.sceneLoaded += LevelLoaded;
+		LevelLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
 //		Debug.Log(GameMaster.me);
+
+
+	}
+
+	void LevelLoaded(Scene scene, LoadSceneMode bop){
+		BulletManager.me.spawnList.Clear();
 		GameMaster.me.findUI ();
 		GameMaster.me.updateUI ();
 		GameMaster.me.findSpawnPoints();
@@ -54,7 +60,6 @@ public class TimeManager : MonoBehaviour {
 		if (!musicMix) {
 			musicMix = music.outputAudioMixerGroup.audioMixer;
 		}
-
 	}
 	
 	// Update is called once per frame

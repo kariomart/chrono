@@ -15,6 +15,9 @@ public class LevelSettings : MonoBehaviour {
 	void Awake() {
 
 		me = this;
+		if (GameMaster.me == null){
+			Instantiate(Resources.Load("MANAGERS"), Vector3.zero, Quaternion.identity);
+		}
 		GameMaster.me.initializeLevel();
 	}
 	// Use this for initialization

@@ -112,7 +112,7 @@ public class GameMaster : MonoBehaviour {
 //			}
 		}
 
-		if (controller1.GetButtonDown("start") || controller2.GetButtonDown("start")) {
+		if (matchOver && (controller1.GetButtonDown("Start") || controller2.GetButtonDown("Start"))) {
 			UnityEngine.SceneManagement.SceneManager.LoadScene (pickRandomLevel());
 		}
 	}
@@ -202,6 +202,7 @@ public class GameMaster : MonoBehaviour {
 		// redSetsMesh.text = redSets + " ";
 		// blueSetsMesh.text = blueSets + " ";
 		fillInScore("red", player2.health);
+		Debug.Log(player2.health);
 		fillInScore("blue", player1.health);
 		fillInSets("red", redSets);
 		fillInSets("red", blueSets);
