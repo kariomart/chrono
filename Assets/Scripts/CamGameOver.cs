@@ -94,7 +94,9 @@ public class CamGameOver : MonoBehaviour {
 		if ((counter > fireworksSoundTime + 150) && (redWon || blueWon)) {
 
 			GameMaster.me.winner = playerLost.otherPlayer.colorName;
-			UnityEngine.SceneManagement.SceneManager.LoadScene ("gameover2");
+			Time.timeScale = 0;
+			GameMaster.me.enableGameOver();
+			//UnityEngine.SceneManagement.SceneManager.LoadScene ("gameover2");
 
 
 		}

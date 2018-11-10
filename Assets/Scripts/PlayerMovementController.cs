@@ -184,6 +184,14 @@ public class PlayerMovementController : MonoBehaviour {
 				GameMaster.me.Pause();
 			}
 
+			if (GameMaster.me.matchOver) {
+
+				GameMaster.me.disableGameOver();
+				GameMaster.me.matchOver = false;
+				GameMaster.me.resetScores();
+				Time.timeScale = 1f;
+			}
+
 		}
 		
 		if (dir != Vector2.zero) {

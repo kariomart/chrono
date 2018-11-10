@@ -33,6 +33,7 @@ public class GameMaster : MonoBehaviour {
 	public GameObject PauseMenu;
 	public GameObject TimerUI;
 	TextMesh TimerNum;
+	public GameObject GameOverOverlay;
 	
 	public Sprite filledCircle;
 	public Sprite filledSquare;
@@ -192,6 +193,8 @@ public class GameMaster : MonoBehaviour {
 
 		TimerUI = GameObject.Find("Timer");
 		TimerNum = TimerUI.GetComponentInChildren<TextMesh>(true);
+
+		GameOverOverlay = GameObject.Find("MatchOver");
 		//Debug.Log(TimerNum);
 
 		//PauseMenu = GameObject.Find("PauseMenu");
@@ -315,7 +318,7 @@ public class GameMaster : MonoBehaviour {
 		
 	}
 
-	void enableChildren(Transform o, bool active) {
+	public void enableChildren(Transform o, bool active) {
 
 
 		if (active) {
@@ -331,6 +334,21 @@ public class GameMaster : MonoBehaviour {
 				c.gameObject.SetActive(false);
 			}
 		}
+
+	}
+
+	public void enableGameOver() {
+
+		enableChildren(GameOverOverlay.transform, true);
+		GameOverOverlay.GetComponentInChildren<TextMesh>().text = "the winner is " + winner + redSets + ":" + blueSets;
+
+	}
+
+
+	public void disableGameOver() {
+
+		enableChildren(GameOverOverlay.transform, false);
+		GameOverOverlay.GetComponentInChildren<TextMesh>().text = "the winner is " + winner + redSets + ":" + blueSets;
 
 	}
 
@@ -382,8 +400,12 @@ public class GameMaster : MonoBehaviour {
 				blueSetsSquares[i].sprite = filledSquare;
 			}
 		}
+	}
 
+	public void resetScores() {
 
+		redSets = 0;
+		blueSets = 0;
 
 	}
 
