@@ -4,6 +4,8 @@ using UnityEngine;
 using Rewired;
 using UnityEngine.SceneManagement;
 using Kino;
+using UnityEngine.Audio;
+
 
 public class MainMenu : MonoBehaviour {
 	
@@ -15,6 +17,9 @@ public class MainMenu : MonoBehaviour {
 	public int timer;
 	public int maxTime;
 
+	public AudioMixer ambienceMix;
+	public AudioSource ambience;
+
 	bool gameStarted;
 
 
@@ -24,6 +29,7 @@ public class MainMenu : MonoBehaviour {
 		p2 = ReInput.players.GetPlayer(1);
 		analogGlitchController = Camera.main.GetComponent<AnalogGlitchController>();
 		glitch = Camera.main.GetComponent<AnalogGlitch>();
+		ambienceMix = ambience.outputAudioMixerGroup.audioMixer;
 	}
 	
 	// Update is called once per frame
@@ -38,19 +44,22 @@ public class MainMenu : MonoBehaviour {
 		if (gameStarted && timer <= maxTime) {
 			glitch.colorDrift += 0.01f;
 			glitch.scanLineJitter += 0.01f;
+			float d;
+			ambienceMix.GetFloat("Distortion", out d);
+			ambienceMix.SetFloat("Distortion", d + 0.0025f);
 			timer ++;
 		}
 		
 		else if (gameStarted && timer > maxTime) {
-			//SceneManager.LoadScene(Random.Range(1, 5));
-			StartCoroutine(startGame());
+			SceneManager.LoadScene(Random.Range(1, 5));
+			// StartCoroutine(startGame());
 		}
 	}
 
-	IEnumerator startGame() {
-		yield return new WaitForSeconds(1f);
-		SceneManager.LoadScene(Random.Range(1, 5));
-	}
+	// IEnumerator startGame() {
+	// 	yield return new WaitForSeconds(1f);
+	// 	SceneManager.LoadScene(Random.Range(1, 5));
+	// }
 
 	
 }

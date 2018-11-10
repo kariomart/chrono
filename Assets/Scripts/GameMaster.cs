@@ -14,6 +14,8 @@ public class GameMaster : MonoBehaviour {
 	public AudioClip hoverSoundEffect;
 	public AudioClip playSoundEffect;
 	public AudioClip dropdownSoundEffect;
+	public AudioClip countdownSFX;
+	public AudioClip countdownStartSFX;
 	public int bestOf;
 	public int roundsNeeded;
 	public int setsNeeded;
@@ -70,6 +72,7 @@ public class GameMaster : MonoBehaviour {
 	public Player controller2;
 
 	public bool GameIsPaused;
+	public bool countingDown;
 
 
 
@@ -193,8 +196,6 @@ public class GameMaster : MonoBehaviour {
 
 		TimerUI = GameObject.Find("Timer");
 		TimerNum = TimerUI.GetComponentInChildren<TextMesh>(true);
-
-		GameOverOverlay = GameObject.Find("MatchOver");
 		//Debug.Log(TimerNum);
 
 		//PauseMenu = GameObject.Find("PauseMenu");
@@ -214,11 +215,11 @@ public class GameMaster : MonoBehaviour {
 //		blueScore.text = blueWins.ToString();
 		// redSetsMesh.text = redSets + " ";
 		// blueSetsMesh.text = blueSets + " ";
-		fillInScore("red", player2.health);
+		fillInScore("red", player1.health);
 //		Debug.Log(player2.health);
-		fillInScore("blue", player1.health);
+		fillInScore("blue", player2.health);
 		fillInSets("red", redSets);
-		fillInSets("red", blueSets);
+		fillInSets("blue", blueSets);
 
 	}
 
@@ -281,20 +282,25 @@ public class GameMaster : MonoBehaviour {
 	}
 
 	public IEnumerator Countdown(int seconds) {
+		countingDown = true;
 		Time.timeScale = 0f;
 		GameIsPaused = true;
         int count = seconds;
        // Debug.Log("A " + count);
 		enableChildren(PauseMenu.transform, false);
 		enableChildren(TimerUI.transform, true);
+		AudioSource a = TimerUI.GetComponent<AudioSource>();
 
         for(count = seconds; count > 0; count --) {
            
 			TimerNum.text = "" + (count);
+			a.PlayOneShot(countdownSFX, 1f);
             yield return new WaitForSecondsRealtime(1);
         }
        
         // count down is finished...
+		a.PlayOneShot(countdownStartSFX, 1f);
+		countingDown = false;
        	Resume();
     }
 
@@ -312,7 +318,7 @@ public class GameMaster : MonoBehaviour {
 	public void Resume() {
 
 		//pauseMenu.SetActive(false)
-		TimerUI.SetActive(false);
+		enableChildren(TimerUI.transform, false);
 		GameIsPaused = false;
 		Time.timeScale = timeMaster.globalTimescale;
 		
@@ -337,43 +343,40 @@ public class GameMaster : MonoBehaviour {
 
 	}
 
-	public void enableGameOver() {
+	public void enableMatchOver() {
 
-		enableChildren(GameOverOverlay.transform, true);
-		GameOverOverlay.GetComponentInChildren<TextMesh>().text = "the winner is " + winner + redSets + ":" + blueSets;
-
-	}
-
-
-	public void disableGameOver() {
-
-		enableChildren(GameOverOverlay.transform, false);
-		GameOverOverlay.GetComponentInChildren<TextMesh>().text = "the winner is " + winner + redSets + ":" + blueSets;
+		GameObject g = Instantiate(GameOverOverlay, new Vector3(-3.5f, 1.27f, 0), Quaternion.identity);
+		g.GetComponentInChildren<TextMeshPro>().text = "the winner is " + winner + " " +  redSets + ":" + blueSets;
 
 	}
+
 
 	void fillInScore(string player, int health) {
 
+
 		if (player == "red") {
 
-			int circlesToFill = 7 - health;
+			int circlesToDisplay = health;
 
-			for (int i = 0; i < circlesToFill; i++) {
+			for (int i = 7; i > health; i--) {
 
-				redScoreCircles[i].sprite = filledCircle;
+				redScoreCircles[i - 1].enabled = false;
+
 			}
+
 		}
 
 		if (player == "blue") {
 
-			int circlesToFill = 7 - health;
+			int circlesToDisplay = health;
 
-			for (int i = 0; i < circlesToFill; i++) {
+			for (int i = 7; i > health; i--) {
 
-				blueScoreCircles[i].sprite = filledCircle;
+				blueScoreCircles[i - 1].enabled = false;
+
 			}
-		}
 
+		}
 
 
 	}

@@ -198,7 +198,7 @@ public class PlayerMovementController_OLD : MonoBehaviour {
 			camera.GetComponent<Screenshake> ().enabled = false;
 //			Debug.Log (transform.position.x + " " + transform.position.y + " " + -10);
 			camera.transform.position = new Vector3 (transform.position.x, transform.position.y, -10);
-			cameraController.playerLost = this.GetComponent<PlayerMovementController> ();
+			cameraController.playerWon = this.GetComponent<PlayerMovementController> ();
 			cameraController.textColor = playerColor;
 			cameraController.enabled = true;
 

@@ -12,7 +12,7 @@ public class PlayerMovementController : MonoBehaviour {
 	public int playerId;
 	//InputDevice player1;
 	public Player player;
-	Rigidbody2D rb;
+	public Rigidbody2D rb;
 	BoxCollider2D box;
 	CircleCollider2D almostDeadCircle;
 	public Transform sprite;
@@ -177,7 +177,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if (player.GetButtonDown("Start")) {
 
-			if (GameMaster.me.GameIsPaused ) {
+			if (GameMaster.me.GameIsPaused && !GameMaster.me.countingDown) {
 				//GameMaster.me.Resume();
 				GameMaster.me.StartCoroutine(GameMaster.me.Countdown(3));
 			} else if (!GameMaster.me.GameIsPaused && (!gameOver && !otherPlayer.gameOver)) {
@@ -186,7 +186,6 @@ public class PlayerMovementController : MonoBehaviour {
 
 			if (GameMaster.me.matchOver) {
 
-				GameMaster.me.disableGameOver();
 				GameMaster.me.matchOver = false;
 				GameMaster.me.resetScores();
 				Time.timeScale = 1f;
@@ -266,11 +265,11 @@ public class PlayerMovementController : MonoBehaviour {
 			GameMaster.me.redWins = 0;
 			GameMaster.me.blueWins = 0;
 			GameMaster.me.updateUI();
-			Instantiate (letterbox, new Vector2(transform.position.x, transform.position.y - .5f), Quaternion.identity);
 			CamGameOver cameraController = camera.GetComponent<CamGameOver> ();
+			cameraController.letterbox = Instantiate (letterbox, new Vector2(transform.position.x, transform.position.y - .5f), Quaternion.identity);
 			camera.GetComponent<Screenshake> ().enabled = false;
 			camera.transform.position = new Vector3 (transform.position.x, transform.position.y, -10);
-			cameraController.playerLost = this.GetComponent<PlayerMovementController> ();
+			cameraController.playerWon = this.otherPlayer;
 			cameraController.textColor = playerColor;
 			cameraController.enabled = true;
 			//Destroy (this.gameObject, 1.2f);

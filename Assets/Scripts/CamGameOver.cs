@@ -5,7 +5,7 @@ using UnityEngine;
 public class CamGameOver : MonoBehaviour {
 
 	public Camera cam;
-	public PlayerMovementController playerLost;
+	public PlayerMovementController playerWon;
 	public Color textColor;
 
 	public float zoomMin;
@@ -13,6 +13,7 @@ public class CamGameOver : MonoBehaviour {
 	public float zoomSpeed;
 
 	public GameObject deathConfetti; 
+	public GameObject letterbox;
 	public TextMesh winnerText;
 
 	public AudioClip pop;
@@ -36,10 +37,12 @@ public class CamGameOver : MonoBehaviour {
 		startingZoom = cam.orthographicSize;
 		Instantiate (deathConfetti, new Vector3(transform.position.x, transform.position.y, -3), Quaternion.identity);
 
-		if (playerLost.otherPlayer.colorName == "red") {
+		if (playerWon.colorName == "red") {
 			GameMaster.me.redSets ++;
-		} else {
+			GameMaster.me.player1.rb.isKinematic = false;
+		} if (playerWon.colorName == "blue") {
 			GameMaster.me.blueSets++;
+			GameMaster.me.player2.rb.isKinematic = false; 
 		}
 
 
@@ -58,8 +61,8 @@ public class CamGameOver : MonoBehaviour {
 		if (counter > winnerTextTime && !winnerTextDisplayed) {
 
 			TextMesh winner = Instantiate (winnerText, new Vector3 (transform.position.x, transform.position.y + .3f, -8), Quaternion.identity);
-			winner.text = playerLost.otherPlayer.colorName + "\nhas won";
-			winner.color = playerLost.otherPlayer.playerColor;
+			winner.text = playerWon.colorName + "\nhas won";
+			winner.color = playerWon.playerColor;
 			GameMaster.me.updateUI ();
 			SoundController.me.PlaySound (slam, 1f);
 			this.gameObject.GetComponent<Screenshake> ().SetScreenshake (1.5f, 0.8f);
@@ -93,9 +96,13 @@ public class CamGameOver : MonoBehaviour {
 
 		if ((counter > fireworksSoundTime + 150) && (redWon || blueWon)) {
 
-			GameMaster.me.winner = playerLost.otherPlayer.colorName;
-			Time.timeScale = 0;
-			GameMaster.me.enableGameOver();
+			GameMaster.me.winner = playerWon.colorName;
+			Time.timeScale = 1f;
+			cam.transform.position = new Vector3(0, 2.42f, -10);
+			Destroy(letterbox);
+			cam.orthographicSize = startingZoom;
+			GameMaster.me.enableMatchOver();
+			this.enabled = false;
 			//UnityEngine.SceneManagement.SceneManager.LoadScene ("gameover2");
 
 
