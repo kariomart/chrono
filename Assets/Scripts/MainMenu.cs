@@ -35,9 +35,10 @@ public class MainMenu : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		
-		if (p1.GetButtonDown("Start") || p2.GetButtonDown("Start") && !gameStarted){
+		if ((p1.GetButtonDown("Start") || p2.GetButtonDown("Start") || Input.GetKeyDown(KeyCode.Space))&& !gameStarted){
 			gameStarted = true;
 			analogGlitchController.enabled = false;
+			StartCoroutine(startGame());
 //			TV.SetActive(true);
 		}
 
@@ -46,20 +47,28 @@ public class MainMenu : MonoBehaviour {
 			glitch.scanLineJitter += 0.01f;
 			float d;
 			ambienceMix.GetFloat("Distortion", out d);
-			ambienceMix.SetFloat("Distortion", d + 0.0025f);
+			ambienceMix.SetFloat("Distortion", d + 0.0035f);
 			timer ++;
 		}
 		
 		else if (gameStarted && timer > maxTime) {
-			SceneManager.LoadScene(Random.Range(1, 5));
+			//SceneManager.LoadSceneAsync(Random.Range(1, 5));
 			// StartCoroutine(startGame());
+
 		}
 	}
 
-	// IEnumerator startGame() {
-	// 	yield return new WaitForSeconds(1f);
-	// 	SceneManager.LoadScene(Random.Range(1, 5));
-	// }
+	IEnumerator startGame() {
+
+		yield return new WaitForSeconds(2);
+		AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(Random.Range(1, 5));
+
+        // Wait until the asynchronous scene fully loads
+        while (!asyncLoad.isDone)
+        {
+            yield return null;
+        }
+    }
 
 	
 }

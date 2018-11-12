@@ -179,7 +179,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 			if (GameMaster.me.GameIsPaused && !GameMaster.me.countingDown) {
 				//GameMaster.me.Resume();
-				GameMaster.me.StartCoroutine(GameMaster.me.Countdown(3));
+				GameMaster.me.StartCoroutine(GameMaster.me.Countdown(1));
 			} else if (!GameMaster.me.GameIsPaused && (!gameOver && !otherPlayer.gameOver)) {
 				GameMaster.me.Pause();
 			}

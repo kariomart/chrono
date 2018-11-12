@@ -34,7 +34,7 @@ public class GameMaster : MonoBehaviour {
 	public TextMesh blueSetsMesh;
 	public GameObject PauseMenu;
 	public GameObject TimerUI;
-	TextMesh TimerNum;
+	TextMeshPro TimerNum;
 	public GameObject GameOverOverlay;
 	
 	public Sprite filledCircle;
@@ -195,7 +195,7 @@ public class GameMaster : MonoBehaviour {
 		PauseMenu = GameObject.Find("PauseMenu");
 
 		TimerUI = GameObject.Find("Timer");
-		TimerNum = TimerUI.GetComponentInChildren<TextMesh>(true);
+		TimerNum = TimerUI.GetComponentInChildren<TextMeshPro>(true);
 		//Debug.Log(TimerNum);
 
 		//PauseMenu = GameObject.Find("PauseMenu");
