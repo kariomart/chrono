@@ -22,6 +22,10 @@ public class MainMenu : MonoBehaviour {
 
 	bool gameStarted;
 
+	public GameObject settings;
+	bool settingsEnabled;
+	public SetResolutions res;
+
 
 	// Use this for initialization
 	void Start () {
@@ -40,6 +44,24 @@ public class MainMenu : MonoBehaviour {
 			analogGlitchController.enabled = false;
 			StartCoroutine(startGame());
 //			TV.SetActive(true);
+		}
+
+		if ((p1.GetButtonDown("Select") || p2.GetButtonDown("Select") || Input.GetKeyDown(KeyCode.Escape))&& !gameStarted){
+			if (!settingsEnabled) {
+				settings.SetActive(true);
+				settingsEnabled = true;
+			} else {
+				settings.SetActive(false);
+				settingsEnabled = false;
+			}
+		}
+
+		if ((p1.GetButtonDown("Restart") || p2.GetButtonDown("Restart") && settingsEnabled)) {
+			res.ChangeResolution();
+		}
+
+		if ((p1.GetButtonDown("Back") || p2.GetButtonDown("Back") && settingsEnabled)) {
+			res.toggleFullscreen();
 		}
 
 		if (gameStarted && timer <= maxTime) {

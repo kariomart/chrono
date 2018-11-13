@@ -60,6 +60,8 @@ public class TimeManager : MonoBehaviour {
 		if (!musicMix) {
 			musicMix = music.outputAudioMixerGroup.audioMixer;
 		}
+
+//		Debug.Log(musicMix);
 	}
 	
 	// Update is called once per frame

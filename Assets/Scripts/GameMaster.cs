@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine.PostProcessing;
 using Kino;
 using Rewired;
+using UnityEngine.Audio;
 
 
 public class GameMaster : MonoBehaviour {
@@ -76,6 +77,7 @@ public class GameMaster : MonoBehaviour {
 
 
 
+
 	// Use this for initialization
 	void Awake () {
 
@@ -120,19 +122,18 @@ public class GameMaster : MonoBehaviour {
 		}
 
 		if (matchOver && (controller1.GetButtonDown("Start") || controller2.GetButtonDown("Start"))) {
-			UnityEngine.SceneManagement.SceneManager.LoadScene (pickRandomLevel());
+			int rand  = Random.Range(1, 5);
+
+			while (rand == UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex) {
+				rand = Random.Range(1, 5);
+			}
+
+			UnityEngine.SceneManagement.SceneManager.LoadScene (rand);
+			//Debug.Log(rand + " " + UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
 		}
 	}
 
-	public void playPressed() {
-
-//		Debug.Log(roundsNeeded);
-		SoundController.me.PlaySound (playSoundEffect, .25f);
-		//UnityEngine.SceneManagement.SceneManager.LoadScene (scene);
-		string level = pickRandomLevel();
-		UnityEngine.SceneManagement.SceneManager.LoadScene(level);
-
-	}
+	
 	public IEnumerator ReEnablePlayer(GameObject obj, GameObject otherPlayer) {
 		yield return new WaitForSeconds(.9f);
 		Vector2 point = GameMaster.me.getFarthestSpawnPoint(otherPlayer.transform.position);
@@ -152,6 +153,7 @@ public class GameMaster : MonoBehaviour {
 		}
 
 	}
+
 
 	public void hoverSound() {
 
@@ -358,10 +360,14 @@ public class GameMaster : MonoBehaviour {
 
 			int circlesToDisplay = health;
 
-			for (int i = 7; i > health; i--) {
+			// for (int i = 7; i > health; i--) {
 
-				redScoreCircles[i - 1].enabled = false;
+			// 	redScoreCircles[i - 1].enabled = false;
 
+			// }
+
+			for (int i = 0; i < 7; i++) {
+				redScoreCircles[i].enabled = i < health;
 			}
 
 		}
@@ -370,10 +376,13 @@ public class GameMaster : MonoBehaviour {
 
 			int circlesToDisplay = health;
 
-			for (int i = 7; i > health; i--) {
+			/* for (int i = 7; i > health; i--) {
 
 				blueScoreCircles[i - 1].enabled = false;
 
+			}*/
+			for (int i = 0; i < 7; i++) {
+				blueScoreCircles[i].enabled = i < health;
 			}
 
 		}

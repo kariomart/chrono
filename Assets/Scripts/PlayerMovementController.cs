@@ -247,7 +247,14 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if ((player.GetButtonDown("Restart") && (gameOver || otherPlayer.gameOver) && !GameMaster.me.matchOver)) {
 			Time.timeScale = 1f;
-			UnityEngine.SceneManagement.SceneManager.LoadScene(GameMaster.me.amountOfLevels);
+			Debug.Log("???");
+			int rand  = Random.Range(1, 5);
+
+			while (rand == UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex) {
+				rand = Random.Range(1, 5);
+			}
+
+			UnityEngine.SceneManagement.SceneManager.LoadScene (rand);
 		}
 
 
@@ -387,7 +394,10 @@ public class PlayerMovementController : MonoBehaviour {
 		 /* if (dir == Vector2.zero) {
 			//reticle.transform.position = ((Vector2)(shootPt.position) + prevDir.normalized) * .5f;
 		} else { */
-			reticle.transform.position = new Vector2 (shootPt.transform.position.x + (dir.x * .5f), shootPt.transform.position.y + (dir.y * .5f)); 
+			Vector2 retVect = new Vector2 (shootPt.transform.position.x + (dir.x * .5f), shootPt.transform.position.y + (dir.y * .5f));  
+			reticle.transform.position = retVect;
+			reticle.transform.eulerAngles = new Vector3(0, 0, Geo.ToAng(dir)); 
+
 		/*}*/
 
 	}
