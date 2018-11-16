@@ -47,20 +47,26 @@ public class TimeManager : MonoBehaviour {
 	}
 
 	void LevelLoaded(Scene scene, LoadSceneMode bop){
-		BulletManager.me.spawnList.Clear();
-		GameMaster.me.findUI ();
-		GameMaster.me.updateUI ();
-		GameMaster.me.findSpawnPoints();
-		player1 = GameMaster.me.player1;
-		player2 = GameMaster.me.player2;
-		scanlines = Camera.main.GetComponent<ScanlinesEffect>();
-		globalTimescale = 1f;
 
-		GameMaster.me.StartCoroutine(GameMaster.me.Countdown(3));
-		if (!musicMix) {
-			musicMix = music.outputAudioMixerGroup.audioMixer;
+//		Debug.Log(scene.name);
+		if (scene.name == "_FINAL_menu") {
+			GameMaster.me.managers.transform.GetChild(7).transform.parent = null;
+			Destroy(GameMaster.me.managers);
+		} else {
+			BulletManager.me.spawnList.Clear();
+			GameMaster.me.findUI ();
+			GameMaster.me.updateUI ();
+			GameMaster.me.findSpawnPoints();
+			player1 = GameMaster.me.player1;
+			player2 = GameMaster.me.player2;
+			scanlines = Camera.main.GetComponent<ScanlinesEffect>();
+			globalTimescale = 1f;
+
+			GameMaster.me.StartCoroutine(GameMaster.me.Countdown(3));
+			if (!musicMix) {
+				musicMix = music.outputAudioMixerGroup.audioMixer;
+			}
 		}
-
 //		Debug.Log(musicMix);
 	}
 	

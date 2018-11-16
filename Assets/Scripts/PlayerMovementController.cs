@@ -26,6 +26,7 @@ public class PlayerMovementController : MonoBehaviour {
 	public string colorName;
 
 	public GameObject reticle;
+	Animation reticleScale;
 	public GameObject bullet;
 	public GameObject manaBar;
 	public GameObject pivot;
@@ -124,6 +125,7 @@ public class PlayerMovementController : MonoBehaviour {
 		ammoText = GetComponentInChildren<TextMesh>();
 		updateUI();
 		camera = Camera.main.gameObject;
+		reticleScale = reticle.GetComponent<Animation>();
 //		Debug.Log(InputManager.Devices);
 		//player1 = InputManager.Devices[playerId];
 
@@ -247,7 +249,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 		if ((player.GetButtonDown("Restart") && (gameOver || otherPlayer.gameOver) && !GameMaster.me.matchOver)) {
 			Time.timeScale = 1f;
-			Debug.Log("???");
+//			Debug.Log("???");
 			int rand  = Random.Range(1, 5);
 
 			while (rand == UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex) {
@@ -397,6 +399,7 @@ public class PlayerMovementController : MonoBehaviour {
 			Vector2 retVect = new Vector2 (shootPt.transform.position.x + (dir.x * .5f), shootPt.transform.position.y + (dir.y * .5f));  
 			reticle.transform.position = retVect;
 			reticle.transform.eulerAngles = new Vector3(0, 0, Geo.ToAng(dir)); 
+//			scaleReticle();
 
 		/*}*/
 
@@ -411,6 +414,7 @@ public class PlayerMovementController : MonoBehaviour {
 //		Debug.Log(ang);
 		Instantiate(muzzleFlash, new Vector2 (shootPt.transform.position.x + (dir.x * .5f), shootPt.transform.position.y + (dir.y * .5f)), Quaternion.Euler(new Vector3(360 - ang, 90, 0))) ;
 		Instantiate(shootParticle, new Vector2 (shootPt.transform.position.x + (dir.x * .5f), shootPt.transform.position.y + (dir.y * .5f)), Quaternion.Euler(new Vector3(360 - ang, 90, 0)));
+		reticleScale.Play();
 
 		if (slow && otherPlayer.slow) {
 			SoundController.me.PlaySoundAtNormalPitch (shootSoundSlow, 1f, transform.position.x);	
@@ -444,7 +448,6 @@ public class PlayerMovementController : MonoBehaviour {
 
 
 	}
-
 
 	void setGrounded() {
 
@@ -513,6 +516,7 @@ public class PlayerMovementController : MonoBehaviour {
 			gameObject.SetActive(false);
 			GameMaster.me.StartCoroutine(GameMaster.me.rumble(this, 10f, .5f));
 			GameMaster.me.StartCoroutine(GameMaster.me.rumble(otherPlayer, .2f, .1f));
+			reticle.transform.localScale = new Vector3(0.149699f, 0.149699f, 0.149699f);
 		}
 
 	}
@@ -534,7 +538,7 @@ public class PlayerMovementController : MonoBehaviour {
 	}
 
 	bool canShoot() {
-		if (amountOfBullets > 0 && bulletTimer > bulletCooldown) {
+		if (amountOfBullets > 0 && bulletTimer > bulletCooldown && !GameMaster.me.GameIsPaused && !GameMaster.me.countingDown) {
 			return true;
 		} else {
 			return false;
@@ -543,6 +547,7 @@ public class PlayerMovementController : MonoBehaviour {
 
 
 	void OnCollisionEnter2D(Collision2D coll) {
+
 
 		if (coll.contacts.Length > 0) {
 
@@ -556,15 +561,14 @@ public class PlayerMovementController : MonoBehaviour {
 			}
 			if (coll.gameObject.tag == "Player") {
 				vel.y = jumpSpd;
+				//Debug.Log(amountOfBullets < otherPlayer.amountOfBullets);
+				//Debug.Log(amountOfBullets + " " + otherPlayer.amountOfBullets);
 
-				if (amountOfBullets == 0 && otherPlayer.amountOfBullets != 0) {
+				if (amountOfBullets < otherPlayer.amountOfBullets && GameMaster.me.bulletRecentlyStolenTimer > 120) {
+					Debug.Log(GameMaster.me.bulletRecentlyStolenTimer);
 					amountOfBullets ++;
 					otherPlayer.amountOfBullets --;
-				}
-
-				if (otherPlayer.amountOfBullets == 0) {
-					amountOfBullets --;
-					otherPlayer.amountOfBullets ++;
+					GameMaster.me.bulletRecentlyStolenTimer = 0;
 				}
 			}
 			if (coll.gameObject.tag == "Bullet") {

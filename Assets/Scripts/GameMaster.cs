@@ -75,6 +75,10 @@ public class GameMaster : MonoBehaviour {
 	public bool GameIsPaused;
 	public bool countingDown;
 
+	public int bulletRecentlyStolenTimer;
+
+	public GameObject managers;
+
 
 
 
@@ -113,7 +117,7 @@ public class GameMaster : MonoBehaviour {
 
 		if (Input.GetKeyDown (KeyCode.Escape)) {
 
-			UnityEngine.SceneManagement.SceneManager.LoadScene ("menu");
+			UnityEngine.SceneManagement.SceneManager.LoadScene ("_FINAL_MENU");
 //			if (me == null) {
 //				me = this;
 //			} else {
@@ -122,15 +126,22 @@ public class GameMaster : MonoBehaviour {
 		}
 
 		if (matchOver && (controller1.GetButtonDown("Start") || controller2.GetButtonDown("Start"))) {
-			int rand  = Random.Range(1, 5);
+			int rand  = Random.Range(1, 6);
 
 			while (rand == UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex) {
-				rand = Random.Range(1, 5);
+				rand = Random.Range(1, 6);
 			}
 
 			UnityEngine.SceneManagement.SceneManager.LoadScene (rand);
 			//Debug.Log(rand + " " + UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
 		}
+
+		if ((controller1.GetButtonDown("Select") || controller2.GetButtonDown("Select")) && GameIsPaused) {
+			UnityEngine.SceneManagement.SceneManager.LoadScene ("_FINAL_MENU");
+			Time.timeScale = 1f;
+		}
+
+		bulletRecentlyStolenTimer ++;
 	}
 
 	
@@ -141,25 +152,6 @@ public class GameMaster : MonoBehaviour {
 		obj.SetActive(true);
 	}
 
-	public void dropdownItemSwitched() {
-
-		SoundController.me.PlaySound (dropdownSoundEffect, .5f);
-		int temp = GameObject.Find ("Dropdown").GetComponent<TMP_Dropdown> ().value;
-
-		if (temp == 1) {
-			bestOf = 5;
-		} else if (temp == 2) {
-			bestOf = 100;
-		}
-
-	}
-
-
-	public void hoverSound() {
-
-		SoundController.me.PlaySound (hoverSoundEffect, .5f);
-
-	}
 
 	public string pickRandomLevel() {
 

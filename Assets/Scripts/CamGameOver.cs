@@ -44,9 +44,6 @@ public class CamGameOver : MonoBehaviour {
 			GameMaster.me.blueSets++;
 			GameMaster.me.player2.rb.isKinematic = false; 
 		}
-
-
-
 		
 	}
 	

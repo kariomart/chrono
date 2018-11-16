@@ -17,6 +17,7 @@ public class LevelSettings : MonoBehaviour {
 		me = this;
 		if (GameMaster.me == null){
 			Instantiate(Resources.Load("MANAGERS"), Vector3.zero, Quaternion.identity);
+			GameMaster.me.managers = GameObject.Find("MANAGERS(Clone)");
 		}
 		GameMaster.me.initializeLevel();
 	}

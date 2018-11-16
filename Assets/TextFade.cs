@@ -15,6 +15,7 @@ public class TextFade : MonoBehaviour {
 
 	//	sprite = GetComponent<SpriteRenderer>();
 		text = GetComponent<TextMeshProUGUI>();
+
 		c = text.color;
 		
 	}

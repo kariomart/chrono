@@ -74,12 +74,17 @@ public class Bullet : MonoBehaviour {
 
 		if (decayed) {
 			decayDeathCounter += Time.deltaTime;
+//			Debug.Log(decayDeathCounter);
 
 
 			if (decayDeathCounter > lifetime) {
 				BulletManager.amtBullets --;
 				Destroy(gameObject);
 			}
+		}
+
+		if (lifetime - decayDeathCounter <= 2) {
+			//blinking();
 		}
 
 
@@ -96,7 +101,7 @@ public class Bullet : MonoBehaviour {
 
 		if (nonDecayedTime >= decayTime || decayed) {
 
-			sprite.color = decayColor;
+			//sprite.color = decayColor;
 			//decayEffect.SetActive (true);
 			var main = middle.main;
 			main.startColor = decayColor;
@@ -106,7 +111,6 @@ public class Bullet : MonoBehaviour {
 			//sprite.enabled = true;
 			//middle.Stop();
 			trail.Stop();
-
 		}
 
 		if (Mathf.Abs(transform.position.x) > maxMapX) {
@@ -170,6 +174,8 @@ public class Bullet : MonoBehaviour {
 			} else {
 				spd *= .2f;	
 			}
+			decayed = true;
+			trail.Stop();
 		}
 
 
@@ -203,6 +209,8 @@ public class Bullet : MonoBehaviour {
 			if ((GameMaster.me.player1.slow || GameMaster.me.player2.slow)) { 
 				slowZoneAccel = true;
 			}
+			decayed = true;
+			trail.Stop();
 
 
 
@@ -219,33 +227,39 @@ public class Bullet : MonoBehaviour {
 		}
 
 		if (coll.gameObject.layer == LayerMask.NameToLayer("SlowZone")) {
-
 			if (slowZoneAccel) {
 				spd *= 6f;
 			} 
 			//spd = defaultSpd;
-
+			decayed = false;
+			pickupBox.enabled = false;
+			trail.Play();
 		}
 
 	}
 
 	void OnCollisionEnter2D(Collision2D coll) {
 
+		//Debug.Log(decayed);
 
 		if (coll.gameObject.tag == "Player" && decayed) {
 
-			SoundController.me.PlaySound (tick, 1f, 1, transform.position.x);
 			PlayerMovementController player = coll.gameObject.GetComponent<PlayerMovementController> ();
-			player.amountOfBullets ++;
-			player.updateUI();
-			Destroy (this.gameObject);
+//			Debug.Log(decayed);
+			if (player.amountOfBullets < 9) {
+				SoundController.me.PlaySound (tick, 1f, 1, transform.position.x);
+				player.amountOfBullets ++;
+				player.updateUI();
+				Destroy (this.gameObject);
+			}
 
 		}
 
-		if (coll.gameObject.tag == "Player" && !decayed) {
+
+		else if (coll.gameObject.tag == "Player" && !decayed) {
 
 			PlayerMovementController player = coll.gameObject.GetComponent<PlayerMovementController> ();
-
+			Debug.Log(decayed);
 			if (!player.invuln) {
 	//			player.health -= dmg;
 				if (player.health == 1) {
@@ -333,6 +347,19 @@ public class Bullet : MonoBehaviour {
 		//Destroy (this.gameObject);
 
 	}
+
+	// void blinking() {
+
+	// 	GradientAlphaKey[] alphaKey;
+	// 	Gradient gradient = middle.main.startColor;
+
+
+	// 	var main = middle.main;
+	// 	alphaKey = new GradientAlphaKey[1];
+	// 	alphaKey[0].alpha = Mathf.PingPong(alphaKey[0].alpha, 1);
+	
+		
+	// }
 
 	void playBounceSound() {
 

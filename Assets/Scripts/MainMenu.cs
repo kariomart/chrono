@@ -25,6 +25,7 @@ public class MainMenu : MonoBehaviour {
 	public GameObject settings;
 	bool settingsEnabled;
 	public SetResolutions res;
+	public GameObject rewiredManager;
 
 
 	// Use this for initialization
@@ -34,6 +35,11 @@ public class MainMenu : MonoBehaviour {
 		analogGlitchController = Camera.main.GetComponent<AnalogGlitchController>();
 		glitch = Camera.main.GetComponent<AnalogGlitch>();
 		ambienceMix = ambience.outputAudioMixerGroup.audioMixer;
+
+		if (!GameObject.Find("Rewired Input Manager")) {
+			Instantiate(rewiredManager);
+		}
+	
 	}
 	
 	// Update is called once per frame
