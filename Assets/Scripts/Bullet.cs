@@ -273,7 +273,7 @@ public class Bullet : MonoBehaviour {
 				GameObject flash = Instantiate (DamageFlash, transform.position, Quaternion.identity);
 				Camera.main.GetComponent<Screenshake>().SetScreenshake(0.35f, .25f, player);
 				Destroy (this.gameObject);
-				Destroy (flash, .025f); 
+				Destroy (flash, .020f); 
 
 			} else {
 				if (coll.contacts.Length > 0) {
