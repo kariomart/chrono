@@ -28,6 +28,7 @@ public class GameMaster : MonoBehaviour {
 	public bool matchOver;
 	public int amtBullets;
 	public int amountOfLevels;
+	public bool roundOver;
 
 	public TextMesh redScore;
 	public TextMesh blueScore;
@@ -78,6 +79,8 @@ public class GameMaster : MonoBehaviour {
 	public int bulletRecentlyStolenTimer;
 
 	public GameObject managers;
+	Resolution[] resolutions;
+	int resolutionIndex;
 
 
 
@@ -94,6 +97,8 @@ public class GameMaster : MonoBehaviour {
 		} else {
 			Destroy (this.gameObject);
 		}
+		resolutions = Screen.resolutions;
+
 
 		//bestOf = 100;
 		//roundsNeeded = (bestOf + 1) / 2;
@@ -217,6 +222,16 @@ public class GameMaster : MonoBehaviour {
 
 	}
 
+	public void hideUI() {
+
+		GameObject[] scoreUI = GameObject.FindGameObjectsWithTag("score");
+
+		foreach (GameObject g in scoreUI) {
+			g.SetActive(false);
+		}
+
+	}
+
 	public void findSpawnPoints() {
 
 		GameObject spawnPointParent = new GameObject("SpawnPoints");
@@ -297,6 +312,15 @@ public class GameMaster : MonoBehaviour {
 		countingDown = false;
        	Resume();
     }
+
+	public void ChangeResolution() {
+
+		Resolution resolution = resolutions[resolutionIndex % resolutions.Length];
+		Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
+		resolutionIndex ++;
+
+	}
+
 
 	public void Pause() {
 

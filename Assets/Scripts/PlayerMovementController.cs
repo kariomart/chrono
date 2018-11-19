@@ -56,6 +56,7 @@ public class PlayerMovementController : MonoBehaviour {
 	public float jumpChargeTimer;
 	public float jumpChargeMax;
 	public float maxMapX;
+	public float maxMapY;
 
 	public bool right;
 	public bool left;
@@ -177,6 +178,12 @@ public class PlayerMovementController : MonoBehaviour {
 		dir = new Vector2(player.GetAxis("MoveHorizontal"), player.GetAxis("MoveVertical")).normalized;
 		bulletTimer += Time.deltaTime;
 
+		if (player.GetButtonDown("ChangeRes")) {
+
+			  GameMaster.me.ChangeResolution();
+
+		}
+
 		if (player.GetButtonDown("Start")) {
 
 			if (GameMaster.me.GameIsPaused && !GameMaster.me.countingDown) {
@@ -247,7 +254,9 @@ public class PlayerMovementController : MonoBehaviour {
 		// 	Application.LoadLevel(Application.loadedLevel);
 		// }
 
-		if ((player.GetButtonDown("Restart") && (gameOver || otherPlayer.gameOver) && !GameMaster.me.matchOver)) {
+		if ((player.GetButtonDown("Restart") && (gameOver || otherPlayer.gameOver) && !GameMaster.me.matchOver && GameMaster.me.roundOver)) {
+			Debug.Log(GameMaster.me.roundOver);
+			GameMaster.me.roundOver = false;
 			Time.timeScale = 1f;
 //			Debug.Log("???");
 			int rand  = Random.Range(1, 5);
@@ -275,9 +284,9 @@ public class PlayerMovementController : MonoBehaviour {
 			GameMaster.me.blueWins = 0;
 			GameMaster.me.updateUI();
 			CamGameOver cameraController = camera.GetComponent<CamGameOver> ();
-			cameraController.letterbox = Instantiate (letterbox, new Vector2(transform.position.x, transform.position.y - .5f), Quaternion.identity);
+			ammoText.gameObject.SetActive(false);
 			camera.GetComponent<Screenshake> ().enabled = false;
-			camera.transform.position = new Vector3 (transform.position.x, transform.position.y, -10);
+			camera.transform.position = new Vector3 (transform.position.x, transform.position.y -.5f , -10);
 			cameraController.playerWon = this.otherPlayer;
 			cameraController.textColor = playerColor;
 			cameraController.enabled = true;
@@ -387,7 +396,21 @@ public class PlayerMovementController : MonoBehaviour {
 		}
 
 		if (Mathf.Abs(transform.position.x) > maxMapX) {
-			transform.position = new Vector2(-transform.position.x, transform.position.y);
+
+			if (transform.position.x > 0) {
+				transform.position = new Vector2(-transform.position.x + .25f, transform.position.y);
+			} else {
+				transform.position = new Vector2(-transform.position.x - .25f, transform.position.y);
+			}
+		}
+
+		if (Mathf.Abs(transform.position.y) > maxMapY) {
+
+			if (transform.position.y > 0) {
+				transform.position = new Vector2(transform.position.x , -transform.position.y + .25f);
+			} else {
+				transform.position = new Vector2(transform.position.x, -transform.position.y - .25f);
+			}
 		}
 
 		prevVel = vel;
@@ -538,7 +561,7 @@ public class PlayerMovementController : MonoBehaviour {
 	}
 
 	bool canShoot() {
-		if (amountOfBullets > 0 && bulletTimer > bulletCooldown && !GameMaster.me.GameIsPaused && !GameMaster.me.countingDown) {
+		if (amountOfBullets > 0 && bulletTimer > bulletCooldown && !GameMaster.me.GameIsPaused && !GameMaster.me.countingDown && !gameOver) {
 			return true;
 		} else {
 			return false;
@@ -565,7 +588,7 @@ public class PlayerMovementController : MonoBehaviour {
 				//Debug.Log(amountOfBullets + " " + otherPlayer.amountOfBullets);
 
 				if (amountOfBullets < otherPlayer.amountOfBullets && GameMaster.me.bulletRecentlyStolenTimer > 120) {
-					Debug.Log(GameMaster.me.bulletRecentlyStolenTimer);
+//					Debug.Log(GameMaster.me.bulletRecentlyStolenTimer);
 					amountOfBullets ++;
 					otherPlayer.amountOfBullets --;
 					GameMaster.me.bulletRecentlyStolenTimer = 0;

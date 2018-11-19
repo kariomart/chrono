@@ -49,6 +49,8 @@ public class Bullet : MonoBehaviour {
 	public GameObject DamageFlash;
 	Vector2 prevVel;
 	public float maxMapX;
+	public float maxMapY;
+	public bool slowzone;
 
 	// Use this for initialization
 	void Start () {
@@ -83,7 +85,7 @@ public class Bullet : MonoBehaviour {
 			}
 		}
 
-		if (lifetime - decayDeathCounter <= 2) {
+		if (lifetime - decayDeathCounter <= 8) {
 			//blinking();
 		}
 
@@ -114,12 +116,26 @@ public class Bullet : MonoBehaviour {
 		}
 
 		if (Mathf.Abs(transform.position.x) > maxMapX) {
-			transform.position = new Vector2(-transform.position.x, transform.position.y);
-			vel.x *= 1.1f;
+			if (transform.position.x > 0){
+				transform.position = new Vector2(-transform.position.x + .25f, transform.position.y);
+			} else {
+				transform.position = new Vector2(-transform.position.x - .25f, transform.position.y);
+			}
+			//vel.x *= 1.1f;
 			vel *= .8f;
 		}
 
-		if (spd < decayVel && !decayed) {
+		if (Mathf.Abs(transform.position.y) > maxMapY) {
+			if (transform.position.y > 0){
+				transform.position = new Vector2(transform.position.x, -transform.position.y + .25f);
+			} else {
+				transform.position = new Vector2(transform.position.x, -transform.position.y - .25f);
+			}
+			//vel.x *= 1.1f;
+			vel *= .8f;
+		}
+
+		if (spd < decayVel && !decayed && !slowzone) {
 			decayed = true;
 		}
 
@@ -168,14 +184,15 @@ public class Bullet : MonoBehaviour {
 		
 		if (coll.gameObject.layer == LayerMask.NameToLayer("SlowZone")) {
 
+			slowzone = true;
 
 			if ((GameMaster.me.player1.slow || GameMaster.me.player2.slow)) {
 				spd *= 3f;	
 			} else {
 				spd *= .2f;	
 			}
-			decayed = true;
-			trail.Stop();
+			decayed = false;
+			trail.Play();
 		}
 
 
@@ -195,11 +212,7 @@ public class Bullet : MonoBehaviour {
 			//vel *= Random.Range (-.1f, -.2f);
 
 
-		if (coll.gameObject.tag == "pivot" && !decayed) {
-
-			GameMaster.me.timeMaster.gameOverSlow = true;
-			GameMaster.me.timeMaster.pos = coll.gameObject.transform.position;
-		}
+		
 	}
 
 	void OnTriggerStay2D(Collider2D coll) {
@@ -209,13 +222,14 @@ public class Bullet : MonoBehaviour {
 			if ((GameMaster.me.player1.slow || GameMaster.me.player2.slow)) { 
 				slowZoneAccel = true;
 			}
-			decayed = true;
-			trail.Stop();
-
-
-
+			decayed = false;
 		}
 
+
+		if (coll.gameObject.tag == "pivot" && !decayed) {
+			GameMaster.me.timeMaster.gameOverSlow = true;
+			GameMaster.me.timeMaster.pos = coll.gameObject.transform.position;
+		}
 
 	}
 
@@ -235,6 +249,8 @@ public class Bullet : MonoBehaviour {
 			pickupBox.enabled = false;
 			trail.Play();
 		}
+
+		slowzone = false;
 
 	}
 
@@ -259,7 +275,7 @@ public class Bullet : MonoBehaviour {
 		else if (coll.gameObject.tag == "Player" && !decayed) {
 
 			PlayerMovementController player = coll.gameObject.GetComponent<PlayerMovementController> ();
-			Debug.Log(decayed);
+//			Debug.Log(decayed);
 			if (!player.invuln) {
 	//			player.health -= dmg;
 				if (player.health == 1) {
@@ -304,9 +320,18 @@ public class Bullet : MonoBehaviour {
 		if (coll.gameObject.tag == "bullet") {
 			
 //			Debug.Log(coll.contacts.Length);
+			Bullet b = coll.gameObject.GetComponent<Bullet>();
 			if (coll.contacts.Length > 0) {
-				vel = Geo.ReflectVect (prevVel.normalized, coll.contacts [0].normal) * (prevVel.magnitude * 0.65f);
-			}
+
+				if (b.vel == Vector2.zero) {
+					b.vel = vel;
+					b.prevVel = vel;
+					b.spd = spd;
+					
+				} else {
+					vel = Geo.ReflectVect (prevVel.normalized, coll.contacts [0].normal) * (prevVel.magnitude * 0.65f);
+					}
+				}
 			bounceCount++;
 
 			if (bounceCount >= 4) {
@@ -348,18 +373,28 @@ public class Bullet : MonoBehaviour {
 
 	}
 
-	// void blinking() {
+	void blinking() {
 
-	// 	GradientAlphaKey[] alphaKey;
-	// 	Gradient gradient = middle.main.startColor;
+		ParticleSystem.MinMaxGradient gradient = new Gradient();
+		GradientColorKey[] cK = new GradientColorKey[1];
+		GradientAlphaKey[] aK = new GradientAlphaKey[1];
 
+		//Debug.Log(c1 + " " + c2);		
+		cK[0].color = Color.grey;
+//		cK[1].time = 1;
+		aK[0].alpha = Mathf.PingPong(Time.time, 1);
+		Debug.Log(Mathf.PingPong(Time.time, 1));
 
-	// 	var main = middle.main;
-	// 	alphaKey = new GradientAlphaKey[1];
-	// 	alphaKey[0].alpha = Mathf.PingPong(alphaKey[0].alpha, 1);
-	
 		
-	// }
+		gradient.gradient.SetKeys(cK, aK);
+		
+		var main = middle.main;
+		gradient.mode = ParticleSystemGradientMode.Gradient;
+		//main.startColor.mode = ParticleSystemGradientMode.Gradient;
+
+		main.startColor = gradient;  
+		
+	}
 
 	void playBounceSound() {
 

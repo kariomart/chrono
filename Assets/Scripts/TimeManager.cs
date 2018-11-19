@@ -62,7 +62,7 @@ public class TimeManager : MonoBehaviour {
 			scanlines = Camera.main.GetComponent<ScanlinesEffect>();
 			globalTimescale = 1f;
 
-			GameMaster.me.StartCoroutine(GameMaster.me.Countdown(3));
+			GameMaster.me.StartCoroutine(GameMaster.me.Countdown(1));
 			if (!musicMix) {
 				musicMix = music.outputAudioMixerGroup.audioMixer;
 			}
@@ -111,7 +111,7 @@ public class TimeManager : MonoBehaviour {
 				slowCounter ++;
 			}
 
-			if (slowCounter > 300) {
+			if (slowCounter > 150) {
 				gameOverSlow = false;
 				slowCounter = 0;
 			}

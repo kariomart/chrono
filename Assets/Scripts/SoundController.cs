@@ -22,7 +22,7 @@ public class SoundController : MonoBehaviour {
 
 
 	void Start () {
-		audSources = new AudioSource[128];
+		audSources = new AudioSource[64];
 
 		for (int i = 0; i < audSources.Length; i++) {
 
