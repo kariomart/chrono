@@ -57,6 +57,7 @@ public class PlayerMovementController : MonoBehaviour {
 	public float jumpChargeMax;
 	public float maxMapX;
 	public float maxMapY;
+	public float minMapY;
 
 	public bool right;
 	public bool left;
@@ -184,6 +185,12 @@ public class PlayerMovementController : MonoBehaviour {
 
 		}
 
+		if (player.GetButtonDown("ToggleMusic")) {
+
+			  GameMaster.me.toggleMusic();
+
+		}
+
 		if (player.GetButtonDown("Start")) {
 
 			if (GameMaster.me.GameIsPaused && !GameMaster.me.countingDown) {
@@ -286,10 +293,12 @@ public class PlayerMovementController : MonoBehaviour {
 			CamGameOver cameraController = camera.GetComponent<CamGameOver> ();
 			ammoText.gameObject.SetActive(false);
 			camera.GetComponent<Screenshake> ().enabled = false;
+			reticle.gameObject.SetActive(false);
 			camera.transform.position = new Vector3 (transform.position.x, transform.position.y -.5f , -10);
 			cameraController.playerWon = this.otherPlayer;
 			cameraController.textColor = playerColor;
 			cameraController.enabled = true;
+			Time.timeScale = 1;
 			//Destroy (this.gameObject, 1.2f);
 		}
 
@@ -404,13 +413,13 @@ public class PlayerMovementController : MonoBehaviour {
 			}
 		}
 
-		if (Mathf.Abs(transform.position.y) > maxMapY) {
+		if (transform.position.y > maxMapY) {
 
-			if (transform.position.y > 0) {
 				transform.position = new Vector2(transform.position.x , -transform.position.y + .25f);
-			} else {
-				transform.position = new Vector2(transform.position.x, -transform.position.y - .25f);
-			}
+		}
+
+		if (transform.position.y < minMapY) {
+			transform.position = new Vector2(transform.position.x , maxMapY - .25f);
 		}
 
 		prevVel = vel;

@@ -41,6 +41,8 @@ public class TimeManager : MonoBehaviour {
 	}
 	// Use this for initialization
 	void Start () {
+
+//		Debug.Log("started");
 		SceneManager.sceneLoaded += LevelLoaded;
 		LevelLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
 //		Debug.Log(GameMaster.me);
@@ -50,8 +52,11 @@ public class TimeManager : MonoBehaviour {
 
 //		Debug.Log(scene.name);
 		if (scene.name == "_FINAL_menu") {
-			GameMaster.me.managers.transform.GetChild(7).transform.parent = null;
+			if (GameMaster.me.managers.transform.childCount == 8) {
+				GameMaster.me.managers.transform.GetChild(7).transform.parent = null;
+			}
 			Destroy(GameMaster.me.managers);
+
 		} else {
 			BulletManager.me.spawnList.Clear();
 			GameMaster.me.findUI ();
@@ -62,7 +67,9 @@ public class TimeManager : MonoBehaviour {
 			scanlines = Camera.main.GetComponent<ScanlinesEffect>();
 			globalTimescale = 1f;
 
-			GameMaster.me.StartCoroutine(GameMaster.me.Countdown(1));
+			GameMaster.me.StartCoroutine(GameMaster.me.Countdown(3));
+//			Debug.Log(music);
+
 			if (!musicMix) {
 				musicMix = music.outputAudioMixerGroup.audioMixer;
 			}

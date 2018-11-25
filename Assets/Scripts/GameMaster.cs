@@ -81,7 +81,7 @@ public class GameMaster : MonoBehaviour {
 	public GameObject managers;
 	Resolution[] resolutions;
 	int resolutionIndex;
-
+	bool musicPaused;
 
 
 
@@ -143,6 +143,7 @@ public class GameMaster : MonoBehaviour {
 
 		if ((controller1.GetButtonDown("Select") || controller2.GetButtonDown("Select")) && GameIsPaused) {
 			UnityEngine.SceneManagement.SceneManager.LoadScene ("_FINAL_MENU");
+			timeMaster.music.Stop();
 			Time.timeScale = 1f;
 		}
 
@@ -328,7 +329,21 @@ public class GameMaster : MonoBehaviour {
 		timeMaster.globalTimescale = Time.timeScale;
 		Time.timeScale = 0f;
 		GameIsPaused = true;
+		timeMaster.music.Pause();
 		enableChildren(PauseMenu.transform, true);
+
+	}
+
+	public void toggleMusic() {
+
+		if (timeMaster.music.isPlaying) {
+			timeMaster.music.Pause(); 
+			musicPaused = true;
+		} else {
+			timeMaster.music.Play(); 
+			musicPaused = false;
+		}
+
 
 	}
 
@@ -338,6 +353,10 @@ public class GameMaster : MonoBehaviour {
 		//pauseMenu.SetActive(false)
 		enableChildren(TimerUI.transform, false);
 		GameIsPaused = false;
+
+		if(!musicPaused) {
+			timeMaster.music.Play();
+		}
 		Time.timeScale = timeMaster.globalTimescale;
 		
 	}

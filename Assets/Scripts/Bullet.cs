@@ -38,7 +38,6 @@ public class Bullet : MonoBehaviour {
 
 
 	public GameObject decayEffect;
-	public ParticleSystem bulletCore;
 	public ParticleSystem middle;
 
 	public ParticleSystem bulletWall;
@@ -51,6 +50,7 @@ public class Bullet : MonoBehaviour {
 	public float maxMapX;
 	public float maxMapY;
 	public bool slowzone;
+	int blinkCounter;
 
 	// Use this for initialization
 	void Start () {
@@ -85,8 +85,8 @@ public class Bullet : MonoBehaviour {
 			}
 		}
 
-		if (lifetime - decayDeathCounter <= 8) {
-			//blinking();
+		if (lifetime - decayDeathCounter <= 1.5f && decayed) {
+			blinking();
 		}
 
 
@@ -241,18 +241,58 @@ public class Bullet : MonoBehaviour {
 		}
 
 		if (coll.gameObject.layer == LayerMask.NameToLayer("SlowZone")) {
-			if (slowZoneAccel) {
-				spd *= 6f;
-			} 
-			//spd = defaultSpd;
+
+			spd *= 6f;
 			decayed = false;
-			pickupBox.enabled = false;
+			middle.Play();
 			trail.Play();
+			// if (slowZoneAccel) {
+			// 	spd *= 6f;
+			// } 
+			// //spd = defaultSpd;
+			// decayed = false;
+			// pickupBox.enabled = false;
+			// trail.Play();
 		}
 
 		slowzone = false;
 
 	}
+
+	void OnCollisionStay2D(Collision2D coll) {
+
+		if (coll.gameObject.tag == "Player") {
+
+			PlayerMovementController player = coll.gameObject.GetComponent<PlayerMovementController> ();
+//			Debug.Log(decayed);
+			if (!player.invuln) {
+	//			player.health -= dmg;
+				if (player.health == 1) {
+					SoundController.me.PlaySoundAtNormalPitch (lastHit, 1f);	
+				} else {
+					SoundController.me.PlaySoundAtNormalPitch (playerHit, 1f, transform.position.x);
+					//Debug.Log("???");
+				}
+				player.respawn();
+				GameMaster.me.addColorDrift();
+				GameObject flash = Instantiate (DamageFlash, transform.position, Quaternion.identity);
+				Camera.main.GetComponent<Screenshake>().SetScreenshake(0.35f, .25f, player);
+				Destroy (this.gameObject);
+				Destroy (flash, .020f); 
+
+			} else {
+				if (coll.contacts.Length > 0) {
+					vel = Geo.ReflectVect (prevVel.normalized, coll.contacts [0].normal) * (prevVel.magnitude * 0.65f);
+				}
+				
+			}
+
+		}
+
+
+	}
+
+
 
 	void OnCollisionEnter2D(Collision2D coll) {
 
@@ -374,27 +414,35 @@ public class Bullet : MonoBehaviour {
 	}
 
 	void blinking() {
+		blinkCounter ++;
+		
+		if (blinkCounter % 4/* (lifetime - decayDeathCounter <= .5f ? 4 : 2)*/ == 0) {
+			middle.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
+		} else if (blinkCounter % 2 == 0) {
+			middle.Play();
+		}
+// 		ParticleSystem.MinMaxGradient gradient = new Gradient();
+// 		GradientColorKey[] cK = new GradientColorKey[1];
+// 		GradientAlphaKey[] aK = new GradientAlphaKey[1];
 
-		ParticleSystem.MinMaxGradient gradient = new Gradient();
-		GradientColorKey[] cK = new GradientColorKey[1];
-		GradientAlphaKey[] aK = new GradientAlphaKey[1];
-
-		//Debug.Log(c1 + " " + c2);		
-		cK[0].color = Color.grey;
-//		cK[1].time = 1;
-		aK[0].alpha = Mathf.PingPong(Time.time, 1);
-		Debug.Log(Mathf.PingPong(Time.time, 1));
+// 		//Debug.Log(c1 + " " + c2);		
+// 		cK[0].color = Color.grey;
+// //		cK[1].time = 1;
+// 		aK[0].alpha = Mathf.PingPong(Time.time, 1);
+// 		Debug.Log(Mathf.PingPong(Time.time, 1));
 
 		
-		gradient.gradient.SetKeys(cK, aK);
+// 		gradient.gradient.SetKeys(cK, aK);
 		
-		var main = middle.main;
-		gradient.mode = ParticleSystemGradientMode.Gradient;
-		//main.startColor.mode = ParticleSystemGradientMode.Gradient;
+// 		var main = middle.main;
+// 		gradient.mode = ParticleSystemGradientMode.Gradient;
+// 		//main.startColor.mode = ParticleSystemGradientMode.Gradient;
 
-		main.startColor = gradient;  
+// 		main.startColor = gradient;  
+
+
 		
-	}
+ 	}
 
 	void playBounceSound() {
 

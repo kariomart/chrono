@@ -48,6 +48,7 @@ public class MainMenu : MonoBehaviour {
 		if ((p1.GetButtonDown("Start") || p2.GetButtonDown("Start") || Input.GetKeyDown(KeyCode.Space))&& !gameStarted){
 			gameStarted = true;
 			analogGlitchController.enabled = false;
+			//SceneManager.LoadSceneAsync(Random.Range(1, 6));
 			StartCoroutine(startGame());
 //			TV.SetActive(true);
 		}

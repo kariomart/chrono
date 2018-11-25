@@ -23,7 +23,7 @@ public class PinataSwitch : MonoBehaviour {
 	void OnTriggerEnter2D(Collider2D coll) {
 
 		if (coll.gameObject.tag == "bullet" || coll.gameObject.tag == "Player") {
-			Debug.Log("?");
+			//Debug.Log("?");
 			DropPinata();
 
 		} 
@@ -32,10 +32,12 @@ public class PinataSwitch : MonoBehaviour {
 
 	void DropPinata() {
 
-		Debug.Log("???");
+		//Debug.Log("???");
 		Destroy(platform);
 		Destroy(anchor);
-		pinataString.enabled = false;
+		if (pinataString) {
+			pinataString.enabled = false;
+		}
 		pinata.cut = true;
 		Destroy(this.gameObject);
 

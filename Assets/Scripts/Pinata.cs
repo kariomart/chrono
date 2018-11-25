@@ -57,6 +57,7 @@ public class Pinata : MonoBehaviour {
 				
 				GameObject tempBullet = Instantiate (bullet, new Vector2 (transform.position.x + Random.Range (-1, 1), transform.position.y + Random.Range (-1, 1)), Quaternion.identity);
 				Bullet bulletTemp = tempBullet.GetComponent<Bullet> ();
+				bulletTemp.lifetime += Random.Range(0, 10);
 
 				if (!releaseActiveBullets) {
 					bulletTemp.decayColor = new Color (Random.Range (0f, 1f), Random.Range (0f, 1f), Random.Range (0f, 1f));

@@ -93,7 +93,7 @@ public class CamGameOver : MonoBehaviour {
 		TextMeshPro wt = w.GetComponentInChildren<TextMeshPro>();
 		wt.text = playerWon.colorName + " wins";
 		wt.color = playerWon.playerColor;
-		yield return new WaitForSeconds(2f);
+		yield return new WaitForSeconds(1.5f);
 		CycleGame();
 
 
@@ -177,7 +177,7 @@ public class CamGameOver : MonoBehaviour {
 			Time.timeScale = 1f;
 			cam.transform.position = new Vector3(0, 2.42f, -10);
 			Destroy(letterboxObj);
-			cam.orthographicSize = startingZoom;
+			cam.orthographicSize = 5.5f;
 			GameMaster.me.enableMatchOver();
 			GameMaster.me.updateUI();
 			this.enabled = false;
