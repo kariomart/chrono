@@ -90,7 +90,7 @@ public class MainMenu : MonoBehaviour {
 	IEnumerator startGame() {
 
 		yield return new WaitForSeconds(2);
-		AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(Random.Range(1, 5));
+		AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(Random.Range(1, 6));
 
         // Wait until the asynchronous scene fully loads
         while (!asyncLoad.isDone)

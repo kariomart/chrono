@@ -27,7 +27,7 @@ public class GameMaster : MonoBehaviour {
 	public string winner;
 	public bool matchOver;
 	public int amtBullets;
-	public int amountOfLevels;
+	int amountOfLevels;
 	public bool roundOver;
 
 	public TextMesh redScore;
@@ -583,6 +583,10 @@ public class GameMaster : MonoBehaviour {
 
 		main.startColor = gradient;  
 
+	}
+
+	public int getAmountOfLevels() {
+		return amountOfLevels;
 	}
 
 

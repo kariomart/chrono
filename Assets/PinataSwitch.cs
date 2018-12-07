@@ -33,8 +33,8 @@ public class PinataSwitch : MonoBehaviour {
 	void DropPinata() {
 
 		//Debug.Log("???");
-		Destroy(platform);
-		Destroy(anchor);
+		//Destroy(platform);
+		//Destroy(anchor);
 		if (pinataString) {
 			pinataString.enabled = false;
 		}
