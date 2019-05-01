@@ -102,6 +102,7 @@ public class GameMaster : MonoBehaviour {
 
 		//bestOf = 100;
 		//roundsNeeded = (bestOf + 1) / 2;
+		Cursor.visible = false;
 
 	}
 
