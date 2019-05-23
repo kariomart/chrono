@@ -89,7 +89,7 @@ public class CamGameOver : MonoBehaviour {
 		SoundController.me.PlaySound (slam, 1f);
 		this.gameObject.GetComponent<Screenshake> ().SetScreenshake (1.5f, 0.8f);
 		GameMaster.me.hideUI();
-		GameObject w = Instantiate (winnerText.gameObject, (p.transform.position - (Vector3.forward * 6) - (Vector3.up * 1.35f)) , Quaternion.identity);
+		GameObject w = Instantiate (winnerText.gameObject, (p.transform.position - (Vector3.forward * 6) - (Vector3.up * .5f)) , Quaternion.identity);
 		TextMeshPro wt = w.GetComponentInChildren<TextMeshPro>();
 		wt.text = playerWon.colorName + " wins";
 		wt.color = playerWon.playerColor;

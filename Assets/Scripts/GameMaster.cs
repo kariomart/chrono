@@ -82,6 +82,7 @@ public class GameMaster : MonoBehaviour {
 	Resolution[] resolutions;
 	int resolutionIndex;
 	bool musicPaused;
+	public GameObject pauseMenu;
 
 
 
@@ -143,7 +144,10 @@ public class GameMaster : MonoBehaviour {
 		}
 
 		if ((controller1.GetButtonDown("Select") || controller2.GetButtonDown("Select")) && GameIsPaused) {
+			Destroy(GameMaster.me.managers);
+			//Destroy(managers.transform.GetChild(7));
 			UnityEngine.SceneManagement.SceneManager.LoadScene ("_FINAL_MENU");
+		
 			timeMaster.music.Stop();
 			Time.timeScale = 1f;
 		}
@@ -193,7 +197,8 @@ public class GameMaster : MonoBehaviour {
 
 		redScoreCircles = GameObject.Find("redCircles").GetComponentsInChildren<SpriteRenderer>();
 		blueScoreCircles = GameObject.Find("blueCircles").GetComponentsInChildren<SpriteRenderer>();
-		PauseMenu = GameObject.Find("PauseMenu");
+		//PauseMenu = GameObject.Find("PauseMenu");
+		pauseMenu = GameObject.Find("PauseMenu");
 
 		TimerUI = GameObject.Find("Timer");
 		TimerNum = TimerUI.GetComponentInChildren<TextMeshProUGUI>(true);
@@ -298,7 +303,7 @@ public class GameMaster : MonoBehaviour {
 		GameIsPaused = true;
         int count = seconds;
        // Debug.Log("A " + count);
-		enableChildren(PauseMenu.transform, false);
+		enableChildren(pauseMenu.transform, false);
 		enableChildren(TimerUI.transform, true);
 		AudioSource a = TimerUI.GetComponent<AudioSource>();
 
@@ -331,8 +336,9 @@ public class GameMaster : MonoBehaviour {
 		Time.timeScale = 0f;
 		GameIsPaused = true;
 		timeMaster.music.Pause();
-		enableChildren(PauseMenu.transform, true);
-
+		//enableChildren(PauseMenu.transform, true);
+		enableChildren(pauseMenu.transform, true);
+		//pauseMenu.transform.GetChild(0).transform.GetChild(1).GetComponent<Button>().Select();
 	}
 
 	public void toggleMusic() {
@@ -383,7 +389,7 @@ public class GameMaster : MonoBehaviour {
 
 	public void enableMatchOver() {
 
-		GameObject g = Instantiate(GameOverOverlay, new Vector3(-3.5f, 1.27f, 0), Quaternion.identity);
+		GameObject g = Instantiate(GameOverOverlay, new Vector3(-2.95f, 2.32f, 0), Quaternion.identity);
 		g.GetComponentInChildren<TextMeshPro>().text = "the winner is " + winner + " " +  redSets + ":" + blueSets;
 
 	}

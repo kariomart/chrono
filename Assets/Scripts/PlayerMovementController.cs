@@ -125,7 +125,6 @@ public class PlayerMovementController : MonoBehaviour {
         defSprScale = sprite.localScale;
 		defaultScale = pivot.transform.localScale;
 		ammoText = GetComponentInChildren<TextMesh>();
-		updateUI();
 		camera = Camera.main.gameObject;
 		reticleScale = reticle.GetComponent<Animation>();
 //		Debug.Log(InputManager.Devices);
@@ -161,6 +160,7 @@ public class PlayerMovementController : MonoBehaviour {
 		bulletCooldown = tuning.bulletCooldown;
 		invulnMaxFrames = tuning.invulnMaxFrames;
 		health = tuning.health;
+		GameMaster.me.updateUI();
 
 	}
 	

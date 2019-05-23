@@ -52,10 +52,10 @@ public class TimeManager : MonoBehaviour {
 
 //		Debug.Log(scene.name);
 		if (scene.name == "_FINAL_menu") {
-			if (GameMaster.me.managers.transform.childCount == 8) {
-				GameMaster.me.managers.transform.GetChild(7).transform.parent = null;
-			}
-			Destroy(GameMaster.me.managers);
+			//if (GameMaster.me.managers.transform.childCount == 8) {
+				//GameMaster.me.managers.transform.GetChild(7).transform.parent = null;
+			//}
+			//Destroy(GameMaster.me.managers);
 
 		} else {
 			BulletManager.me.spawnList.Clear();
