@@ -28,6 +28,7 @@ public class TimeManager : MonoBehaviour {
 
 	public ScanlinesEffect scanlines;
 
+	bool slowing;
 
 
 
@@ -46,6 +47,10 @@ public class TimeManager : MonoBehaviour {
 		SceneManager.sceneLoaded += LevelLoaded;
 		LevelLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
 //		Debug.Log(GameMaster.me);
+	}
+
+	void OnDestroy(){
+		SceneManager.sceneLoaded -= LevelLoaded;
 	}
 
 	void LevelLoaded(Scene scene, LoadSceneMode bop){
@@ -68,6 +73,7 @@ public class TimeManager : MonoBehaviour {
 			globalTimescale = 1f;
 
 			GameMaster.me.StartCoroutine(GameMaster.me.Countdown(3));
+			Debug.Log("TIMER");
 //			Debug.Log(music);
 
 			if (!musicMix) {
@@ -90,7 +96,7 @@ public class TimeManager : MonoBehaviour {
 
 		if (player1 && player2 && !GameMaster.me.GameIsPaused) {
 
-			if (!player1.slow && !player2.slow) {
+			if (!player1.slow && !player2.slow && !slowing) {
 				NormalTime ();
 			}
 
@@ -161,9 +167,9 @@ public class TimeManager : MonoBehaviour {
 
 	void SpeedTime() {
 
-//		Time.timeScale = 2f;
-//		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
-//		music.pitch = 1.25f;
+		Time.timeScale = 1.5f;
+		Time.fixedDeltaTime = Time.timeScale * 1/60f; 
+		music.pitch = 1.25f;
 
 	}
 
@@ -179,6 +185,38 @@ public class TimeManager : MonoBehaviour {
 		scanlines.displacementSpeed = 0.525f;
 
 	}
+
+    public void TimeLord(bool slowLast, float time)
+    {
+		StopAllCoroutines();
+        if (slowLast)
+        {
+			StartCoroutine(SpeedTimeForDuration(time));
+        } else
+        {
+			StartCoroutine(SlowTimeForDuration(time));
+		}
+    }
+
+    public IEnumerator SlowTimeForDuration(float time)
+    {
+		SlowTime();
+		slowing = true;
+		yield return new WaitForSecondsRealtime(time);
+		NormalTime();
+		slowing = false;
+    }
+
+	public IEnumerator SpeedTimeForDuration(float time)
+	{
+		SpeedTime();
+		slowing = true;
+		yield return new WaitForSecondsRealtime(time);
+		NormalTime();
+		slowing = false;
+	}
+
+
 
 
 }

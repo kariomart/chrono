@@ -12,6 +12,7 @@ public class MenuManager : MonoBehaviour
 {
 
     private Player player;
+    private Player player2;
 
     public GameObject selection;
     public Button startButton;
@@ -44,12 +45,15 @@ public class MenuManager : MonoBehaviour
         analogGlitch = Camera.main.GetComponent<AnalogGlitch>();
         startButton.Select();
         player = ReInput.players.GetPlayer(0);
+        player2 = ReInput.players.GetPlayer(1);
+
+        //Cursor.visible = false;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (player.GetButtonDown("UICancel")) {
+        if (player.GetButtonDown("UICancel") || player2.GetButtonDown("UICancel")) {
             if (settingsOpen) {
                 settingsDisabled();
             }
@@ -74,7 +78,7 @@ public class MenuManager : MonoBehaviour
     public void startPressed() {
 
         Debug.Log("settings enabled");
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(Random.Range(1, 6));
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(Random.Range(1, 8));
 
     }
 
@@ -142,6 +146,10 @@ public class MenuManager : MonoBehaviour
             analogGlitch.colorDrift-=.1f;
             yield return new WaitForSeconds(.08f);   
         }
+    }
+    public void quitGame() {
+
+        Application.Quit();
     }
 
     public void selectionChangeSound() {

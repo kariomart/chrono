@@ -191,28 +191,35 @@ public class Bullet : MonoBehaviour {
 			} else {
 				spd *= .2f;	
 			}
-			decayed = false;
+			decayed = true;
 			trail.Play();
 		}
 
+		if (coll.gameObject.tag == "Juicer")
+		{
+			Debug.Log("Juiced");
+			spd *= Random.Range(3f, 5f);
 
-			// if (!coll.GetComponent<SlowZone>().slow) {
-
-			// 	spd *= 2f;
-			// 	//Debug.Log("Slowzone");
-
-			// } else {
-
-			// 	spd *= .2f;
-			// }
+		}
 
 
-			//Debug.Log (rb.velocity);
-			//Debug.Log ("trying to special case velocity");
-			//vel *= Random.Range (-.1f, -.2f);
+		// if (!coll.GetComponent<SlowZone>().slow) {
+
+		// 	spd *= 2f;
+		// 	//Debug.Log("Slowzone");
+
+		// } else {
+
+		// 	spd *= .2f;
+		// }
 
 
-		
+		//Debug.Log (rb.velocity);
+		//Debug.Log ("trying to special case velocity");
+		//vel *= Random.Range (-.1f, -.2f);
+
+
+
 	}
 
 	void OnTriggerStay2D(Collider2D coll) {
@@ -302,8 +309,8 @@ public class Bullet : MonoBehaviour {
 
 			PlayerMovementController player = coll.gameObject.GetComponent<PlayerMovementController> ();
 //			Debug.Log(decayed);
-			if (player.amountOfBullets < 9) {
-				SoundController.me.PlaySound (tick, 1f, 1, transform.position.x);
+			if (player.amountOfBullets < 10) {
+				SoundController.me.PlaySound (tick, .6f, 1, transform.position.x);
 				player.amountOfBullets ++;
 				player.updateUI();
 				Destroy (this.gameObject);

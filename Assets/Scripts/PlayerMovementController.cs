@@ -108,6 +108,7 @@ public class PlayerMovementController : MonoBehaviour {
 	public GameObject shootParticle;
 	public GameObject muzzleFlash;
 	public ParticleSystem jumpParticle;
+	public ParticleSystem wallParticle;
 	public ParticleSystem landParticle;
 	public ParticleSystem moveParticle;
 
@@ -121,11 +122,11 @@ public class PlayerMovementController : MonoBehaviour {
 		rb = GetComponent<Rigidbody2D>();
         box = GetComponent<BoxCollider2D>();
 		almostDeadCircle = GetComponentInChildren<CircleCollider2D>();
-		screenshake = Camera.main.GetComponent<Screenshake>();
+		camera = Camera.main.gameObject;
+		screenshake = camera.GetComponent<Screenshake>();
         defSprScale = sprite.localScale;
 		defaultScale = pivot.transform.localScale;
 		ammoText = GetComponentInChildren<TextMesh>();
-		camera = Camera.main.gameObject;
 		reticleScale = reticle.GetComponent<Animation>();
 //		Debug.Log(InputManager.Devices);
 		//player1 = InputManager.Devices[playerId];
@@ -222,7 +223,16 @@ public class PlayerMovementController : MonoBehaviour {
 			jumpTimer = 5;
 
 			if (grounded) {
-				GameMaster.me.SpawnParticle(jumpParticle, (Vector2)transform.position + (Vector2.down * .1f), playerColor);
+				wallCast();
+				if (!onWall)
+				{
+					GameMaster.me.SpawnParticle(jumpParticle, (Vector2)transform.position + (Vector2.down * .1f), playerColor);
+				}
+				else if (onWall)
+				{
+					Debug.Log("walled");        
+					GameMaster.me.SpawnParticle(wallParticle, (Vector2)transform.position + (Vector2.down * .1f), playerColor);
+				}
 			}
 			//Instantiate(jumpEffect)
 		}
@@ -234,7 +244,7 @@ public class PlayerMovementController : MonoBehaviour {
 		if (player.GetButtonDown("Shoot") && canShoot()) {
 			shootBullet();
 		} else if (player.GetButtonDown("Shoot") && !canShoot()) {
-			SoundController.me.PlaySoundAtPitch(cantShootSound, 1f, 0.25f);
+			SoundController.me.PlaySoundAtPitch(cantShootSound, .6f, 0.25f);
 		}
 
 		if (player.GetButton("SlowTime") && (canSlowTime() || (slow && mana > 0))) {
@@ -365,6 +375,7 @@ public class PlayerMovementController : MonoBehaviour {
 				//vel.y = jumpSpd;
 				vel.x = onWallLeft ? 15f : -15f;//new Vector2((-wallDir.x * 10) + dir.x, jumpSpd);
 				vel.y = jumpSpd;
+				GameMaster.me.SpawnParticle(wallParticle, (Vector2)transform.position + (Vector2.down * .1f), playerColor);
 				onWall = false;
 			}
 
@@ -588,10 +599,18 @@ public class PlayerMovementController : MonoBehaviour {
 				vel += pt.normal * Vector2.Dot(-pt.normal, vel);
 
 				if (!prevGrounded) {
-					GameMaster.me.SpawnParticle(landParticle, coll.contacts[0].point, playerColor, coll.gameObject.GetComponent<SpriteRenderer>().color);
+					wallCast();
+					if (!onWall)
+					{
+						GameMaster.me.SpawnParticle(landParticle, coll.contacts[0].point, playerColor, coll.gameObject.GetComponent<SpriteRenderer>().color);
+					} else
+                    {
+						GameMaster.me.SpawnParticle(wallParticle, (Vector2)transform.position + (Vector2.down * .8f), playerColor);
+					}
 				}
 			}
 			if (coll.gameObject.tag == "Player") {
+				//otherPlayer.vel = this.vel;
 				vel.y = jumpSpd;
 				//Debug.Log(amountOfBullets < otherPlayer.amountOfBullets);
 				//Debug.Log(amountOfBullets + " " + otherPlayer.amountOfBullets);
@@ -603,6 +622,7 @@ public class PlayerMovementController : MonoBehaviour {
 					GameMaster.me.bulletRecentlyStolenTimer = 0;
 				}
 			}
+
 			if (coll.gameObject.tag == "Bullet") {
 				Bullet bull = coll.gameObject.GetComponent<Bullet> ();
 				updateUI();
@@ -624,5 +644,17 @@ public class PlayerMovementController : MonoBehaviour {
 
 	}
 
+	void OnTriggerEnter2D(Collider2D coll)
+	{
 
-}
+		//if (coll.gameObject.tag == "Juicer")
+		//{
+
+		//	vel.x = Mathf.Sign(vel.x) * -10f;
+		//	vel.y = jumpSpd;
+
+		//}
+
+	}
+
+	}

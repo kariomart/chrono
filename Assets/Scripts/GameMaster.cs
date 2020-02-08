@@ -133,10 +133,10 @@ public class GameMaster : MonoBehaviour {
 		}
 
 		if (matchOver && (controller1.GetButtonDown("Start") || controller2.GetButtonDown("Start"))) {
-			int rand  = Random.Range(1, 6);
+			int rand  = Random.Range(1, 8);
 
 			while (rand == UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex) {
-				rand = Random.Range(1, 6);
+				rand = Random.Range(1, 8);
 			}
 
 			UnityEngine.SceneManagement.SceneManager.LoadScene (rand);
@@ -306,6 +306,7 @@ public class GameMaster : MonoBehaviour {
 		enableChildren(pauseMenu.transform, false);
 		enableChildren(TimerUI.transform, true);
 		AudioSource a = TimerUI.GetComponent<AudioSource>();
+		a.volume = 0.55f;
 
         for(count = seconds; count > 0; count --) {
            

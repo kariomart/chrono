@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Audio;
 using TMPro;
 
 public class SetResolutions : MonoBehaviour {
@@ -16,6 +17,7 @@ public class SetResolutions : MonoBehaviour {
 	public TextMeshProUGUI musicVal;
 	AudioSource menuMusic;
 	float sfxVol;
+	public AudioMixer sfxMixer;
 	public TextMeshProUGUI sfxVal;
 
 	public GameObject managerPrefab;
@@ -130,7 +132,8 @@ public class SetResolutions : MonoBehaviour {
 
 	void setSFXVolume() {
 		sfxVal.text = "" + sfxVol + "%";
-		//managerPrefab.transform.GetChild(3).GetComponent<AudioSource>().volume = musicVol/100;
+		//AudioMixer sfx = SoundController.me.audSource.GetComponent<AudioSource>().outputAudioMixerGroup.audioMixer;
+		sfxMixer.SetFloat("volume", Mathf.Lerp(-10, 0, sfxVol / 100));
 	}
 
 	public void changeHealthVal() {
