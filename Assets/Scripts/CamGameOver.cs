@@ -94,7 +94,8 @@ public class CamGameOver : MonoBehaviour {
 		wt.text = playerWon.colorName + " wins";
 		wt.color = playerWon.playerColor;
 		yield return new WaitForSeconds(1.5f);
-		CycleGame();
+		FastGameCycle();
+		//CycleGame();
 
 
 
@@ -161,7 +162,11 @@ public class CamGameOver : MonoBehaviour {
 		
  	}
 
-	 void CycleGame() {
+	void FastGameCycle() {
+		GameMaster.me.matchOver = true;
+	}
+
+	void CycleGame() {
 
 
 		bool redWon = GameMaster.me.redSets >= GameMaster.me.setsNeeded;

@@ -68,10 +68,10 @@ public class MenuManager : MonoBehaviour
 
         }
 
-        if (Input.GetKeyDown(KeyCode.S)) {
-            Debug.Log("screenshot taken");
-            ScreenCapture.CaptureScreenshot("chrono_screenshot.png1", 8);
-        }
+        // if (Input.GetKeyDown(KeyCode.S)) {
+        //     Debug.Log("screenshot taken");
+        //     ScreenCapture.CaptureScreenshot("chrono_screenshot.png1", 8);
+        // }
         
     }
 

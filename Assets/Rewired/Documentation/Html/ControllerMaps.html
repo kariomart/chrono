@@ -80,9 +80,11 @@
               <li><a href="InputBehaviors.html">Input Behaviors</a></li>
               <li><a href="Controllers.html">Controllers</a></li>
               <li><a href="ControllerMaps.html">Controller Maps</a></li>
+              <li><a href="ControllerTemplates.html">Controller Templates</a></li>
               <li><a href="MapCategories.html">Map Categories</a></li>
               <li><a href="Layouts.html">Layouts</a></li>
-              <li><a href="ControllerTemplates.html">Controller Templates</a></li>
+              <li><a href="LayoutManager.html">Layout Manager</a></li>
+              <li><a href="MapEnabler.html">Map Enabler</a></li>
               <li><a href="CustomControllers.html">Custom Controllers</a></li>
             </ul>
             <strong>Extras:</strong>
@@ -141,13 +143,15 @@
             </h1>
             
 			<!-- InstanceBeginEditable name="MainBody" -->
-    <p>One of the most unique and powerful features of Rewired is the Controller Map system. A Controller Map is a map of controller elements to Actions.</p>
-    <p>All maps are owned by a <a href="Players.html">Player</a>, so changes you make to one Player's maps don't affect the others even if it's assigned to the same controller.</p>
-    <p>You can create pre-defined controller maps for known controller types and controller templates and load the maps at runtime. Pre-defined maps for controllers are created in the <a href="RewiredEditor.html">Rewired Editor.</a> For more information about how to create maps, see <a href="#creating-and-editing-controller-maps">Creating and Editing Controller Maps</a>.</p>
-    <p>If you create a user control assignment screen, the user can customize his controller maps for any joystick or controller. (See <a href="HowTos.html#controller-mapping-screen">Creating a controller mapping screen</a> for information.)</p>
+    <p>One of the most unique and powerful features of Rewired is the Controller Map system. </p>
+    <p>A Controller Map is a  map  of bindings between Controller elements and <a href="Actions.html">Actions</a> for a single Controller.</p>
+    <p> Controller Maps are owned by the <a href="Players.html">Player</a>, not the Controller, so changes you make to one Player's maps don't affect the other Players' even if they're using the same Controller.  Each Controller assigned to a Player must have its own Controller Maps with bindings defined for Action-based input to function.</p>
+    <p>You can create pre-defined Controller Map configurations for known controller types and controller templates and load the maps at runtime or when a compatible Joystick is assigned. Pre-defined maps for controllers are created in the <a href="RewiredEditor.html">Rewired Editor.</a> For more information about how to create maps, see <a href="#creating-and-editing-controller-maps">Creating and Editing Controller Maps</a>.</p>
+    <p>If you create a user control assignment screen, the user can customize his Controller Maps for any joystick or controller. (See <a href="HowTos.html#controller-mapping-screen">Creating a Controller Mapping screen</a> for information.)</p>
     <p>Maps co-exist so you can have as many maps for each controller as you need. For example: If you have multiple game modes such as Infantry, Tank, Airplane, you can have shared controls on one map, and mode-specific controls each on its own map. You can have even more maps as needed: A Menu map for when you're in the menus, a system map for controls like Save/Load and Quit, multiple maps for different players on the keyboard, etc. All the maps can co-exist simultaneously and can be <a href="HowTos.html#enabling-disabling-controller-maps">enabled or disabled as needed</a>, for example, when changing game modes.</p>
-<p>A shared controller (the keyboard for example) can be mapped by any number of players with any number of maps.</p>
-    <p>Maps can be saved to XML or JSON. (See <a href="HowTos.html#saving-loading-controller-maps">Saving and loading controller maps</a> for more information.)</p>
+<p>A shared controller (the keyboard for example) can be mapped by any number of Players with any number of maps.</p>
+<p>Maps can be saved to XML or JSON. (See <a href="HowTos.html#saving-loading-controller-maps">Saving and loading Controller Maps</a> for more information.)</p>
+<p>Each Controller Map belongs to one <a href="MapCategories.html">Map Category</a> and one <a href="Layouts.html">Layout</a>. The combination of the two serves to identify the Controller Map when selecting a Controller Map in the Rewired Editor or from the API.</p>
 <p><strong><a name="creating-and-editing-controller-maps" id="creating-and-editing-controller-maps"></a>Creating and Editing Controller Maps:</strong></p>
 <p>Controller Maps are created and edited in the <a href="RewiredEditor.html">Rewired Editor</a>.</p>
     <p><a href="RewiredEditor.html#JoystickMaps">Rewired Editor - Joystick Maps</a><br />
@@ -155,10 +159,10 @@
     <a href="RewiredEditor.html#MouseMaps">Rewired Editor - Mouse Maps</a><br />
     <a href="RewiredEditor.html#CustomControllerMaps">Rewired Editor - Custom Controller Maps</a></p>
     <p><strong><a name="assigning-loading" id="creating-and-editing-controller-maps2"></a>Assigning/Loading Controller Maps:</strong></p>
-    <p>When you create a Controller Map (Joystick Map, Keyboard Map, etc.) in the Rewired   Input Manager, you are defining a default Map that can be used by any Player. In   order for a Player to make use of a Controller Map, it must first be assigned to that   Player and enabled. You can assign the Controller Map in the <a href="RewiredEditor.html#Players">Rewired Input   Manager under the Players page</a>, and when the game starts and Rewired initializes, it will load the   map into the Player. You can also assign/load Controller Maps at runtime through scripting. <a href="HowTos.html#loading-controller-maps-runtime">See How To's - Loading controller maps at runtime</a> for more information.</p>
+    <p>When you create a Controller Map (Joystick Map, Keyboard Map, etc.) in the Rewired   Input Manager, you are defining a default Map that can be used by any Player. In   order for a Player to make use of a Controller Map, it must first be assigned to that   Player and enabled. You can assign the Controller Map in the <a href="RewiredEditor.html#Players">Rewired Input   Manager under the Players page</a>, and when the game starts and Rewired initializes, it will load the   map into the Player. You can also assign/load Controller Maps at runtime through scripting. <a href="HowTos.html#loading-controller-maps-runtime">See How To's - Loading Controller Maps at runtime</a> for more information.</p>
 <div>
   <p><strong><a name="enabling-disabling" id="creating-and-editing-controller-maps3"></a>Enabling and Disabling Controller Maps:</strong></p>
-  <p>Controller Maps can be enabled or disabled at will via scripting. This can be useful if you want to change game modes and have a different set of controls become active. For example, opening a menu screen. Disabled controller maps will not return any value when the Player is queried for an Action's input value. Controller Maps are stored in the <a href="http://guavaman.com/projects/rewired/docs/api-reference/?topic=html/T_Rewired_Player.htm">Player</a> class.</p>
+  <p>Controller Maps can be enabled or disabled at will via scripting. This can be useful if you want to change game modes and have a different set of controls become active. For example, opening a menu screen. Disabled Controller Maps will not return any value when the Player is queried for an Action's input value. Controller Maps are stored in the <a href="http://guavaman.com/projects/rewired/docs/api-reference/?topic=html/T_Rewired_Player.htm">Player</a> class.</p>
   <p>For a Controller Map to be processed and contribute to input, it must be enabled. The starting enabled state of the map can be set in the <a href="RewiredEditor.html#Players">Rewired Input   Manager on the Players page</a> where you have assigned the Controller Maps to be   loaded at start. To enable or disable a Controller Map at runtime via scripting,   see <a href="HowTos.html#enabling-disabling-controller-maps">How To’s – Enabling and Disabling Controller Maps</a>.</p>
   <p>Individual Action Element Maps (Action bindings) in each Controller Map <a href="HowTos.html#enabling-disabling-action-element-maps">can also be enabled and disabled</a> via scripting.</p>
 </div>
@@ -177,7 +181,7 @@
     <p>Mouse input returned by a Player is determined by the axes and buttons bound to Actions in one or more Mouse Maps assigned to a Player. When a button or axis is activated that is bound to an Action, the Player will return a value for that Action.  You create these maps in the Rewired Input Manager and assign them to each Player and they will be loaded at start. You can also enable, disable, remove, add,  load, and save Mouse Maps at runtime. </p>
     <p>The mouse is similar to a Joystick in that it must be assigned to a Player before you can receive input from it. (This can be set in the Rewired Input Manager or through the <a href="http://guavaman.com/projects/rewired/docs/api-reference/html/P_Rewired_Player_ControllerHelper_hasMouse.htm">player.controllers.hasMouse</a> property.) </p>
     <p><strong><a name="controller-templates" id="controller-templates"></a>Controller Templates:</strong></p>
-    <p>A <a href="ControllerTemplates.html">Controller Template</a> represents a generalized controller layout that applies to all compatible controllers providing a common interface to work with these controllers. When you create a map for a Controller Template, any controller that implements the template will inherit that map automatically without the need for you to create a map specifically for that controller. For example, Rewired comes with a Gamepad Template. When you create a map for this Gamepad Template, you do not need to create individual maps specifically for any of the gamepads <a href="SupportedControllers.html">listed on this page</a> because they are all covered by the Gamepad Template. This makes is much quicker to create pre-defined controller maps for a huge variety of controllers. Additionally, as more controllers are added to the Template in the future, the map you've already created will work with these new controllers as well.</p>
+    <p>A <a href="ControllerTemplates.html">Controller Template</a> represents a generalized controller layout that applies to all compatible controllers providing a common interface to work with these controllers. When you create a map for a Controller Template, any controller that implements the template will inherit that map automatically without the need for you to create a map specifically for that controller. For example, Rewired comes with a Gamepad Template. When you create a map for this Gamepad Template, you do not need to create individual maps specifically for any of the gamepads <a href="SupportedControllers.html">listed on this page</a> because they are all covered by the Gamepad Template. This makes is much quicker to create pre-defined Controller Maps for a huge variety of controllers. Additionally, as more controllers are added to the Template in the future, the map you've already created will work with these new controllers as well.</p>
     <p>Please see <a href="ControllerTemplates.html">Controller Templates</a> for detailed information.</p>
 <p><strong><a name="controllers-without-templates" id="controllers-without-templates"></a>Controllers without Templates:</strong></p>
 <p>For the other controllers that do not currently have Controller Templates,  you have to create a map for each you want supported out of the box (meaning you don't want the user to manually have to map them before playing). If you don't create a map and you want the user to be able to use that controller, you'll have to make a remapping screen where the user can map his controls manually (see <a href="HowTos.html#controller-mapping-screen">Creating a Controller Mapping Screen</a> for more information).</p>
@@ -219,7 +223,7 @@
     <p><strong><a name="xinput-devices-windows" id="xinput-devices-windows"></a>Special Considerations for XInput gamepads on Windows Standalone, Windows App Store, and Windows 10 Universal</strong>:</p>
 <p>On Windows Standalone builds and in the Windows Unity Editor, when Use XInput is enabled, and always on Windows App Store and Windows 10 Universal builds, Rewired uses XInput for all XInput-compatible controllers instead of the chosen primary input source. This has some implications on creating Joystick Maps:</p>
     <p>When using XInput, Rewired has no way of determining the actual controller type because this information is not available through XInput. The only information Rewired has to identify the controller is that it is XInput-compatible. Therefore, all XInput devices are treated as &quot;XBox 360 Controller&quot;. This means, with Use XInput enabled, if you plug in a XBox One Controller, Rewired cannot identify that it's an XBox One Controller and load the Joystick Maps you created specifically for the XBox One Controller. Instead, it identifies it simply as an &quot;XInput Gamepad&quot; and loads the Joystick Maps from the XBox 360 Controller maps you've created. This is an inherent limitation in XInput.</p>
-    <p>But because Rewired has the Gamepad Template that is compatible with these controllers, it's easiest to just create a Dual Analog Gamepad Joystick Map instead and it will work for any XInput device when Use XInput is enabled. This way, you don't have to worry about making separate maps for XBox 360 Controller, XBox One Controller, etc. and everything will just work. This also works cross-platform.</p>
+    <p>But because Rewired has the Gamepad Template that is compatible with these controllers, it's easiest to just create a Gamepad Template Joystick Map instead and it will work for any XInput device when Use XInput is enabled. This way, you don't have to worry about making separate maps for XBox 360 Controller, XBox One Controller, etc. and everything will just work. This also works cross-platform.</p>
 <p><strong><a name="mfi-gamepads" id="mfi-gamepads"></a>Special Considerations for MFI gamepads on iOS, tvOS, and OSX</strong>:</p>
     <p>Rewired supports many MFI gamepads on iOS, tvOS, and OSX. However, these platforms identify controllers differently so it affects which Joystick Maps are loaded.</p>
     <p>iOS/tvOS - All MFI-compatible gamepads are recognized simply as &quot;iOS MFI Gamepad&quot; and will load the &quot;iOS MFI Gamepad&quot; Joystick Maps you've created (if any). All MFI gamepads are supported. Joystick Maps created for specific controllers such as SteelSeries Nimbus will not be loaded and do not apply to iOS/tvOS.</p>
@@ -240,7 +244,7 @@
     <p style="text-align: center"><img src="files/images/input-mapping-diagram-1.png" alt="Input Mapping Diagram" /></p>
     <hr />
     <p>&nbsp;</p>
-    <p>The two diagrams below show how input from a source controller element is processed by the Controller Maps in Player, returning a result to the calling script. Note that some controller maps are disabled, while others are enabled (disabled maps are greyed out). When a Controller Map is disabled, input is not passed through.</p>
+    <p>The two diagrams below show how input from a source controller element is processed by the Controller Maps in Player, returning a result to the calling script. Note that some Controller Maps are disabled, while others are enabled (disabled maps are greyed out). When a Controller Map is disabled, input is not passed through.</p>
 <p>&nbsp;</p>
     <p><img src="files/images/input-mapping-diagram-2.png" /></p>
     <p>&nbsp;</p>
@@ -267,14 +271,14 @@
     <a href="http://guavaman.com/projects/rewired/docs/api-reference/html/T_Rewired_CustomControllerMap.htm">API Reference - Custom Controller Map    </a></p>
     <div class="bottom-pager clearfix">
 	    <a class="back-button" href="Controllers.html" title="Input Behaviors"><span class="button-img"></span>Controllers</a>
-    	<a class="forward-button" href="MapCategories.html" title="Map Categories"><span class="button-img"></span>Map Categories</a>
+    	<a class="forward-button" href="ControllerTemplates.html" title="Map Categories"><span class="button-img"></span>Controller Templates</a>
 	</div>
 <!-- InstanceEndEditable -->
         </div>
         
     </div>
   <div class="footer clearfix">
-   	<p class="left">Copyright &copy;2014-2016 <a href="http://guavaman.com" title="Guavaman Enterprises">Guavaman Enterprises</a>. All rights reserved. No materials may be reproduced without permission.</p>
+   	<p class="left">Copyright &copy;2014-2021 <a href="http://guavaman.com" title="Guavaman Enterprises">Guavaman Enterprises</a>. All rights reserved. No materials may be reproduced without permission.</p>
   	<p class="right"><a href="http://guavaman.com/projects/rewired" title="Return to Rewired Website">Return to Rewired Website</a></p>
   </div>
   <!-- end .content --></div>

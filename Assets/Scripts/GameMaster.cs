@@ -18,7 +18,6 @@ public class GameMaster : MonoBehaviour {
 	public AudioClip countdownSFX;
 	public AudioClip countdownStartSFX;
 	public int bestOf;
-	public int roundsNeeded;
 	public int setsNeeded;
 	public int redWins;
 	public int blueWins;
@@ -29,6 +28,9 @@ public class GameMaster : MonoBehaviour {
 	public int amtBullets;
 	int amountOfLevels;
 	public bool roundOver;
+	public float afkTimer;
+	public float timeoutTime;
+	public bool countingDown;
 
 	public TextMesh redScore;
 	public TextMesh blueScore;
@@ -74,7 +76,7 @@ public class GameMaster : MonoBehaviour {
 	public Player controller2;
 
 	public bool GameIsPaused;
-	public bool countingDown;
+	public bool timingOut;
 
 	public int bulletRecentlyStolenTimer;
 
@@ -88,6 +90,7 @@ public class GameMaster : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
+
 
 //		DontDestroyOnLoad (this.gameObject);
 
@@ -103,14 +106,13 @@ public class GameMaster : MonoBehaviour {
 
 		//bestOf = 100;
 		//roundsNeeded = (bestOf + 1) / 2;
-		Cursor.visible = false;
+		Cursor.visible = false;	
 
 	}
 
 	public void initializeLevel(){ 
 
-		roundsNeeded = 7;
-		setsNeeded = 2;
+		setsNeeded = 1;
 		retroFX_default = Camera.main.GetComponent<PostProcessingBehaviour>().profile;
 		glitchFX = Camera.main.GetComponent<AnalogGlitch>();
 		setFXDefaults();
@@ -122,6 +124,22 @@ public class GameMaster : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+		if (!Input.anyKey) {
+			afkTimer+=Time.deltaTime;
+		} else {
+			afkTimer = 0;
+			if (timingOut) {
+				timingOut = false;
+			}
+		}
+
+		if (afkTimer>timeoutTime && !timingOut) {
+			timingOut = true;
+			StartCoroutine(Timeout(5));
+		}
+
+
+
 		if (Input.GetKeyDown (KeyCode.Escape)) {
 
 			UnityEngine.SceneManagement.SceneManager.LoadScene ("_FINAL_MENU");
@@ -132,15 +150,11 @@ public class GameMaster : MonoBehaviour {
 //			}
 		}
 
-		if (matchOver && (controller1.GetButtonDown("Start") || controller2.GetButtonDown("Start"))) {
-			int rand  = Random.Range(1, 8);
-
-			while (rand == UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex) {
-				rand = Random.Range(1, 8);
-			}
-
-			UnityEngine.SceneManagement.SceneManager.LoadScene (rand);
-			//Debug.Log(rand + " " + UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+		if (matchOver && (Input.anyKey)) {
+			Destroy(GameMaster.me.managers);
+			UnityEngine.SceneManagement.SceneManager.LoadScene ("_FINAL_MENU");
+			timeMaster.music.Stop();
+			Time.timeScale = 1f;
 		}
 
 		if ((controller1.GetButtonDown("Select") || controller2.GetButtonDown("Select")) && GameIsPaused) {
@@ -202,16 +216,15 @@ public class GameMaster : MonoBehaviour {
 
 		TimerUI = GameObject.Find("Timer");
 		TimerNum = TimerUI.GetComponentInChildren<TextMeshProUGUI>(true);
-		//Debug.Log(TimerNum);
 
-		//PauseMenu = GameObject.Find("PauseMenu");
-
-		// foreach(Transform c in redCircles.transform) {
-
-		// 	redScoreCircles[count] = c.GetComponent<SpriteRenderer>();
-		// 	count ++;
-
-		// }
+		if (setsNeeded == 1) {
+			foreach(SpriteRenderer s in redSetsSquares) {
+				s.enabled = false;
+			}
+			foreach(SpriteRenderer s in blueSetsSquares) {
+				s.enabled = false;
+			}
+		}
 
 	}
 
@@ -321,6 +334,41 @@ public class GameMaster : MonoBehaviour {
        	Resume();
     }
 
+	public IEnumerator Timeout(int seconds) {
+        int count = seconds;
+       // Debug.Log("A " + count);
+		enableChildren(pauseMenu.transform, false);
+		enableChildren(TimerUI.transform, true);
+		AudioSource a = TimerUI.GetComponent<AudioSource>();
+		a.volume = 0.55f;
+
+        for(count = seconds; count > 0; count --) {
+			
+			if (!timingOut){
+				enableChildren(TimerUI.transform, false);
+				yield break;
+			}
+
+			TimerNum.text = "" + (count);
+			a.PlayOneShot(countdownSFX, 1f);
+            yield return new WaitForSecondsRealtime(1);
+        }
+       
+        // count down is finished...
+		a.PlayOneShot(countdownStartSFX, 1f);
+		timingOut = false;
+       	BacktoMainMenu();
+    }
+
+	void BacktoMainMenu() {
+		Destroy(GameMaster.me.managers);
+		timeMaster.music.Stop();
+		Time.timeScale = 1f;
+		UnityEngine.SceneManagement.SceneManager.LoadScene ("_FINAL_MENU");
+	}
+
+
+
 	public void ChangeResolution() {
 
 		Resolution resolution = resolutions[resolutionIndex % resolutions.Length];
@@ -391,7 +439,7 @@ public class GameMaster : MonoBehaviour {
 	public void enableMatchOver() {
 
 		GameObject g = Instantiate(GameOverOverlay, new Vector3(-2.95f, 2.32f, 0), Quaternion.identity);
-		g.GetComponentInChildren<TextMeshPro>().text = "the winner is " + winner + " " +  redSets + ":" + blueSets;
+		g.GetComponentInChildren<TextMeshPro>().text = "the winner is " + winner + "!";
 
 	}
 
