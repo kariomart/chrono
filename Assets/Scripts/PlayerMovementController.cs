@@ -186,8 +186,24 @@ public class PlayerMovementController : MonoBehaviour {
 		dir = GetDir();
 		//Debug.Log(Vector2.Distance(dir.normalized, prevDir.normalized));
 		//dir = Vector2.Lerp(prevDir, dir, 0.5f*Vector2.Distance(dir.normalized, prevDir.normalized));
-		dir = Vector2.Lerp(prevDir, dir, 0.6f*(Time.timeScale*2f));
+		//float angModifer = Mathf.Abs((Geo.ToAng(prevDir.normalized - dir.normalized)/180.0f))+1;
+		float dirAng = Geo.ToAng(dir);
+		float prevDirAng = Geo.ToAng(prevDir);
+		float angleDifference = dirAng-prevDirAng;
+
+		if(Mathf.Abs(dirAng+360-prevDirAng) < Mathf.Abs(angleDifference)){
+                    angleDifference = dirAng+360-prevDirAng;
+        }
+
+		if(Mathf.Abs(dirAng-360-prevDirAng) < Mathf.Abs(angleDifference)){
+                    angleDifference = dirAng-360-prevDirAng;
+        }
+
+		dirAng = prevDirAng+angleDifference*0.1f*(Time.timeScale*4f);
+		dir = Geo.ToVect(dirAng);
+		//dir = Vector2.Lerp(prevDir, dir, 0.1f*(Time.timeScale*4f));
 		dir.Normalize();
+		prevDir = dir;
 
 
 		bulletTimer += Time.deltaTime;
@@ -215,9 +231,6 @@ public class PlayerMovementController : MonoBehaviour {
 
 		}
 		
-		//if (dir != Vector2.zero) {
-			prevDir = dir;
-		//}
 
 		if (player.GetButtonDown("Jump") && jumpChargeTimer < jumpChargeMax) {
 			jumpChargeTimer ++;
