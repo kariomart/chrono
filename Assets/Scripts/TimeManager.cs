@@ -28,7 +28,7 @@ public class TimeManager : MonoBehaviour {
 
 	public ScanlinesEffect scanlines;
 
-	bool slowing;
+	public bool slowing;
 
 
 

@@ -28,6 +28,7 @@ public class GameMaster : MonoBehaviour {
 	public int amtBullets;
 	int amountOfLevels;
 	public bool roundOver;
+	public bool afkTimerEnabled;
 	public float afkTimer;
 	public float timeoutTime;
 	public bool countingDown;
@@ -133,7 +134,7 @@ public class GameMaster : MonoBehaviour {
 			}
 		}
 
-		if (afkTimer>timeoutTime && !timingOut) {
+		if (afkTimer>timeoutTime && !timingOut && afkTimerEnabled) {
 			timingOut = true;
 			StartCoroutine(Timeout(5));
 		}

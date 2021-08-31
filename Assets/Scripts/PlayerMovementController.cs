@@ -59,6 +59,7 @@ public class PlayerMovementController : MonoBehaviour {
 	public float maxMapY;
 	public float minMapY;
 
+	public bool up;
 	public bool right;
 	public bool left;
 	public bool down;
@@ -172,12 +173,23 @@ public class PlayerMovementController : MonoBehaviour {
 		// left = player1.LeftStickLeft && player1.LeftStickLeft.Value > .5f;
 		right = player.GetAxis("MoveHorizontal") > .5f;
 		left = player.GetAxis("MoveHorizontal") < -.5f;
+		up = player.GetAxis("MoveVertical") > .5f;
+		down = player.GetAxis("MoveVertical") < -.5f;
+		
 //		Debug.Log(player.GetAxis("MoveHorizontal"));
 		
 		updateUI();
 
 		//dir = new Vector2(player1.LeftStickX, player1.LeftStickY).normalized;
-		dir = new Vector2(player.GetAxis("MoveHorizontal"), player.GetAxis("MoveVertical")).normalized;
+		//dir = new Vector2(player.GetAxis("MoveHorizontal"), player.GetAxis("MoveVertical")).normalized;
+		//Debug.Log("PREV DIR: " + prevDir + "CURRENT DIR" dir);
+		dir = GetDir();
+		//Debug.Log(Vector2.Distance(dir.normalized, prevDir.normalized));
+		//dir = Vector2.Lerp(prevDir, dir, 0.5f*Vector2.Distance(dir.normalized, prevDir.normalized));
+		dir = Vector2.Lerp(prevDir, dir, 0.6f*(Time.timeScale*2f));
+		dir.Normalize();
+
+
 		bulletTimer += Time.deltaTime;
 
 		if (player.GetButtonDown("ChangeRes")) {
@@ -203,9 +215,9 @@ public class PlayerMovementController : MonoBehaviour {
 
 		}
 		
-		if (dir != Vector2.zero) {
+		//if (dir != Vector2.zero) {
 			prevDir = dir;
-		}
+		//}
 
 		if (player.GetButtonDown("Jump") && jumpChargeTimer < jumpChargeMax) {
 			jumpChargeTimer ++;
@@ -441,6 +453,29 @@ public class PlayerMovementController : MonoBehaviour {
 
 	}
 
+	Vector2 GetDir() {
+		Vector2 d = new Vector2();
+
+		if (up && left) {
+			d = new Vector2(-1,1);
+		} else if (up && right) {
+			d = new Vector2(1,1);
+		} else if (up && (!left && !right)){
+			d = new Vector2(0,1);
+		} else if (down && left) {
+			d = new Vector2(-1,-1);
+		} else if (down && right) {
+			d = new Vector2(1,-1);
+		} else if (down && (!right && !left)) {
+			d = new Vector2(0,-1);
+		} else if (right && (!up && !down)) {
+			d = new Vector2(1,0);
+		} else if (left && (!up && !down)) {
+			d = new Vector2(-1,0);
+		}
+
+		return d;
+	}
 	void shootBullet() {
 
 		amountOfBullets --;
