@@ -46,7 +46,7 @@ namespace LetterboxCamera {
         /// Apply movement input to the Players velocity
         /// </summary>
         private void FixedUpdate() {
-            Vector3 newVelocity = rigid.velocity;
+            Vector3 newVelocity = rigid.linearVelocity;
             float horizontalInput = Input.GetAxis("Horizontal");
 
             // If grounded, the player can attempt to jump
@@ -58,7 +58,7 @@ namespace LetterboxCamera {
             newVelocity.x = runSpeed * horizontalInput;
 
             // Set the newly calculated velocity
-            rigid.velocity = newVelocity;
+            rigid.linearVelocity = newVelocity;
 
             // We set grounded as false here because FixedUpdate() always runs before Collision checks
             grounded = false;

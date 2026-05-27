@@ -1,6 +1,6 @@
 ﻿// Copyright (c) 2015 Augie R. Maddox, Guavaman Enterprises. All rights reserved.
 
-#if UNITY_2017 || UNITY_2018 || UNITY_2019 || UNITY_2020 || UNITY_2021 || UNITY_2022 || UNITY_2023 || UNITY_2024 || UNITY_2025
+#if UNITY_2017 || UNITY_2018 || UNITY_2019 || UNITY_2020 || UNITY_2021 || UNITY_2022 || UNITY_2023 || UNITY_6000 || UNITY_6000_0_OR_NEWER
 #define UNITY_2017_PLUS
 #endif
 
@@ -17,11 +17,11 @@
 #pragma warning disable 0649
 
 namespace Rewired.Data {
-
     using UnityEngine;
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Text;
     using Rewired;
     using Rewired.Utils.Libraries.TinyJson;
 
@@ -32,8 +32,21 @@ namespace Rewired.Data {
     public class UserDataStore_PlayerPrefs : UserDataStore {
 
         private const string thisScriptName = "UserDataStore_PlayerPrefs";
-        private const string editorLoadedMessage = "\nIf unexpected input issues occur, the loaded XML data may be outdated or invalid. Clear PlayerPrefs using the inspector option on the UserDataStore_PlayerPrefs component.";
+        private const string logPrefix = "Rewired: ";
+#if UNITY_EDITOR
+        private const string editorLoadedMessage = "\n***IMPORTANT:*** Changes made to the Rewired Input Manager configuration after the last time XML data was saved WILL NOT be used because the loaded old saved data has overwritten these values. If you change something in the Rewired Input Manager such as a Joystick Map or Input Behavior settings, you will not see these changes reflected in the current configuration. Clear PlayerPrefs using the inspector option on the UserDataStore_PlayerPrefs component.";
+#endif
         private const string playerPrefsKeySuffix_controllerAssignments = "ControllerAssignments";
+
+        // 0 = original
+        // 1 = include duplicate joystick index
+        // 2 = support for loading maps for disconnected recognized controllers
+        private const int controllerMapPPKeyVersion_original = 0;
+        private const int controllerMapPPKeyVersion_includeDuplicateJoystickIndex = 1;
+        private const int controllerMapPPKeyVersion_supportDisconnectedControllers = 2;
+        private const int controllerMapPPKeyVersion_includeFormatVersion = 2;
+        private const int controllerMapPPKeyVersion = 2;
+        private const int controllerElementByRoleMapPPKeyVersion = 0;
 
 #if UNITY_4_6_PLUS
         [Tooltip("Should this script be used? If disabled, nothing will be saved or loaded.")]
@@ -68,6 +81,24 @@ namespace Rewired.Data {
         private bool loadMouseAssignments = true;
 
 #if UNITY_4_6_PLUS
+        [Tooltip("How should Action mapping data be saved?\n\n" +
+            "By Controller: Data is stored per-controller. Action mappings apply only to the specific controller for which it was saved.\n\n" +
+            "By Controller Element Role: " +
+            "Data is stored per-element on the controller if the controller element has a known role. " +
+            "Action mappings are mirrored on controller elements with the same role on all other controllers for the Player. " +
+            "Example: When saving Action mappings for a gamepad, element on all gamepads that have the same roles " +
+            "will inherit the mappings. This allows you to remap once for all compatible gamepads simultaneously, for example. " +
+            "This can extend beyond just gamepads, however. For example: On a console platform, a racing wheel with A, B, X, Y, D-Pad etc. elements " +
+            "will also reflect the same Action mappings if the gamepad is remapped. " +
+            "Action mappings for any controller elements that do not have known roles will be saved per-controller. " +
+            "Warning: Do not use this mode if you need to allow a Player to save different mappings for multiple controllers of the same type such as gamepads. " +
+            "(This option currently works best for gamepads and only miminally for other controller types.)"
+        )]
+#endif
+        [UnityEngine.SerializeField]
+        private ActionMappingSaveMode _actionMappingSaveMode = ActionMappingSaveMode.ByController;
+
+#if UNITY_4_6_PLUS
         [Tooltip("The PlayerPrefs key prefix. Change this to change how keys are stored in PlayerPrefs. Changing this will make saved data already stored with the old key no longer accessible.")]
 #endif
         [UnityEngine.SerializeField]
@@ -96,6 +127,10 @@ namespace Rewired.Data {
         /// </summary>
         public bool LoadMouseAssignments { get { return loadMouseAssignments; } set { loadMouseAssignments = value; } }
         /// <summary>
+        /// How should Action mapping data be saved?
+        /// </summary>
+        public ActionMappingSaveMode actionMappingSaveMode { get { return _actionMappingSaveMode; } set { _actionMappingSaveMode = value; } }
+        /// <summary>
         /// The PlayerPrefs key prefix. Change this to change how keys are stored in PlayerPrefs. Changing this will make saved data already stored with the old key no longer accessible.
         /// </summary>
         public string PlayerPrefsKeyPrefix { get { return playerPrefsKeyPrefix; } set { playerPrefsKeyPrefix = value; } }
@@ -104,9 +139,49 @@ namespace Rewired.Data {
 
         private bool loadControllerAssignments { get { return loadKeyboardAssignments || loadMouseAssignments || loadJoystickAssignments; } }
 
+        private List<int> allActionIds {
+            get {
+                if (__allActionIds != null) return __allActionIds; // use the cached version
+                List<int> ids = new List<int>();
+                IList<InputAction> actions = ReInput.mapping.Actions;
+                for (int i = 0; i < actions.Count; i++) {
+                    ids.Add(actions[i].id);
+                }
+                __allActionIds = ids;
+                return ids;
+            }
+        }
+
+        private string allActionIdsString {
+            get {
+                if (!string.IsNullOrEmpty(__allActionIdsString)) return __allActionIdsString; // use the cached version
+                StringBuilder sb = new StringBuilder();
+                List<int> ids = allActionIds;
+                for (int i = 0; i < ids.Count; i++) {
+                    if (i > 0) sb.Append(",");
+                    sb.Append(ids[i]);
+                }
+                __allActionIdsString = sb.ToString();
+                return __allActionIdsString;
+            }
+        }
+
+        [NonSerialized]
         private bool allowImpreciseJoystickAssignmentMatching = true;
+        [NonSerialized]
         private bool deferredJoystickAssignmentLoadPending;
+        [NonSerialized]
         private bool wasJoystickEverDetected;
+        [NonSerialized]
+        private List<int> __allActionIds;
+        [NonSerialized]
+        private string __allActionIdsString;
+        [NonSerialized]
+        private readonly StringBuilder _sb = new StringBuilder();
+        [NonSerialized]
+        private Dictionary<string, ControllerElementByRoleMap> _tempElementByRoleMaps;
+        [NonSerialized]
+        private Dictionary<string, bool> _tempElementByRoleMapsEnabled;
 
         #region UserDataStore Implementation
 
@@ -117,13 +192,13 @@ namespace Rewired.Data {
         /// </summary>
         public override void Save() {
             if(!isEnabled) {
-                Debug.LogWarning("Rewired: " + thisScriptName + " is disabled and will not save any data.", this);
+                Debug.LogWarning(logPrefix + thisScriptName + " is disabled and will not save any data.", this);
                 return;
             }
             SaveAll();
 
 #if UNITY_EDITOR
-            Debug.Log("Rewired: " + thisScriptName + " saved all user data to XML.");
+            Debug.Log(logPrefix + thisScriptName + " saved all user data to XML.");
 #endif
         }
 
@@ -135,13 +210,13 @@ namespace Rewired.Data {
         /// <param name="controllerId">Controller id</param>
         public override void SaveControllerData(int playerId, ControllerType controllerType, int controllerId) {
             if(!isEnabled) {
-                Debug.LogWarning("Rewired: " + thisScriptName + " is disabled and will not save any data.", this);
+                Debug.LogWarning(logPrefix + thisScriptName + " is disabled and will not save any data.", this);
                 return;
             }
             SaveControllerDataNow(playerId, controllerType, controllerId);
 
 #if UNITY_EDITOR
-            Debug.Log("Rewired: " + thisScriptName + " saved " + controllerType + " " + controllerId + " data for Player " + playerId + " to XML.");
+            Debug.Log(logPrefix + thisScriptName + " saved " + controllerType + " " + controllerId + " data for Player " + playerId + " to XML.");
 #endif
         }
 
@@ -152,13 +227,13 @@ namespace Rewired.Data {
         /// <param name="controllerId">Controller id</param>
         public override void SaveControllerData(ControllerType controllerType, int controllerId) {
             if(!isEnabled) {
-                Debug.LogWarning("Rewired: " + thisScriptName + " is disabled and will not save any data.", this);
+                Debug.LogWarning(logPrefix + thisScriptName + " is disabled and will not save any data.", this);
                 return;
             }
             SaveControllerDataNow(controllerType, controllerId);
 
 #if UNITY_EDITOR
-            Debug.Log("Rewired: " + thisScriptName + " saved " + controllerType + " " + controllerId + " data to XML.");
+            Debug.Log(logPrefix + thisScriptName + " saved " + controllerType + " " + controllerId + " data to XML.");
 #endif
         }
 
@@ -168,13 +243,13 @@ namespace Rewired.Data {
         /// <param name="playerId">Player id</param>
         public override void SavePlayerData(int playerId) {
             if(!isEnabled) {
-                Debug.LogWarning("Rewired: " + thisScriptName + " is disabled and will not save any data.", this);
+                Debug.LogWarning(logPrefix + thisScriptName + " is disabled and will not save any data.", this);
                 return;
             }
             SavePlayerDataNow(playerId);
 
 #if UNITY_EDITOR
-            Debug.Log("Rewired: " + thisScriptName + " saved all user data for Player " + playerId + " to XML.");
+            Debug.Log(logPrefix + thisScriptName + " saved all user data for Player " + playerId + " to XML.");
 #endif
         }
 
@@ -185,13 +260,13 @@ namespace Rewired.Data {
         /// <param name="behaviorId">Input Behavior id</param>
         public override void SaveInputBehavior(int playerId, int behaviorId) {
             if(!isEnabled) {
-                Debug.LogWarning("Rewired: " + thisScriptName + " is disabled and will not save any data.", this);
+                Debug.LogWarning(logPrefix + thisScriptName + " is disabled and will not save any data.", this);
                 return;
             }
             SaveInputBehaviorNow(playerId, behaviorId);
 
 #if UNITY_EDITOR
-            Debug.Log("Rewired: " + thisScriptName + " saved Input Behavior data for Player " + playerId + " to XML.");
+            Debug.Log(logPrefix + thisScriptName + " saved Input Behavior data for Player " + playerId + " to XML.");
 #endif
         }
 
@@ -200,13 +275,13 @@ namespace Rewired.Data {
         /// </summary>
         public override void Load() {
             if(!isEnabled) {
-                Debug.LogWarning("Rewired: " + thisScriptName + " is disabled and will not load any data.", this);
+                Debug.LogWarning(logPrefix + thisScriptName + " is disabled and will not load any data.", this);
                 return;
             }
             int count = LoadAll();
 
 #if UNITY_EDITOR
-            if(count > 0) Debug.Log("Rewired: " + thisScriptName + " loaded all user data from XML. " + editorLoadedMessage);
+            if(count > 0) Debug.LogWarning(logPrefix + thisScriptName + " loaded all user data from XML. " + editorLoadedMessage);
 #endif
         }
 
@@ -218,13 +293,13 @@ namespace Rewired.Data {
         /// <param name="controllerId">Controller id</param>
         public override void LoadControllerData(int playerId, ControllerType controllerType, int controllerId) {
             if(!isEnabled) {
-                Debug.LogWarning("Rewired: " + thisScriptName + " is disabled and will not load any data.", this);
+                Debug.LogWarning(logPrefix + thisScriptName + " is disabled and will not load any data.", this);
                 return;
             }
             int count = LoadControllerDataNow(playerId, controllerType, controllerId);
 
 #if UNITY_EDITOR
-            if(count > 0) Debug.Log("Rewired: " + thisScriptName + " loaded user data for " + controllerType + " " + controllerId + " for Player " + playerId + " from XML. " + editorLoadedMessage);
+            if(count > 0) Debug.LogWarning(logPrefix + thisScriptName + " loaded user data for " + controllerType + " " + controllerId + " for Player " + playerId + " from XML. " + editorLoadedMessage);
 #endif
         }
 
@@ -235,13 +310,13 @@ namespace Rewired.Data {
         /// <param name="controllerId">Controller id</param>
         public override void LoadControllerData(ControllerType controllerType, int controllerId) {
             if(!isEnabled) {
-                Debug.LogWarning("Rewired: " + thisScriptName + " is disabled and will not load any data.", this);
+                Debug.LogWarning(logPrefix + thisScriptName + " is disabled and will not load any data.", this);
                 return;
             }
             int count = LoadControllerDataNow(controllerType, controllerId);
 
 #if UNITY_EDITOR
-            if(count > 0) Debug.Log("Rewired: " + thisScriptName + " loaded user data for " + controllerType + " " + controllerId + " from XML. " + editorLoadedMessage);
+            if(count > 0) Debug.LogWarning(logPrefix + thisScriptName + " loaded user data for " + controllerType + " " + controllerId + " from XML. " + editorLoadedMessage);
 #endif
         }
 
@@ -251,13 +326,13 @@ namespace Rewired.Data {
         /// <param name="playerId">Player id</param>
         public override void LoadPlayerData(int playerId) {
             if(!isEnabled) {
-                Debug.LogWarning("Rewired: " + thisScriptName + " is disabled and will not load any data.", this);
+                Debug.LogWarning(logPrefix + thisScriptName + " is disabled and will not load any data.", this);
                 return;
             }
             int count = LoadPlayerDataNow(playerId);
 
 #if UNITY_EDITOR
-            if(count > 0) Debug.Log("Rewired: " + thisScriptName + " loaded Player + " + playerId + " user data from XML. " + editorLoadedMessage);
+            if(count > 0) Debug.LogWarning(logPrefix + thisScriptName + " loaded Player + " + playerId + " user data from XML. " + editorLoadedMessage);
 #endif
         }
 
@@ -268,13 +343,13 @@ namespace Rewired.Data {
         /// <param name="behaviorId">Input Behavior id</param>
         public override void LoadInputBehavior(int playerId, int behaviorId) {
             if(!isEnabled) {
-                Debug.LogWarning("Rewired: " + thisScriptName + " is disabled and will not load any data.", this);
+                Debug.LogWarning(logPrefix + thisScriptName + " is disabled and will not load any data.", this);
                 return;
             }
             int count = LoadInputBehaviorNow(playerId, behaviorId);
 
 #if UNITY_EDITOR
-            if(count > 0) Debug.Log("Rewired: " + thisScriptName + " loaded Player + " + playerId + " InputBehavior data from XML. " + editorLoadedMessage);
+            if(count > 0) Debug.LogWarning(logPrefix + thisScriptName + " loaded Player + " + playerId + " InputBehavior data from XML. " + editorLoadedMessage);
 #endif
         }
 
@@ -287,7 +362,7 @@ namespace Rewired.Data {
 
             // Disallow imprecise joystick assignment matching on some platforms when
             // system id/player Rewired Player alignment needs to stay fixed.
-#if !UNITY_EDITOR && (UNITY_XBOXONE || UNITY_PS4 || UNITY_SWITCH)
+#if !UNITY_EDITOR && (UNITY_XBOXONE || UNITY_PS4 || UNITY_PS5 || UNITY_SWITCH2 || UNITY_OUNCE)
             allowImpreciseJoystickAssignmentMatching = false;
 #endif
 
@@ -299,6 +374,7 @@ namespace Rewired.Data {
                 // This will not save over controller assignment data if no joysticks were attached initially.
                 // This is not always saved because of delayed joystick connection on some platforms like iOS.
                 if(loadControllerAssignments && ReInput.controllers.joystickCount > 0) {
+                    wasJoystickEverDetected = true;
                     SaveControllerAssignments();
                 }
             }
@@ -315,7 +391,7 @@ namespace Rewired.Data {
             if(args.controllerType == ControllerType.Joystick) {
                 int count = LoadJoystickData(args.controllerId);
 #if UNITY_EDITOR
-                if(count > 0) Debug.Log("Rewired: " + thisScriptName + " loaded Joystick " + args.controllerId + " (" + ReInput.controllers.GetJoystick(args.controllerId).hardwareName + ") data from XML. " + editorLoadedMessage);
+                if(count > 0) Debug.LogWarning(logPrefix + thisScriptName + " loaded Joystick " + args.controllerId + " (" + ReInput.controllers.GetJoystick(args.controllerId).hardwareName + ") data from XML. " + editorLoadedMessage);
 #endif
 
                 // Load joystick assignments once on connect, but deferred until the end of the frame so all joysticks can connect first.
@@ -324,7 +400,7 @@ namespace Rewired.Data {
                 // Unity starts. Also allows the user to start the game with no joysticks connected and on the first
                 // joystick connected, load the assignments for a better user experience on phones/tablets.
                 // No further joystick assignments will be made on connect.
-                if(loadDataOnStart && loadJoystickAssignments && !wasJoystickEverDetected) {
+                if (loadDataOnStart && loadJoystickAssignments && !wasJoystickEverDetected) {
                     this.StartCoroutine(LoadJoystickAssignmentsDeferred());
                 }
 
@@ -341,14 +417,14 @@ namespace Rewired.Data {
         /// Calls after a controller has been disconnected.
         /// </summary>
         /// <param name="args">ControllerStatusChangedEventArgs</param>
-        protected override void OnControllerPreDiscconnect(ControllerStatusChangedEventArgs args) {
+        protected override void OnControllerPreDisconnect(ControllerStatusChangedEventArgs args) {
             if(!isEnabled) return;
 
             // Save data before joystick is disconnected
             if(args.controllerType == ControllerType.Joystick) {
                 SaveJoystickData(args.controllerId);
 #if UNITY_EDITOR
-                Debug.Log("Rewired: " + thisScriptName + " saved Joystick " + args.controllerId + " (" + ReInput.controllers.GetJoystick(args.controllerId).hardwareName + ") data to XML.");
+                Debug.Log(logPrefix + thisScriptName + " saved Joystick " + args.controllerId + " (" + ReInput.controllers.GetJoystick(args.controllerId).hardwareName + ") data to XML.");
 #endif
             }
         }
@@ -362,6 +438,36 @@ namespace Rewired.Data {
 
             // Save controller assignments
             if(loadControllerAssignments) SaveControllerAssignments();
+        }
+
+        #endregion
+
+        #region IControllerMapStore Implementation
+
+        /// <summary>
+        /// Saves a Controller Map.
+        /// </summary>
+        /// <param name="playerId">The Player id</param>
+        /// <param name="controllerMap">The Controller Map</param>
+        public override void SaveControllerMap(int playerId, ControllerMap controllerMap) {
+            if (controllerMap == null) return;
+            Player player = ReInput.players.GetPlayer(playerId);
+            if (player == null) return;
+            SaveControllerMap(player, controllerMap);
+        }
+
+        /// <summary>
+        /// Loads a Controller Map for a Controller.
+        /// </summary>
+        /// <param name="playerId">The Player id</param>
+        /// <param name="controllerIdentifier">Controller Identifier for the Controller. Get this from <see cref="Controller.identifier"/>.</param>
+        /// <param name="categoryId">The Map Category id of the Controller Map</param>
+        /// <param name="layoutId">The Layout id of the Controller Map</param>
+        /// <returns>Controller Map</returns>
+        public override ControllerMap LoadControllerMap(int playerId, ControllerIdentifier controllerIdentifier, int categoryId, int layoutId) {
+            Player player = ReInput.players.GetPlayer(playerId);
+            if (player == null) return null;
+            return LoadControllerMap(player, controllerIdentifier, categoryId, layoutId);
         }
 
         #endregion
@@ -411,6 +517,9 @@ namespace Rewired.Data {
                 count += LoadControllerMaps(player.id, ControllerType.Joystick, joystick.id);
             }
 
+            // Trigger Layout Manager refresh after load
+            RefreshLayoutManager(player.id);
+
             return count;
         }
 
@@ -440,6 +549,7 @@ namespace Rewired.Data {
                 Player player = allPlayers[i];
                 if(!player.controllers.ContainsController(ControllerType.Joystick, joystickId)) continue; // player does not have the joystick
                 count += LoadControllerMaps(player.id, ControllerType.Joystick, joystickId); // load the maps
+                RefreshLayoutManager(player.id); // trigger Layout Manager refresh after load
             }
 
             // Load calibration maps for joystick
@@ -454,6 +564,9 @@ namespace Rewired.Data {
 
             // Load map data
             count += LoadControllerMaps(playerId, controllerType, controllerId);
+
+            // Trigger Layout Manager refresh after load
+            RefreshLayoutManager(playerId);
 
             // Loat other controller data
             count += LoadControllerDataNow(controllerType, controllerId);
@@ -480,17 +593,170 @@ namespace Rewired.Data {
             Controller controller = ReInput.controllers.GetController(controllerType, controllerId);
             if(controller == null) return count;
 
-            // Load the controller maps first and make sure we have them to load
-            List<SavedControllerMapData> savedData = GetAllControllerMapsXml(player, true, controller);
-            if(savedData.Count == 0) return count;
+            IList<InputMapCategory> categories = ReInput.mapping.MapCategories;
+            for (int categoryIndex = 0; categoryIndex < categories.Count; categoryIndex++) {
 
-            // Load Joystick Maps
-            count += player.controllers.maps.AddMapsFromXml(controllerType, controllerId, SavedControllerMapData.GetXmlStringList(savedData)); // load controller maps
+                InputMapCategory category = categories[categoryIndex];
+                if (!category.userAssignable) continue; // skip map because not user-assignable
 
-            // Analyze the saved data and compare to defaults to find bindings for newly created Actions
-            AddDefaultMappingsForNewActions(player, savedData, controllerType, controllerId);
+                IList<InputLayout> layouts = ReInput.mapping.MapLayouts(controller.type);
+                for (int layoutIndex = 0; layoutIndex < layouts.Count; layoutIndex++) {
+
+                    InputLayout layout = layouts[layoutIndex];
+
+                    switch (_actionMappingSaveMode) {
+
+                        case ActionMappingSaveMode.ByController: {
+
+                                // Load the Controller Map
+                                ControllerMap controllerMap = LoadControllerMap(player, controller.identifier, category.id, layout.id);
+                                if (controllerMap == null) continue;
+
+                                // Add the map to the Player
+                                player.controllers.maps.AddMap(controller, controllerMap);
+                                count += 1;
+                            }
+                            break;
+
+                        case ActionMappingSaveMode.ByControllerElementRole: {
+
+                                Dictionary<string, ControllerElementByRoleMap> elementByRoleMaps = _tempElementByRoleMaps != null ? _tempElementByRoleMaps : (_tempElementByRoleMaps = new Dictionary<string, ControllerElementByRoleMap>());
+                                elementByRoleMaps.Clear();
+                                string role;
+                                bool loadedData = false;
+                                bool modified = false;
+
+                                // Load individual element bindings
+                                for (int elementIndex = 0; elementIndex < controller.elementCount; elementIndex++) {
+                                    role = controller.Elements[elementIndex].elementIdentifier.role;
+                                    if (string.IsNullOrEmpty(role)) continue;
+                                    LoadControllerElementMapByRole(player, controller, role, category.id, layout.id, elementByRoleMaps);
+                                }
+
+                                // Load the regular Controller Map, then merge with element bindings if available
+                                ControllerMap controllerMap = LoadControllerMap(player, controller.identifier, category.id, layout.id);
+                                if (controllerMap == null) {
+                                    // If no saved data for this controller was found, get the current map in the Player if any
+                                    controllerMap = player.controllers.maps.GetMap(controller.type, controller.id, category.id, layout.id);
+                                    if (controllerMap == null) {
+                                        if (elementByRoleMaps.Count == 0) continue; // if no element maps were loaded, just exit out since there was nothing to load
+
+                                        // If no current map found, create a blank map
+                                        controllerMap = ControllerMap.Create(controller, category.id, layout.id);
+                                    }
+                                } else {
+                                    loadedData = true;
+                                }
+
+                                if (elementByRoleMaps.Count != 0) {
+
+                                    // First remove existing element bindings with roles for which data was loaded
+                                    {
+                                        if (_tempElementByRoleMapsEnabled == null) _tempElementByRoleMapsEnabled = new Dictionary<string, bool>();
+                                        _tempElementByRoleMapsEnabled.Clear();
+                                        ControllerElementIdentifier ei;
+                                        ActionElementMap aem;
+                                        int elementMapCount = controllerMap.elementMapCount;
+                                        for (int aemIndex = elementMapCount - 1; aemIndex >= 0; aemIndex--) {
+                                            aem = controllerMap.ElementMaps[aemIndex];
+                                            ei = controller.GetElementIdentifierById(aem.elementIdentifierId);
+                                            if (ei == null) continue;
+                                            if (!elementByRoleMaps.ContainsKey(ei.role)) continue;
+                                            _tempElementByRoleMapsEnabled[ei.role] = aem.enabled; // preserve enabled state
+                                            controllerMap.DeleteElementMap(aem.id);
+                                            modified = true;
+                                        }
+                                    }
+
+                                    // Add new bindings
+                                    {
+                                        ControllerElementByRoleMap elementByRoleMap;
+                                        Controller.Element targetElement;
+                                        ElementAssignment elementAssignment;
+                                        ActionElementMap aem;
+                                        bool enabled;
+
+                                        foreach (var kvp in elementByRoleMaps) {
+                                            elementByRoleMap = kvp.Value;
+
+                                            // Add bindings for the element identifier(s) that match the role
+                                            // No controller should have multiple elements in the same role or there will be conflicts.
+                                            for (int elementIndex = 0; elementIndex < controller.Elements.Count; elementIndex++) {
+                                                targetElement = controller.Elements[elementIndex];
+                                                if (targetElement.elementIdentifier.role != kvp.Value.role) continue;
+                                                if (elementByRoleMap.data == null || elementByRoleMap.data.Count == 0) continue; // blank map
+
+                                                // Add bindings for each loaded map
+                                                for (int elementByRoleMapDataIndex = 0; elementByRoleMapDataIndex < elementByRoleMap.data.Count; elementByRoleMapDataIndex++) {
+                                                    if (!elementByRoleMap.data[elementByRoleMapDataIndex].TryGetElementAssignment(controllerType, targetElement, out elementAssignment)) continue; // bad assignment
+                                                    if (controllerMap.CreateElementMap(elementAssignment, out aem)) {
+                                                        if (_tempElementByRoleMapsEnabled.TryGetValue(kvp.Value.role, out enabled)) { // restore enabled state
+                                                            aem.enabled = enabled;
+                                                        }
+                                                        loadedData = true;
+                                                        modified = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                if (modified) {
+                                    controllerMap.isModified = false; // clear the modified status so this isn't considered a user-modified controller map
+                                }
+                                if (loadedData) {
+                                    // Add the map to the Player
+                                    player.controllers.maps.AddMap(controller, controllerMap);
+                                    count += 1;
+                                }
+                            }
+                            break;
+                        default:
+                            throw new NotImplementedException();
+                    }
+                }
+            }
 
             return count;
+        }
+
+        private ControllerMap LoadControllerMap(Player player, ControllerIdentifier controllerIdentifier, int categoryId, int layoutId) {
+            if (player == null) return null;
+
+            // Get the XML for the Controller Map
+            string xml = GetControllerMapXml(player, controllerIdentifier, categoryId, layoutId);
+            if (string.IsNullOrEmpty(xml)) return null;
+
+            ControllerMap controllerMap = ControllerMap.CreateFromXml(controllerIdentifier.controllerType, xml);         
+            if (controllerMap == null) return null;
+
+            // Load default mappings for new Actions
+            List<int> knownActionIds = GetControllerMapKnownActionIds(player, controllerIdentifier, categoryId, layoutId);
+            AddDefaultMappingsForNewActions(controllerIdentifier, controllerMap, knownActionIds);
+
+            return controllerMap;
+        }
+
+        private bool LoadControllerElementMapByRole(Player player, Controller controller, string role, int mapCategoryId, int layoutId, Dictionary<string, ControllerElementByRoleMap> elementByRoleMaps) {
+            if (string.IsNullOrEmpty(role)) return false;
+
+            string key = GetControllerElementByRoleMapPlayerPrefsKey(player, role, mapCategoryId, layoutId, controllerElementByRoleMapPPKeyVersion);
+
+            try {
+                // Check if there is any data saved
+                string json;
+                if (!PlayerPrefs.HasKey(key) || string.IsNullOrEmpty(json = PlayerPrefs.GetString(key))) return false;
+                if (string.IsNullOrEmpty(json)) return false;
+
+                // Parse Json
+                ControllerElementByRoleMap data = ControllerElementByRoleMap.FromJson(role, json);
+                if (data == null) return false; // no valid save data found
+
+                elementByRoleMaps[role] = data;
+                return true;
+            } catch {
+                return false;
+            }
         }
 
         private int LoadInputBehaviors(int playerId) {
@@ -542,11 +808,11 @@ namespace Rewired.Data {
                 }
 
 #if UNITY_EDITOR
-                Debug.Log("Rewired: " + thisScriptName + " loaded controller assignments from PlayerPrefs.");
+                Debug.LogWarning(logPrefix + thisScriptName + " loaded controller assignments from PlayerPrefs.");
 #endif
             } catch {
 #if UNITY_EDITOR
-                Debug.LogError("Rewired: " + thisScriptName + " encountered an error loading controller assignments from PlayerPrefs.");
+                Debug.LogError(logPrefix + thisScriptName + " encountered an error loading controller assignments from PlayerPrefs.");
 #endif
             }
 
@@ -575,7 +841,7 @@ namespace Rewired.Data {
                 }
             } catch {
 #if UNITY_EDITOR
-                Debug.LogError("Rewired: " + thisScriptName + " encountered an error loading keyboard and/or mouse assignments from PlayerPrefs.");
+                Debug.LogError(logPrefix + thisScriptName + " encountered an error loading keyboard and/or mouse assignments from PlayerPrefs.");
 #endif
             }
 
@@ -667,7 +933,7 @@ namespace Rewired.Data {
                 }
             } catch {
 #if UNITY_EDITOR
-                Debug.LogError("Rewired: " + thisScriptName + " encountered an error loading joystick assignments from PlayerPrefs.");
+                Debug.LogError(logPrefix + thisScriptName + " encountered an error loading joystick assignments from PlayerPrefs.");
 #endif
             }
 
@@ -707,10 +973,10 @@ namespace Rewired.Data {
             // Load the joystick assignments
             if(LoadJoystickAssignmentsNow(null)) {
 #if UNITY_EDITOR
-                Debug.Log("Rewired: " + thisScriptName + " loaded joystick assignments from PlayerPrefs.");
+                Debug.LogWarning(logPrefix + thisScriptName + " loaded joystick assignments from PlayerPrefs.");
 #endif
             }
-            
+
             // Save the controller assignments after loading in case anything has been
             // re-assigned to a different Player or a new joystick was connected.
             SaveControllerAssignments();
@@ -740,13 +1006,23 @@ namespace Rewired.Data {
 
             // Save changes to PlayerPrefs
             PlayerPrefs.Save();
+
+            // Report controller maps saved
+            for (int i = 0; i < allPlayers.Count; i++) {
+                OnControllerMapsSaved(allPlayers[i]);
+            }
         }
 
         private void SavePlayerDataNow(int playerId) {
-            SavePlayerDataNow(ReInput.players.GetPlayer(playerId));
+            Player player = ReInput.players.GetPlayer(playerId);
+
+            SavePlayerDataNow(player);
 
             // Save changes to PlayerPrefs
             PlayerPrefs.Save();
+
+            // Report controller maps saved
+            OnControllerMapsSaved(player);
         }
         private void SavePlayerDataNow(Player player) {
             if(player == null) return;
@@ -817,8 +1093,18 @@ namespace Rewired.Data {
         }
 
         private void SaveControllerMaps(Player player, PlayerSaveData playerSaveData) {
-            foreach(ControllerMapSaveData saveData in playerSaveData.AllControllerMapSaveData) {
-                SaveControllerMap(player, saveData);
+
+            List<ControllerMapSaveData> controllerMapSaveData = new List<ControllerMapSaveData>(playerSaveData.AllControllerMapSaveData);
+
+            // Sort controller maps by oldest to newest
+            // ActionMappingSaveMode.ByControllerElementRole only works if oldest maps are saved first and newly modified maps
+            // are saved last because the last element role maps will overwrite the first.
+            if (_actionMappingSaveMode == ActionMappingSaveMode.ByControllerElementRole) {
+                controllerMapSaveData.Sort(SortOldestToNewest);
+            }
+
+            for (int i = 0; i < controllerMapSaveData.Count; i++) {
+                SaveControllerMap(player, controllerMapSaveData[i].map);
             }
         }
         private void SaveControllerMaps(int playerId, ControllerType controllerType, int controllerId) {
@@ -832,21 +1118,111 @@ namespace Rewired.Data {
             ControllerMapSaveData[] saveData = player.controllers.maps.GetMapSaveData(controllerType, controllerId, true);
             if(saveData == null) return;
 
-            for(int i = 0; i < saveData.Length; i++) {
-                SaveControllerMap(player, saveData[i]);
+            // Sort controller maps by oldest to newest
+            // ActionMappingSaveMode.ByControllerElementRole only works if oldest maps are saved first and newly modified maps
+            // are saved last because the last element role maps will overwrite the first.
+            if (_actionMappingSaveMode == ActionMappingSaveMode.ByControllerElementRole) {
+                List<ControllerMapSaveData> saveDataSorted = new List<ControllerMapSaveData>(saveData);
+                saveDataSorted.Sort(SortOldestToNewest);
+                saveDataSorted.CopyTo(saveData);
+            }
+
+            for (int i = 0; i < saveData.Length; i++) {
+                SaveControllerMap(player, saveData[i].map);
             }
         }
 
-        private void SaveControllerMap(Player player, ControllerMapSaveData saveData) {
+        private void SaveControllerMap(Player player, ControllerMap controllerMap) {
+            switch (_actionMappingSaveMode) {
+                case ActionMappingSaveMode.ByController:
+                    SaveControllerMapByController(player, controllerMap);
+                    break;
+                case ActionMappingSaveMode.ByControllerElementRole:
+                    SaveControllerMapByControllerElementRole(player, controllerMap.controller, controllerMap);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private void SaveControllerMapByController(Player player, ControllerMap controllerMap) {
 
             // Save the Controller Map
-            string key = GetControllerMapPlayerPrefsKey(player, saveData.controller, saveData.categoryId, saveData.layoutId, true);
-            PlayerPrefs.SetString(key, saveData.map.ToXmlString()); // save the map to player prefs in XML format
+            string key = GetControllerMapPlayerPrefsKey(player, controllerMap.controller.identifier, controllerMap.categoryId, controllerMap.layoutId, controllerMapPPKeyVersion);
+            PlayerPrefs.SetString(key, controllerMap.ToXmlString()); // save the map to player prefs in XML format
 
             // Save the Action ids list for this Controller Map used to allow new Actions to be added to the
             // Rewired Input Manager and have the new mappings show up when saved data is loaded
-            key = GetControllerMapKnownActionIdsPlayerPrefsKey(player, saveData.controller, saveData.categoryId, saveData.layoutId, true);
-            PlayerPrefs.SetString(key, GetAllActionIdsString());
+            key = GetControllerMapKnownActionIdsPlayerPrefsKey(player, controllerMap.controller.identifier, controllerMap.categoryId, controllerMap.layoutId, controllerMapPPKeyVersion);
+            PlayerPrefs.SetString(key, allActionIdsString);
+        }
+
+        private void SaveControllerMapByControllerElementRole(Player player, Controller controller, ControllerMap controllerMap) {
+            if (controller == null) return;
+
+            // Must save both the whole controller map and the individual elements in case some elements are not supported
+            SaveControllerMapByController(player, controllerMap);
+
+            IList<ActionElementMap> elementMaps = controllerMap.ElementMaps;
+
+            // Save all bindings for each role
+            Dictionary<string, ControllerElementByRoleMap> maps = null;
+
+            // Save bindings for the role even if no bindings exist
+            // This is so deleted bindings will be handled correctly
+
+            {
+                bool added;
+                Controller.Element element;
+                string role;
+
+                for (int i = 0; i < controller.elementCount; i++) {
+                    role = controller.Elements[i].elementIdentifier.role;
+                    if (string.IsNullOrEmpty(role)) continue;
+
+                    added = false;
+
+                    for (int j = 0; j < elementMaps.Count; j++) {
+                        element = controller.GetElementById(elementMaps[j].elementIdentifierId);
+                        if (element == null || element.elementIdentifier.role != role) continue;
+                        added |= AddControllerElementByRoleMapEntry(player, controllerMap.controller, elementMaps[j], ref maps);
+                    }
+
+                    // If nothing was mapped for the role, add an empty map
+                    if (!added) {
+                        if (maps == null) maps = new Dictionary<string, ControllerElementByRoleMap>();
+                        maps.Add(role, new ControllerElementByRoleMap() { role = role });
+                    }
+                }
+            }
+
+            if (maps == null) return; // nothing to save
+
+            // Save maps
+            foreach (var kvp in maps) {
+                PlayerPrefs.SetString(
+                    GetControllerElementByRoleMapPlayerPrefsKey(player, kvp.Value.role, controllerMap.categoryId, controllerMap.layoutId, controllerElementByRoleMapPPKeyVersion),
+                    kvp.Value.ToJson()
+                );
+            }
+        }
+
+        private bool AddControllerElementByRoleMapEntry(Player player, Controller controller, ActionElementMap elementMap, ref Dictionary<string, ControllerElementByRoleMap> maps) {
+
+            ControllerElementIdentifier ei = controller.GetElementIdentifierById(elementMap.elementIdentifierId);
+            if (ei == null || string.IsNullOrEmpty(ei.role)) return false;
+
+            if (maps == null) maps = new Dictionary<string, ControllerElementByRoleMap>();
+
+            ControllerElementByRoleMap map;
+            if (!maps.TryGetValue(ei.role, out map)) {
+                map = new ControllerElementByRoleMap();
+                map.role = ei.role;
+                maps.Add(ei.role, map);
+            }
+
+            map.Add(elementMap);
+            return true;
         }
 
         private void SaveInputBehaviors(Player player, PlayerSaveData playerSaveData) {
@@ -923,11 +1299,11 @@ namespace Rewired.Data {
                 PlayerPrefs.Save();
 
 #if UNITY_EDITOR
-                Debug.Log("Rewired: " + thisScriptName + " saved controller assignments to PlayerPrefs.");
+                Debug.Log(logPrefix + thisScriptName + " saved controller assignments to PlayerPrefs.");
 #endif
             } catch {
 #if UNITY_EDITOR
-                Debug.LogError("Rewired: " + thisScriptName + " encountered an error saving controller assignments to PlayerPrefs.");
+                Debug.LogError(logPrefix + thisScriptName + " encountered an error saving controller assignments to PlayerPrefs.");
 #endif
             }
             return true;
@@ -957,85 +1333,163 @@ namespace Rewired.Data {
 
         // WARNING: Do not use & symbol in keys. Linux cannot load them after the current session ends.
 
-        private string GetBasePlayerPrefsKey(Player player) {
-            string key = playerPrefsKeyPrefix;
-            key += "|playerName=" + player.name; // make a key for this specific player, could use id, descriptive name, or a custom profile identifier of your choice
-            return key;
+        private string GetControllerMapPlayerPrefsKey(Player player, ControllerIdentifier controllerIdentifier, int categoryId, int layoutId, int ppKeyVersion) {
+            _sb.Length = 0;
+            AppendBaseKey(_sb, playerPrefsKeyPrefix);
+            AppendPlayerKey(_sb, player);
+            AppendControllerMapKey(_sb, player, controllerIdentifier, categoryId, layoutId, ppKeyVersion);
+            return _sb.ToString();
         }
 
-        private string GetControllerMapPlayerPrefsKey(Player player, Controller controller, int categoryId, int layoutId, bool includeDuplicateIndex) {
-            // Create a player prefs key like a web querystring so we can search for player prefs key when loading maps
-            string key = GetBasePlayerPrefsKey(player);
-            key += "|dataType=ControllerMap";
-            key += "|controllerMapType=" + controller.mapTypeString;
-            key += "|categoryId=" + categoryId + "|" + "layoutId=" + layoutId;
-            key += "|hardwareIdentifier=" + controller.hardwareIdentifier; // the hardware identifier string helps us identify maps for unknown hardware because it doesn't have a Guid
-            if(controller.type == ControllerType.Joystick) { // store special info for joystick maps
-                key += "|hardwareGuid=" + ((Joystick)controller).hardwareTypeGuid.ToString(); // the identifying GUID that determines which known joystick this is
-                // Added in Rewired 1.1.19.0
-                if(includeDuplicateIndex) key += "|duplicate=" + GetDuplicateIndex(player, controller).ToString();
-            }
-            return key;
-        }
-
-        private string GetControllerMapKnownActionIdsPlayerPrefsKey(Player player, Controller controller, int categoryId, int layoutId, bool includeDuplicateIndex) {
-            // Create a player prefs key like a web querystring so we can search for player prefs key when loading maps
-            string key = GetBasePlayerPrefsKey(player);
-            key += "|dataType=ControllerMap_KnownActionIds";
-            key += "|controllerMapType=" + controller.mapTypeString;
-            key += "|categoryId=" + categoryId + "|" + "layoutId=" + layoutId;
-            key += "|hardwareIdentifier=" + controller.hardwareIdentifier; // the hardware identifier string helps us identify maps for unknown hardware because it doesn't have a Guid
-            if(controller.type == ControllerType.Joystick) { // store special info for joystick maps
-                key += "|hardwareGuid=" + ((Joystick)controller).hardwareTypeGuid.ToString(); // the identifying GUID that determines which known joystick this is
-                // Added in Rewired 1.1.19.0
-                if(includeDuplicateIndex) key += "|duplicate=" + GetDuplicateIndex(player, controller).ToString();
-            }
-            return key;
+        private string GetControllerElementByRoleMapPlayerPrefsKey(Player player, string elementRole, int categoryId, int layoutId, int ppKeyVersion) {
+            _sb.Length = 0;
+            AppendBaseKey(_sb, playerPrefsKeyPrefix);
+            AppendPlayerKey(_sb, player);
+            AppendControllerElementByRoleMapKey(_sb, elementRole, categoryId, layoutId, ppKeyVersion);
+            return _sb.ToString();
         }
 
         private string GetJoystickCalibrationMapPlayerPrefsKey(Joystick joystick) {
-            // Create a player prefs key like a web querystring so we can search for player prefs key when loading maps
-            string key = playerPrefsKeyPrefix;
-            key += "|dataType=CalibrationMap";
-            key += "|controllerType=" + joystick.type.ToString();
-            key += "|hardwareIdentifier=" + joystick.hardwareIdentifier; // the hardware identifier string helps us identify maps for unknown hardware because it doesn't have a Guid
-            key += "|hardwareGuid=" + joystick.hardwareTypeGuid.ToString();
-            return key;
+            _sb.Length = 0;
+            AppendBaseKey(_sb, playerPrefsKeyPrefix);
+            AppendJoystickCalibrationMapKey(_sb, joystick);
+            return _sb.ToString();
+        }
+
+        private string GetControllerMapKnownActionIdsPlayerPrefsKey(Player player, ControllerIdentifier controllerIdentifier, int categoryId, int layoutId, int ppKeyVersion) {
+            _sb.Length = 0;
+            AppendBaseKey(_sb, playerPrefsKeyPrefix);
+            AppendPlayerKey(_sb, player);
+            AppendControllerMapKnownActionIdsKey(_sb, player, controllerIdentifier, categoryId, layoutId, ppKeyVersion);
+            return _sb.ToString();
         }
 
         private string GetInputBehaviorPlayerPrefsKey(Player player, int inputBehaviorId) {
-            // Create a player prefs key like a web querystring so we can search for player prefs key when loading maps
-            string key = GetBasePlayerPrefsKey(player);
-            key += "|dataType=InputBehavior";
-            key += "|id=" + inputBehaviorId;
-            return key;
+            _sb.Length = 0;
+            AppendBaseKey(_sb, playerPrefsKeyPrefix);
+            AppendPlayerKey(_sb, player);
+            AppendInputBehaviorKey(_sb, inputBehaviorId);
+            return _sb.ToString();
         }
 
-        private string GetControllerMapXml(Player player, Controller controller, int categoryId, int layoutId) {
+        // Static
+
+        private static void AppendBaseKey(StringBuilder sb, string playerPrefsKeyPrefix) {
+            sb.Append(playerPrefsKeyPrefix);
+        }
+
+        private static void AppendPlayerKey(StringBuilder sb, Player player) {
+            sb.Append("|playerName=");
+            sb.Append(player.name); // make a key for this specific player, could use id, descriptive name, or a custom profile identifier of your choice
+        }
+
+        private static void AppendControllerMapKey(StringBuilder sb, Player player, ControllerIdentifier controllerIdentifier, int categoryId, int layoutId, int ppKeyVersion) {
+            sb.Append("|dataType=ControllerMap");
+            AppendControllerMapKeyCommonSuffix(sb, player, controllerIdentifier, categoryId, layoutId, ppKeyVersion);
+        }
+
+        private static void AppendControllerMapKnownActionIdsKey(StringBuilder sb, Player player, ControllerIdentifier controllerIdentifier, int categoryId, int layoutId, int ppKeyVersion) {
+            sb.Append("|dataType=ControllerMap_KnownActionIds");
+            AppendControllerMapKeyCommonSuffix(sb, player, controllerIdentifier, categoryId, layoutId, ppKeyVersion);
+        }
+
+        private static void AppendControllerMapKeyCommonSuffix(StringBuilder sb, Player player, ControllerIdentifier controllerIdentifier, int categoryId, int layoutId, int ppKeyVersion) {
+            if (ppKeyVersion >= controllerMapPPKeyVersion_includeFormatVersion) {
+                sb.Append("|kv=");
+                sb.Append(ppKeyVersion); // include the key version in the string
+            }
+            sb.Append("|controllerMapType=");
+            sb.Append(GetControllerMapType(controllerIdentifier.controllerType).Name);
+            sb.Append("|categoryId=");
+            sb.Append(categoryId);
+            sb.Append("|layoutId=");
+            sb.Append(layoutId);
+
+            // Choose the key based on the key format version id
+            if (ppKeyVersion >= controllerMapPPKeyVersion_supportDisconnectedControllers) {
+
+                // Added in Rewired 1.1.27.0 to support loading controller maps for disconnected controllers
+                sb.Append("|hardwareGuid=");
+                sb.Append(controllerIdentifier.hardwareTypeGuid); // the identifying GUID that determines which known controller this is
+                if (controllerIdentifier.hardwareTypeGuid == Guid.Empty) { // not recognized, Hardware Idenfitier is required
+                    // This is no longer included for recognized controllers because it makes it impossible to lookup the map when the controller is not attached because the hardware identifier cannot be known without the device present.
+                    sb.Append("|hardwareIdentifier=");
+                    sb.Append(controllerIdentifier.hardwareIdentifier); // the hardware identifier string helps us identify maps for unknown hardware because it doesn't have a Guid
+                }
+                if (controllerIdentifier.controllerType == ControllerType.Joystick) { // store special info for joystick maps
+                    sb.Append("|duplicate=");
+                    sb.Append(GetDuplicateIndex(player, controllerIdentifier));
+                }
+
+            } else {
+
+                // Old version prior to 1.1.27.0
+                sb.Append("|hardwareIdentifier=");
+                sb.Append(controllerIdentifier.hardwareIdentifier); // the hardware identifier string helps us identify maps for unknown hardware because it doesn't have a Guid
+                if (controllerIdentifier.controllerType == ControllerType.Joystick) { // store special info for joystick maps
+                    sb.Append("|hardwareGuid=");
+                    sb.Append(controllerIdentifier.hardwareTypeGuid); // the identifying GUID that determines which known joystick this is
+                    // Added in Rewired 1.1.19.0
+                    if (ppKeyVersion >= controllerMapPPKeyVersion_includeDuplicateJoystickIndex) {
+                        sb.Append("|duplicate=");
+                        sb.Append(GetDuplicateIndex(player, controllerIdentifier));
+                    }
+                }
+            }
+        }
+
+        private static void AppendControllerElementByRoleMapKey(StringBuilder sb, string elementRole, int categoryId, int layoutId, int ppKeyVersion) {
+            sb.Append("|dataType=ElementRoleMap");
+            sb.Append("|kv=");
+            sb.Append(ppKeyVersion); // include the key version in the string
+            sb.Append("|categoryId=");
+            sb.Append(categoryId);
+            sb.Append("|layoutId=");
+            sb.Append(layoutId);
+            sb.Append("|role=");
+            sb.Append(elementRole);
+        }
+
+        private static void AppendJoystickCalibrationMapKey(StringBuilder sb, Joystick joystick) {
+            sb.Append("|dataType=CalibrationMap");
+            sb.Append("|controllerType=");
+            sb.Append(joystick.type.ToString());
+            sb.Append("|hardwareIdentifier=");
+            sb.Append(joystick.hardwareIdentifier); // the hardware identifier string helps us identify maps for unknown hardware because it doesn't have a Guid
+            sb.Append("|hardwareGuid=");
+            sb.Append(joystick.hardwareTypeGuid.ToString());
+        }
+
+        private static void AppendInputBehaviorKey(StringBuilder sb, int inputBehaviorId) {
+            sb.Append("|dataType=InputBehavior");
+            sb.Append("|id=");
+            sb.Append(inputBehaviorId);
+        }
+
+        private string GetControllerMapXml(Player player, ControllerIdentifier controllerIdentifier, int categoryId, int layoutId) {
             string key;
-            
-            // Must try twice because of new additions in 1.1.19.0 to keep backward compatibility
-            key = GetControllerMapPlayerPrefsKey(player, controller, categoryId, layoutId, true);
-            if(!PlayerPrefs.HasKey(key)) {
-                if(controller.type != ControllerType.Joystick) return string.Empty; // key does not exist
-                // Fall back to old version for data saved before 1.1.19.0
-                key = GetControllerMapPlayerPrefsKey(player, controller, categoryId, layoutId, false);
-                if(!PlayerPrefs.HasKey(key)) return string.Empty; // key does not exist
+            // Must try many times because of new additions in various versions
+            for(int i = controllerMapPPKeyVersion; i >= 0; i--) {
+                key = GetControllerMapPlayerPrefsKey(player, controllerIdentifier, categoryId, layoutId, i);
+                if (PlayerPrefs.HasKey(key)) return PlayerPrefs.GetString(key); // return the data
             }
-            return PlayerPrefs.GetString(key); // return the data
+            return null;
         }
 
-        private List<int> GetControllerMapKnownActionIds(Player player, Controller controller, int categoryId, int layoutId) {
+        private List<int> GetControllerMapKnownActionIds(Player player, ControllerIdentifier controllerIdentifier, int categoryId, int layoutId) {
             List<int> actionIds = new List<int>();
+            string key = null;
+            bool found = false;
 
-            // Must try twice because of new additions in 1.1.19.0 to keep backward compatibility
-            string key = GetControllerMapKnownActionIdsPlayerPrefsKey(player, controller, categoryId, layoutId, true);
-            if(!PlayerPrefs.HasKey(key)) {
-                if(controller.type != ControllerType.Joystick) return actionIds; // key does not exist
-                // Fall back to old version for data saved before 1.1.19.0
-                key = GetControllerMapKnownActionIdsPlayerPrefsKey(player, controller, categoryId, layoutId, false);
-                if(!PlayerPrefs.HasKey(key)) return actionIds; // key does not exist
+            // Must try many times because of new additions in various versions
+            for(int i = controllerMapPPKeyVersion; i >= 0; i--) {
+                key = GetControllerMapKnownActionIdsPlayerPrefsKey(player, controllerIdentifier, categoryId, layoutId, i);
+                if (PlayerPrefs.HasKey(key)) {
+                    found = true;
+                    break;
+                }
             }
+            if(!found) return actionIds; // key does not exist
 
             // Get the data and try to parse it
             string data = PlayerPrefs.GetString(key);
@@ -1050,29 +1504,6 @@ namespace Rewired.Data {
                 }
             }
             return actionIds;
-        }
-
-        private List<SavedControllerMapData> GetAllControllerMapsXml(Player player, bool userAssignableMapsOnly, Controller controller) {
-            // Because player prefs does not allow us to search for partial keys, we have to check all possible category ids and layout ids to find the maps to load
-
-            List<SavedControllerMapData> data = new List<SavedControllerMapData>();
-
-            IList<InputMapCategory> categories = ReInput.mapping.MapCategories;
-            for(int i = 0; i < categories.Count; i++) {
-                InputMapCategory cat = categories[i];
-                if(userAssignableMapsOnly && !cat.userAssignable) continue; // skip map because not user-assignable
-
-                IList<InputLayout> layouts = ReInput.mapping.MapLayouts(controller.type);
-                for(int j = 0; j < layouts.Count; j++) {
-                    InputLayout layout = layouts[j];
-                    string xml = GetControllerMapXml(player, controller, cat.id, layout.id);
-                    if(xml == string.Empty) continue;
-                    List<int> knownActionIds = GetControllerMapKnownActionIds(player, controller, cat.id, layout.id);
-                    data.Add(new SavedControllerMapData(xml, knownActionIds));
-                }
-            }
-
-            return data;
         }
 
         private string GetJoystickCalibrationMapXml(Joystick joystick) {
@@ -1091,81 +1522,55 @@ namespace Rewired.Data {
 
         #region Misc
 
-        private void AddDefaultMappingsForNewActions(Player player, List<SavedControllerMapData> savedData, ControllerType controllerType, int controllerId) {
-            if(player == null || savedData == null) return;
+        private void AddDefaultMappingsForNewActions(ControllerIdentifier controllerIdentifier, ControllerMap controllerMap, List<int> knownActionIds) {
+            if (controllerMap == null || knownActionIds == null) return;
+            if (knownActionIds == null || knownActionIds.Count == 0) return;
 
             // Check for new Actions added to the default mappings that didn't exist when the Controller Map was saved
-            List<int> allActionIds = GetAllActionIds();
 
-            for(int i = 0; i < savedData.Count; i++) {
-                SavedControllerMapData data = savedData[i];
-                if(data == null) continue;
-                if(data.knownActionIds == null || data.knownActionIds.Count == 0) continue;
+            // Load default map for comparison
+            ControllerMap defaultMap = ReInput.mapping.GetControllerMapInstance(controllerIdentifier, controllerMap.categoryId, controllerMap.layoutId);
+            if (defaultMap == null) return;
 
-                // Create a map from the Xml so we can get information
-                ControllerMap mapFromXml = ControllerMap.CreateFromXml(controllerType, savedData[i].xml);
-                if(mapFromXml == null) continue;
-
-                // Load the map that was added to the Player
-                ControllerMap mapInPlayer = player.controllers.maps.GetMap(controllerType, controllerId, mapFromXml.categoryId, mapFromXml.layoutId);
-                if(mapInPlayer == null) continue;
-
-                // Load default map for comparison
-                ControllerMap defaultMap = ReInput.mapping.GetControllerMapInstance(ReInput.controllers.GetController(controllerType, controllerId), mapFromXml.categoryId, mapFromXml.layoutId);
-                if(defaultMap == null) continue;
-
-                // Find any new Action ids that didn't exist when the Controller Map was saved
-                List<int> unknownActionIds = new List<int>();
-                foreach(int id in allActionIds) {
-                    if(data.knownActionIds.Contains(id)) continue;
-                    unknownActionIds.Add(id);
-                }
-
-                if(unknownActionIds.Count == 0) continue; // no new Action ids
-
-                // Add all mappings in the default map for previously unknown Action ids
-                foreach(ActionElementMap aem in defaultMap.AllMaps) {
-                    if(!unknownActionIds.Contains(aem.actionId)) continue;
-
-                    // Skip this ActionElementMap if there's a conflict within the loaded map
-                    if(mapInPlayer.DoesElementAssignmentConflict(aem)) continue;
-
-                    // Create an assignment
-                    ElementAssignment assignment = new ElementAssignment(
-                        controllerType,
-                        aem.elementType,
-                        aem.elementIdentifierId,
-                        aem.axisRange,
-                        aem.keyCode,
-                        aem.modifierKeyFlags,
-                        aem.actionId,
-                        aem.axisContribution,
-                        aem.invert
-                    );
-
-                    // Assign it
-                    mapInPlayer.CreateElementMap(assignment);
-                }
+            // Find any new Action ids that didn't exist when the Controller Map was saved
+            List<int> unknownActionIds = new List<int>();
+            foreach (int id in allActionIds) {
+                if (knownActionIds.Contains(id)) continue;
+                unknownActionIds.Add(id);
             }
-        }
 
-        private List<int> GetAllActionIds() {
-            List<int> ids = new List<int>();
-            IList<InputAction> actions = ReInput.mapping.Actions;
-            for(int i = 0; i < actions.Count; i++) {
-                ids.Add(actions[i].id);
-            }
-            return ids;
-        }
+            if (unknownActionIds.Count == 0) return; // no new Action ids
 
-        private string GetAllActionIdsString() {
-            string str = string.Empty;
-            List<int> ids = GetAllActionIds();
-            for(int i = 0; i < ids.Count; i++) {
-                if(i > 0) str += ",";
-                str += ids[i];
+            // Add all mappings in the default map for previously unknown Action ids
+            bool added = false;
+            foreach (ActionElementMap aem in defaultMap.AllMaps) {
+                if (!unknownActionIds.Contains(aem.actionId)) continue;
+
+                // Skip this ActionElementMap if there's a conflict within the loaded map
+                if (controllerMap.DoesElementAssignmentConflict(aem)) continue;
+
+                // Create an assignment
+                ElementAssignment assignment = new ElementAssignment(
+                    controllerMap.controllerType,
+                    aem.elementType,
+                    aem.elementIdentifierId,
+                    aem.axisRange,
+                    aem.keyCode,
+                    aem.modifierKeyFlags,
+                    aem.actionId,
+                    aem.axisContribution,
+                    aem.invert
+                );
+
+                // Assign it
+                controllerMap.CreateElementMap(assignment);
+                added = true;
             }
-            return str;
+
+            // Because the Controller Map was modified, clear the modified status so this isn't considered a user-modified controller map
+            if (added) {
+                controllerMap.isModified = false;
+            }
         }
 
         private Joystick FindJoystickPrecise(ControllerAssignmentSaveInfo.JoystickInfo joystickInfo) {
@@ -1197,15 +1602,17 @@ namespace Rewired.Data {
             return matches != null;
         }
 
-        private static int GetDuplicateIndex(Player player, Controller controller) {
+        private static int GetDuplicateIndex(Player player, ControllerIdentifier controllerIdentifier) {
             // Determine how many duplicates of this controller are owned by this Player
+            Controller controller = ReInput.controllers.GetController(controllerIdentifier);
+            if (controller == null) return 0; // cannot support index count if the controller is not connected
             int duplicateCount = 0;
             foreach(var c in player.controllers.Controllers) {
                 if(c.type != controller.type) continue;
                 bool isRecognized = false;
                 if(controller.type == ControllerType.Joystick) {
-                    if((c as Joystick).hardwareTypeGuid != (controller as Joystick).hardwareTypeGuid) continue;
-                    if((controller as Joystick).hardwareTypeGuid != Guid.Empty) isRecognized = true;
+                    if((c as Joystick).hardwareTypeGuid != controller.hardwareTypeGuid) continue;
+                    if(controller.hardwareTypeGuid != Guid.Empty) isRecognized = true;
                 }
                 if(!isRecognized && c.hardwareIdentifier != controller.hardwareIdentifier) continue;
                 if(c == controller) return duplicateCount;
@@ -1214,32 +1621,55 @@ namespace Rewired.Data {
             return duplicateCount;
         }
 
+        private void RefreshLayoutManager(int playerId) {
+            Player player = ReInput.players.GetPlayer(playerId);
+            if (player == null) return;
+            player.controllers.maps.layoutManager.Apply();
+        }
+
+        private void OnControllerMapsSaved(Player player) {
+            // Reload Joystick maps after saving if using By Controller Element Role
+            // If a Player has multiple Controllers that share element roles, this synchronizes them
+            if (_actionMappingSaveMode == ActionMappingSaveMode.ByControllerElementRole) {
+
+                int joystickCount = player.controllers.joystickCount;
+                if (joystickCount > 1) { // no point in reloading if Player only has one Joystick
+
+                    for (int i = 0; i < joystickCount; i++) {
+                        LoadControllerMaps(player.id, ControllerType.Joystick, player.controllers.Joysticks[i].id);
+                    }
+
+                    // Trigger Layout Manager refresh after load
+                    RefreshLayoutManager(player.id);
+                }
+            }
+        }
+
+        private static Type GetControllerMapType(ControllerType controllerType) {
+            switch(controllerType) {
+                case ControllerType.Custom: return typeof(CustomControllerMap);
+                case ControllerType.Joystick: return typeof(JoystickMap);
+                case ControllerType.Keyboard: return typeof(KeyboardMap);
+                case ControllerType.Mouse: return typeof(MouseMap);
+                default:
+                    Debug.LogWarning(logPrefix + "Unknown ControllerType " + controllerType.ToString());
+                    return null;
+            }
+        }
+
+        private static int SortOldestToNewest(ControllerMapSaveData a, ControllerMapSaveData b) {
+            if (a.map == null) {
+                if (b.map == null) return 0;
+                else return -1;
+            } else if (b.map == null) {
+                return 1;
+            }
+            return a.map.modifiedTime.CompareTo(b.map.modifiedTime);
+        }
+
         #endregion
 
         #region Classes
-
-        private class SavedControllerMapData {
-
-            public string xml;
-            public List<int> knownActionIds;
-
-            public SavedControllerMapData(string xml, List<int> knownActionIds) {
-                this.xml = xml;
-                this.knownActionIds = knownActionIds;
-            }
-
-            public static List<string> GetXmlStringList(List<SavedControllerMapData> data) {
-                List<string> xml = new List<string>();
-                if(data == null) return xml;
-
-                for(int i = 0; i < data.Count; i++) {
-                    if(data[i] == null) continue;
-                    if(string.IsNullOrEmpty(data[i].xml)) continue;
-                    xml.Add(data[i].xml);
-                }
-                return xml;
-            }
-        }
 
         private class ControllerAssignmentSaveInfo {
 
@@ -1307,6 +1737,187 @@ namespace Rewired.Data {
                 this.joystick = joystick;
                 this.oldJoystickId = oldJoystickId;
             }
+        }
+
+        [Serializable]
+        private class ControllerElementByRoleMap {
+
+            [DoNotSerialize]
+            public string role;
+            public List<Entry> data;
+
+            [Rewired.Utils.Attributes.Preserve]
+            public ControllerElementByRoleMap() {
+                data = new List<Entry>();
+            }
+
+            public void Add(ActionElementMap elementMap) {
+                data.Add(
+                    new Entry() {
+                        actionId = elementMap.actionId,
+                        elementType = elementMap.elementType,
+                        axisRange = elementMap.axisRange,
+                        invert = elementMap.invert,
+                        axisContribution = elementMap.axisContribution
+                    }
+                );
+            }
+
+            public override string ToString() {
+                StringBuilder sb = new StringBuilder();
+                sb.Append("role: ");
+                sb.Append(role);
+                sb.Append("\nentries:");
+                sb.Append(data != null ? data.Count : 0);
+                sb.Append("\n");
+                if (data != null) {
+                    for (int i = 0; i < data.Count; i++) {
+                        sb.Append("Entry[");
+                        sb.Append(i);
+                        sb.Append("]:\n");
+                        sb.Append(data[i]);
+                    }
+                }
+                return sb.ToString();
+            }
+
+            public string ToJson() {
+                return JsonWriter.ToJson(this);
+            }
+
+            public static ControllerElementByRoleMap FromJson(string role, string json) {
+                ControllerElementByRoleMap r = JsonParser.FromJson<ControllerElementByRoleMap>(json);
+                if (r != null) {
+                    r.role = role;
+                }
+                return r;
+            }
+
+            [Serializable]
+            public struct Entry {
+
+                public int actionId;
+                public ControllerElementType elementType;
+                public AxisRange axisRange;
+                public bool invert;
+                public Pole axisContribution;
+
+                public bool TryGetElementAssignment(ControllerType controllerType, Controller.Element targetElement, out ElementAssignment assignment) {
+
+                    if (targetElement.type == elementType) {
+                        assignment = ElementAssignment.CompleteAssignment(
+                            controllerType,
+                            targetElement.type,
+                            targetElement.elementIdentifier.id,
+                            axisRange,
+                            UnityEngine.KeyCode.None,
+                            ModifierKeyFlags.None,
+                            actionId,
+                            axisContribution,
+                            invert
+                        );
+                        return true;
+                    }
+
+                    switch (elementType) {
+                        case ControllerElementType.Axis: {
+                                if (targetElement.type == ControllerElementType.Button) {
+
+                                    Pole newAxisContribution = axisContribution;
+
+                                    if (axisRange == AxisRange.Full) {
+                                        if (invert) newAxisContribution = Pole.Negative;
+                                    }
+
+                                    assignment = ElementAssignment.CompleteAssignment(
+                                        controllerType,
+                                        targetElement.type,
+                                        targetElement.elementIdentifier.id,
+                                        AxisRange.Full,
+                                        UnityEngine.KeyCode.None,
+                                        ModifierKeyFlags.None,
+                                        actionId,
+                                        newAxisContribution,
+                                        false
+                                    );
+
+                                    return true;
+                                }
+                                assignment = new ElementAssignment();
+                                return false;
+                            }
+
+                        case ControllerElementType.Button: {
+                                if (targetElement.type == ControllerElementType.Axis) {
+
+                                    assignment = ElementAssignment.CompleteAssignment(
+                                        controllerType,
+                                        targetElement.type,
+                                        targetElement.elementIdentifier.id,
+                                        AxisRange.Positive,
+                                        UnityEngine.KeyCode.None,
+                                        ModifierKeyFlags.None,
+                                        actionId,
+                                        axisContribution,
+                                        false
+                                    );
+
+                                    return true;
+                                }
+                                assignment = new ElementAssignment();
+                                return false;
+                            }
+
+                        default:
+                            assignment = new ElementAssignment();
+                            return false;
+                    }
+                }
+
+                public override string ToString() {
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("actionId: ");
+                    sb.Append(actionId);
+                    sb.Append("\nelementType: ");
+                    sb.Append(elementType);
+                    sb.Append("\naxisRange: ");
+                    sb.Append(axisRange);
+                    sb.Append("\ninvert: ");
+                    sb.Append(invert);
+                    sb.Append("\naxisContribution: ");
+                    sb.Append(axisContribution);
+                    return sb.ToString();
+                }
+            }
+        }
+
+        #endregion
+
+        #region Enums
+
+        /// <summary>
+        /// Determines how Action mapping data is saved.
+        /// </summary>
+        public enum ActionMappingSaveMode {
+
+            /// <summary>
+            /// Data is stored per-controller.
+            /// Action mappings apply only to the specific controller for which it was saved.
+            /// </summary>
+            ByController = 0,
+
+            /// <summary>
+            /// Data is stored per-element on the controller if the controller element has a known role.
+            /// Action mappings are mirrored on controller elements with the same role on all other controllers for the Player.
+            /// Example: When saving Action mappings for a gamepad, element on all gamepads that have the same roles
+            /// will inherit the mappings. This allows you to remap once for all compatible gamepads simultaneously, for example.
+            /// This can extend beyond just gamepads, however. For example: On a console platform, a racing wheel with A, B, X, Y, D-Pad etc. elements
+            /// will also reflect the same Action mappings if the gamepad is remapped.
+            /// Action mappings for any controller elements that do not have known roles will be saved per-controller.
+            /// Warning: Do not use this mode if you need to allow a Player to save different mappings for multiple controllers of the same type such as gamepads.
+            /// (This option currently works best for gamepads and only miminally for other controller types.)
+            /// </summary>
+            ByControllerElementRole = 1
         }
 
         #endregion
