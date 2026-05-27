@@ -9,7 +9,7 @@ using Rewired;
 using UnityEngine.Audio;
 using Unity.Netcode;
 
-public class GameMaster : MonoBehaviour {
+public class GameMaster : NetworkBehaviour {
 
     public static GameMaster me;
     public AudioClip hoverSoundEffect;
@@ -84,6 +84,19 @@ public class GameMaster : MonoBehaviour {
     // Helper: true when running without NetworkManager (local play) OR as the server.
     static bool IsServerOrLocal =>
         NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.IsServer;
+
+    // --- NetworkVariables ---
+    public NetworkVariable<int>  netRedSets   = new NetworkVariable<int> (0,     NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<int>  netBlueSets  = new NetworkVariable<int> (0,     NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<bool> netMatchOver = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<bool> netRoundOver = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    public override void OnNetworkSpawn() {
+        netRedSets.OnValueChanged   += (_, v) => { redSets   = v; updateUI(); };
+        netBlueSets.OnValueChanged  += (_, v) => { blueSets  = v; updateUI(); };
+        netMatchOver.OnValueChanged += (_, v) => matchOver = v;
+        netRoundOver.OnValueChanged += (_, v) => roundOver = v;
+    }
 
     // -----------------------------------------------------------------------
 
@@ -320,7 +333,10 @@ public class GameMaster : MonoBehaviour {
         }
     }
 
-    public void resetScores() { redSets = 0; blueSets = 0; }
+    public void resetScores() {
+        redSets = 0; blueSets = 0;
+        if (IsSpawned && IsServer) { netRedSets.Value = 0; netBlueSets.Value = 0; }
+    }
 
     public void AddSlowFX()    { increaseCA(); increaseVignette(); glitchFX.colorDrift += 0.0005f; }
     public void RemoveSlowFX() { decreaseCA(); decreaseVignette(); glitchFX.colorDrift = 0f; }

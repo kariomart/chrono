@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Unity.Netcode;
 
 public class CamGameOver : MonoBehaviour {
 
@@ -44,12 +45,15 @@ public class CamGameOver : MonoBehaviour {
 		startingZoom = cam.orthographicSize;
 		//Instantiate (deathConfetti, new Vector3(transform.position.x, transform.position.y, -3), Quaternion.identity);
 
-		if (playerWon.colorName == "red") {
-			GameMaster.me.redSets ++;
-			GameMaster.me.player1.rb.bodyType = RigidbodyType2D.Dynamic;
+		bool isServer = NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.IsServer;
 
+		if (playerWon.colorName == "red") {
+			GameMaster.me.redSets++;
+			if (isServer) GameMaster.me.netRedSets.Value = GameMaster.me.redSets;
+			GameMaster.me.player1.rb.bodyType = RigidbodyType2D.Dynamic;
 		} if (playerWon.colorName == "blue") {
 			GameMaster.me.blueSets++;
+			if (isServer) GameMaster.me.netBlueSets.Value = GameMaster.me.blueSets;
 			GameMaster.me.player2.rb.bodyType = RigidbodyType2D.Dynamic;
 		}
 
@@ -165,11 +169,14 @@ public class CamGameOver : MonoBehaviour {
 		bool redWon = GameMaster.me.redSets >= GameMaster.me.setsNeeded;
 		bool blueWon = GameMaster.me.blueSets >= GameMaster.me.setsNeeded;
 
-		if (redWon || blueWon) {
-			GameMaster.me.matchOver = true;
-		}
+		bool isServer = NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.IsServer;
+
+		GameMaster.me.roundOver = true;
+		if (isServer) GameMaster.me.netRoundOver.Value = true;
 
 		if (redWon || blueWon) {
+			GameMaster.me.matchOver = true;
+			if (isServer) GameMaster.me.netMatchOver.Value = true;
 
 			GameMaster.me.winner = playerWon.colorName;
 			Time.timeScale = 1f;
@@ -179,10 +186,8 @@ public class CamGameOver : MonoBehaviour {
 			GameMaster.me.enableMatchOver();
 			GameMaster.me.updateUI();
 			this.enabled = false;
-	 	}
-
-		 GameMaster.me.roundOver = true;
-	 }
+		}
+	}
 
 
 }
