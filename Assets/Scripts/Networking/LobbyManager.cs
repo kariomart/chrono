@@ -49,7 +49,8 @@ public class LobbyManager : MonoBehaviour {
 
     // --- Public API ---
 
-    public async Task StartHost(int maxPlayers = 2) {
+    // Returns the lobby ID as a string (share with friends for manual join, or use Steam overlay invites).
+    public async Task<string> StartHost(int maxPlayers = 2) {
         SubscribeNGO();
         NetworkManager.Singleton.StartHost();
 
@@ -57,20 +58,21 @@ public class LobbyManager : MonoBehaviour {
         if (!lobby.HasValue) {
             Debug.LogError("[LobbyManager] Lobby creation failed.");
             NetworkManager.Singleton.Shutdown();
-            return;
+            return null;
         }
 
         lobby.Value.SetFriendsOnly();
         lobby.Value.SetData("game", "CHRONO");
         lobby.Value.SetJoinable(true);
         CurrentLobby = lobby;
+        return lobby.Value.Id.Value.ToString();
     }
 
     public async Task JoinLobby(SteamId lobbyId) {
-        RoomEnter result = await SteamMatchmaking.JoinLobbyAsync(lobbyId);
-        if (result != RoomEnter.Success)
-            Debug.LogError($"[LobbyManager] JoinLobbyAsync failed: {result}");
-        // HandleLobbyEntered fires on success and starts the client
+        Lobby? lobby = await SteamMatchmaking.JoinLobbyAsync(lobbyId);
+        if (!lobby.HasValue)
+            Debug.LogError($"[LobbyManager] JoinLobbyAsync failed for lobby {lobbyId}");
+        // HandleLobbyEntered fires on success and starts the NGO client
     }
 
     public void Disconnect() {

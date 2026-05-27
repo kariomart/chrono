@@ -6,6 +6,7 @@ using Kino;
 using UnityEngine.Audio;
 using TMPro;
 using Unity.Netcode;
+using Steamworks.Data;
 
 public class MainMenu : MonoBehaviour {
 
@@ -126,11 +127,11 @@ public class MainMenu : MonoBehaviour {
     public async void OnHostButton() {
         SetStatus("Creating game...");
         try {
-            string code = await LobbyManager.me.StartHost();
-            if (joinCodeDisplay != null) joinCodeDisplay.text = code;
+            string lobbyId = await LobbyManager.me.StartHost();
+            if (joinCodeDisplay != null) joinCodeDisplay.text = lobbyId;
             if (onlinePanel != null) onlinePanel.SetActive(false);
             if (hostWaitPanel != null) hostWaitPanel.SetActive(true);
-            SetStatus($"Share this code: {code}\nWaiting for player 2...");
+            SetStatus($"Lobby ID: {lobbyId}\nInvite via Steam or share ID.");
 
             // Load a level as soon as the second player connects.
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
@@ -149,7 +150,11 @@ public class MainMenu : MonoBehaviour {
         }
         SetStatus("Joining...");
         try {
-            await LobbyManager.me.StartClient(code);
+            if (!ulong.TryParse(code, out ulong lobbyIdVal)) {
+                SetStatus("Invalid lobby ID.");
+                return;
+            }
+            await LobbyManager.me.JoinLobby((SteamId)lobbyIdVal);
             SetStatus("Connected! Loading level...");
             // Host will trigger a NetworkSceneManager scene load; client just waits.
         } catch (System.Exception e) {
