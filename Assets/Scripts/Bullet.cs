@@ -120,9 +120,10 @@ public class Bullet : MonoBehaviour {
 
     void ParticleEffect(GameObject obj) {
         Instantiate(hitObjectEffect, transform.position, Quaternion.identity);
-        hitObjectEffect.startColor = Color.grey;
+        var main = hitObjectEffect.main;
+        main.startColor = Color.grey;
         SpriteRenderer sr = obj.GetComponent<SpriteRenderer>() ?? obj.GetComponentInChildren<SpriteRenderer>();
-        if (sr != null) hitObjectEffect.startColor = sr.color;
+        if (sr != null) main.startColor = sr.color;
     }
 
     void OnTriggerEnter2D(Collider2D coll) {

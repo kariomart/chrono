@@ -37,7 +37,7 @@ public class SoundController : MonoBehaviour {
 
 	public static SoundController Get() {
 		if (me == null) {
-			me = (SoundController)FindObjectOfType(typeof(SoundController));
+			me = FindFirstObjectByType<SoundController>();
 		}
 
 		return me;

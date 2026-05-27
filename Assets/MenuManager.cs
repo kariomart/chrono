@@ -5,7 +5,6 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Rewired;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using Kino;
 
 public class MenuManager : MonoBehaviour

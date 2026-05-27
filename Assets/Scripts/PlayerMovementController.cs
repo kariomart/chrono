@@ -30,7 +30,7 @@ public class PlayerMovementController : NetworkBehaviour {
     public GameObject manaBar;
     public GameObject pivot;
     public GameObject letterbox;
-    public GameObject camera;
+    public new GameObject camera;
 
     public Vector2 dir;
     public Vector2 vel;

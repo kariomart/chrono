@@ -23,9 +23,6 @@ public class TimeManager : MonoBehaviour {
 
     public AudioClip slowSound;
 
-    int lowpassMin = 500;
-    int lowpassMax = 22000;
-
     public ScanlinesEffect scanlines;
 
     bool slowing;

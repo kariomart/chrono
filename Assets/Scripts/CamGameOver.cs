@@ -31,8 +31,6 @@ public class CamGameOver : MonoBehaviour {
 	bool winnerTextDisplayed;
 	bool explosionSound;
 
-	int counter = 0;
-
 	[Range(0f, 3f)]
 	public float firstPause;
 
@@ -48,11 +46,11 @@ public class CamGameOver : MonoBehaviour {
 
 		if (playerWon.colorName == "red") {
 			GameMaster.me.redSets ++;
-			GameMaster.me.player1.rb.isKinematic = false;
+			GameMaster.me.player1.rb.bodyType = RigidbodyType2D.Dynamic;
 
 		} if (playerWon.colorName == "blue") {
 			GameMaster.me.blueSets++;
-			GameMaster.me.player2.rb.isKinematic = false; 
+			GameMaster.me.player2.rb.bodyType = RigidbodyType2D.Dynamic;
 		}
 
 		StartCoroutine("gameOver");
