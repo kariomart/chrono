@@ -5,6 +5,7 @@ using Unity.Networking.Transport.Relay;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
 using UnityEngine;
 
 // Handles Unity Relay allocation and wires it into NetworkManager.
@@ -35,7 +36,7 @@ public class LobbyManager : MonoBehaviour {
         JoinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
 
         NetworkManager.Singleton.GetComponent<UnityTransport>()
-            .SetRelayServerData(new RelayServerData(allocation, "dtls"));
+            .SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, "dtls"));
 
         NetworkManager.Singleton.StartHost();
         Debug.Log($"[LobbyManager] Hosting. Join code: {JoinCode}");
@@ -49,7 +50,7 @@ public class LobbyManager : MonoBehaviour {
         var joinAllocation = await RelayService.Instance.JoinAllocationAsync(code.Trim().ToUpper());
 
         NetworkManager.Singleton.GetComponent<UnityTransport>()
-            .SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
+            .SetRelayServerData(AllocationUtils.ToRelayServerData(joinAllocation, "dtls"));
 
         NetworkManager.Singleton.StartClient();
         Debug.Log($"[LobbyManager] Joined with code: {code}");

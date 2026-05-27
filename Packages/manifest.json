@@ -5,7 +5,7 @@
     "com.unity.netcode.gameobjects": "2.11.2",
     "com.unity.postprocessing": "3.5.4",
     "com.unity.services.authentication": "3.6.1",
-    "com.unity.services.relay": "1.2.0",
+    "com.unity.services.multiplayer": "2.2.1",
     "com.unity.ugui": "2.0.0",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",
