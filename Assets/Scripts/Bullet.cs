@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 
-public class Bullet : MonoBehaviour {
+public class Bullet : NetworkBehaviour {
 
     public float defaultSpd;
     public float spd;
@@ -49,9 +49,7 @@ public class Bullet : MonoBehaviour {
     public bool slowzone;
     int blinkCounter;
 
-    // True when running without NetworkManager (local play) OR as the server.
-    bool IsServerOrLocal =>
-        NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.IsServer;
+    bool IsServerOrLocal => !IsSpawned || IsServer;
 
     void Start() {
         rb = GetComponent<Rigidbody2D>();
@@ -157,13 +155,17 @@ public class Bullet : MonoBehaviour {
         if (coll.gameObject.tag == "pivot" && !decayed) {
             GameMaster.me.timeMaster.gameOverSlow = true;
             GameMaster.me.timeMaster.pos = coll.gameObject.transform.position;
+            if (IsSpawned) SetGameOverSlowClientRpc(true);
         }
     }
 
     void OnTriggerExit2D(Collider2D coll) {
         if (!IsServerOrLocal) return;
 
-        if (coll.gameObject.tag == "pivot" && !decayed) GameMaster.me.timeMaster.gameOverSlow = false;
+        if (coll.gameObject.tag == "pivot" && !decayed) {
+            GameMaster.me.timeMaster.gameOverSlow = false;
+            if (IsSpawned) SetGameOverSlowClientRpc(false);
+        }
 
         if (coll.gameObject.layer == LayerMask.NameToLayer("SlowZone")) {
             spd *= 6f;
@@ -279,6 +281,11 @@ public class Bullet : MonoBehaviour {
             pinata.Shrink();
             ParticleEffect(coll.gameObject);
         }
+    }
+
+    [ClientRpc]
+    void SetGameOverSlowClientRpc(bool value) {
+        GameMaster.me.timeMaster.gameOverSlow = value;
     }
 
     void DestroyBullet() {
