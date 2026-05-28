@@ -117,6 +117,9 @@ public class GameMaster : NetworkBehaviour {
         glitchFX        = Camera.main.GetComponent<AnalogGlitch>();
         setFXDefaults();
 
+        // Populate score-circle arrays before SpawnPlayers() triggers OnNetworkSpawn → updateUI.
+        findUI();
+
         // Only the server (or local play) spawns players.
         if (IsServerOrLocal) {
             SpawnPlayers();
